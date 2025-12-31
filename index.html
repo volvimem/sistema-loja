@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL</title>
+    <title>FILHAO.CELL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="manifest" href="manifest.json">
@@ -34,6 +34,11 @@
         .btn-success { background: var(--success); color: white; }
         .btn-sm { width: auto; padding: 5px 10px; font-size: 10px; margin: 0; }
 
+        /* LISTA DE DADOS */
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item-info { flex: 1; margin-left: 10px; font-size: 11px; }
+        .btn-del { background: #ff4444; color: white; border: none; width: 30px; height: 30px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
         /* KANBAN */
         .kanban-container { display: flex; gap: 4px; padding-bottom: 10px; }
         .kanban-col { flex: 1; background: #eef2f9; padding: 4px; border-radius: 6px; min-width: 0; }
@@ -61,7 +66,7 @@
 </head>
 <body>
 
-<header><h2>FILHÃO.CELL</h2></header>
+<header><h2>FILHAO.CELL</h2></header>
 
 <div class="container">
 
@@ -142,6 +147,18 @@
     </div>
 
     <div id="page-cadastros" class="page">
+        <div class="card" style="border: 2px solid var(--accent)">
+            <h3><i class="fas fa-database"></i> GERENCIAR DADOS</h3>
+            <div style="display:flex; gap:5px; margin-bottom:10px">
+                <button class="btn-sm btn-primary" style="flex:1" onclick="listar('clientes')">CLIENTES</button>
+                <button class="btn-sm btn-primary" style="flex:1" onclick="listar('produtos')">PRODUTOS</button>
+                <button class="btn-sm btn-primary" style="flex:1" onclick="listar('servicos')">SERVIÇOS</button>
+            </div>
+            <div id="lista-bd" style="max-height: 250px; overflow-y: auto; background:#f9f9f9; border-radius:8px; padding:5px;">
+                <div style="text-align:center; color:#999; padding:10px; font-size:11px">SELECIONE UMA OPÇÃO ACIMA</div>
+            </div>
+        </div>
+
         <div class="card">
             <h3>NOVO CLIENTE</h3>
             <div class="foto-circulo" onclick="document.getElementById('f-cli').click()">
@@ -218,7 +235,6 @@
     }
 
     function nav(p, b) {
-        // TRAVA DE SEGURANÇA NA ABA RELATÓRIO
         if(p === 'relatorio') {
             const pass = prompt("DIGITE A SENHA DO ADMINISTRADOR:");
             if(pass !== SENHA_ADM) { alert("ACESSO NEGADO!"); return; }
@@ -232,11 +248,51 @@
         
         if(p === 'servicos') renderKanban();
         if(p === 'relatorio') {
-            // Se passou da senha, libera os dados
             document.getElementById('fin-adm').style.display = 'block';
             renderHist();
         }
     }
+
+    // --- FUNÇÕES DE LISTAGEM E EXCLUSÃO (NOVAS) ---
+    function listar(tipo) {
+        const div = document.getElementById('lista-bd');
+        div.innerHTML = "";
+        
+        let dados = [];
+        let labelPreco = false;
+
+        if(tipo === 'clientes') dados = db.clientes;
+        if(tipo === 'produtos') { dados = db.produtos; labelPreco = true; }
+        if(tipo === 'servicos') { dados = db.servicosCadastrados; labelPreco = true; }
+
+        if(dados.length === 0) { 
+            div.innerHTML = "<div style='padding:10px; text-align:center; color:#999'>NENHUM REGISTRO</div>"; 
+            return; 
+        }
+
+        div.innerHTML = dados.map((item, idx) => `
+            <div class="item-lista">
+                ${item.foto ? `<img src="${item.foto}" style="width:30px; height:30px; border-radius:50%; object-fit:cover">` : ''}
+                <div class="item-info">
+                    <b>${item.nome}</b><br>
+                    <span style="color:#666">${labelPreco ? 'R$ ' + (item.precoVenda ? item.precoVenda.toFixed(2) : '0.00') : (item.tel || '')}</span>
+                </div>
+                <button class="btn-del" onclick="excluir('${tipo}', ${idx})"><i class="fas fa-trash"></i></button>
+            </div>
+        `).join('');
+    }
+
+    function excluir(tipo, idx) {
+        if(!confirm("TEM CERTEZA QUE DESEJA EXCLUIR?")) return;
+        
+        if(tipo === 'clientes') db.clientes.splice(idx, 1);
+        if(tipo === 'produtos') db.produtos.splice(idx, 1);
+        if(tipo === 'servicos') db.servicosCadastrados.splice(idx, 1);
+        
+        localStorage.setItem('filhao_v8', JSON.stringify(db));
+        listar(tipo); // Atualiza a lista visualmente
+    }
+    // ----------------------------------------------
 
     function buscar(tipo, termo, divId) {
         const box = document.getElementById(divId);
@@ -249,10 +305,8 @@
         const divId = tipo === 'produto' ? 'v-sug-prod' : 'v-sug-serv';
         const box = document.getElementById(divId);
         if(termo.length < 2) { box.innerHTML = ""; return; }
-        
         let lista = (tipo === 'produto') ? db.produtos : db.servicosCadastrados;
         const res = lista.filter(i => i.nome.toLowerCase().includes(termo.toLowerCase()));
-        
         box.innerHTML = res.map(i => `<div onclick="selecionarItemVenda('${tipo}', '${i.nome}', '${i.precoVenda}')">${i.nome}</div>`).join('');
     }
 
@@ -282,7 +336,11 @@
         }
         localStorage.setItem('filhao_v8', JSON.stringify(db));
         alert("SALVO COM SUCESSO!");
-        location.reload();
+        // Não recarrega a página para facilitar cadastros em sequência, apenas limpa campos
+        if(tipo === 'cliente') { document.getElementById('c-nome').value = ''; document.getElementById('c-tel').value = ''; }
+        if(tipo === 'produto') { document.getElementById('p-nome').value = ''; document.getElementById('p-custo').value = ''; document.getElementById('p-venda').value = ''; }
+        if(tipo === 'servico') { document.getElementById('serv-nome').value = ''; document.getElementById('serv-venda').value = ''; }
+        listar(tipo + 's'); // Atualiza a lista se estiver aberta
     }
 
     function criarOS() {
@@ -371,7 +429,7 @@
             else { item.lucro = item.valor; }
         } else { item.lucro = item.valor; }
         db.logs.push(item);
-        localStorage.setItem('filhão_v8', JSON.stringify(db));
+        localStorage.setItem('filhao_v8', JSON.stringify(db));
         alert("VENDA CONCLUÍDA!");
         location.reload();
     }
