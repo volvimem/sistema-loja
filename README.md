@@ -1,2 +1,0 @@
-# sistema-loja
-Filhão.Cell
