@@ -1,4 +1,4 @@
-const CACHE_NAME = 'filhão-v13';
+const CACHE_NAME = 'filhão-v14';
 const ASSETS = [
   './',
   './index.html',
