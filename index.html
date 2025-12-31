@@ -61,7 +61,7 @@
 </head>
 <body>
 
-<header><h2>FILHAO.CELL</h2></header>
+<header><h2>FILHÃO.CELL</h2></header>
 
 <div class="container">
 
@@ -105,7 +105,6 @@
     <div id="page-vendas" class="page">
         <div class="card">
             <h3><i class="fas fa-shopping-cart"></i> CAIXA</h3>
-            
             <label>CLIENTE</label>
             <div style="display:flex; gap:5px; align-items: flex-start;">
                 <div class="search-box" style="flex:1">
@@ -136,10 +135,8 @@
             <hr style="margin:15px 0; border-top:1px dashed #ccc">
             <label>ITEM SELECIONADO</label>
             <input type="text" id="v-desc" placeholder="..." readonly style="background:#eee; font-weight:bold">
-            
             <label>VALOR R$</label>
             <input type="number" id="v-val">
-            
             <button class="btn btn-success" onclick="finalizarVenda()">CONCLUIR VENDA</button>
         </div>
     </div>
@@ -180,6 +177,7 @@
 
     <div id="page-relatorio" class="page">
         <div class="card">
+            <h3 style="color:red"><i class="fas fa-lock"></i> FINANCEIRO ADM</h3>
             <div style="display:flex; justify-content:space-between; align-items:center">
                 <select id="f-data" onchange="renderHist()">
                     <option value="hoje">HOJE</option>
@@ -187,10 +185,9 @@
                     <option value="mes">MÊS</option>
                     <option value="ano">ANO ATUAL</option>
                 </select>
-                <button class="btn btn-primary btn-sm" onclick="validarAdm(liberarFinanceiro)">VER LUCRO</button>
             </div>
             <div id="hist-render" style="margin-top:10px; font-size:11px"></div>
-            <div id="fin-adm" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px; font-weight:bold; color:green; display:none"></div>
+            <div id="fin-adm" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px; font-weight:bold; color:green;"></div>
         </div>
     </div>
 
@@ -208,16 +205,6 @@
     const SENHA_ADM = "000800";
     let tipoVendaAtual = 'produto';
 
-    function validarAdm(callback) {
-        const p = prompt("DIGITE A SENHA DO ADMINISTRADOR:");
-        if(p === SENHA_ADM) { callback(); } else { alert("ACESSO NEGADO!"); }
-    }
-
-    function liberarFinanceiro() {
-        document.getElementById('fin-adm').style.display = 'block';
-        renderHist();
-    }
-
     function read(input, imgId, iconId) {
         if (input.files && input.files[0]) {
             let r = new FileReader();
@@ -231,14 +218,22 @@
     }
 
     function nav(p, b) {
+        // TRAVA DE SEGURANÇA NA ABA RELATÓRIO
+        if(p === 'relatorio') {
+            const pass = prompt("DIGITE A SENHA DO ADMINISTRADOR:");
+            if(pass !== SENHA_ADM) { alert("ACESSO NEGADO!"); return; }
+        }
+
         document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(bt => bt.classList.remove('active'));
         document.getElementById('page-'+p).classList.add('active');
         if(!b) b = document.querySelector(`.nav-item[onclick*="${p}"]`);
         if(b) b.classList.add('active');
+        
         if(p === 'servicos') renderKanban();
         if(p === 'relatorio') {
-            document.getElementById('fin-adm').style.display = 'none';
+            // Se passou da senha, libera os dados
+            document.getElementById('fin-adm').style.display = 'block';
             renderHist();
         }
     }
@@ -262,10 +257,8 @@
     }
 
     function selecionarItemVenda(tipo, nome, preco) {
-        // Limpa a busca do outro tipo para evitar confusão
         if(tipo === 'produto') document.getElementById('v-busca-serv').value = '';
         else document.getElementById('v-busca-prod').value = '';
-
         document.getElementById('v-sug-prod').innerHTML = '';
         document.getElementById('v-sug-serv').innerHTML = '';
         
@@ -342,7 +335,6 @@
         const colPecas = document.getElementById('col-pecas');
         const colPgto = document.getElementById('col-pgto');
         const colRetirado = document.getElementById('col-retirado');
-        
         colPecas.innerHTML = ""; colPgto.innerHTML = ""; colRetirado.innerHTML = "";
 
         db.activeOS.forEach(os => {
@@ -358,7 +350,6 @@
                         <button class="btn-sm" style="background:#ddd; width:25px" onclick="zapOS('${os.cliente}','${os.modelo}')"><i class="fab fa-whatsapp"></i></button>
                     </div>
                 </div>`;
-            
             if(os.status === 'pecas') colPecas.innerHTML += card;
             else if(os.status === 'pgto') colPgto.innerHTML += card;
             else if(os.status === 'retirado') colRetirado.innerHTML += card;
@@ -370,19 +361,17 @@
             tipo: tipoVendaAtual === 'produto' ? 'VENDA' : 'SERVIÇO', 
             data: new Date().toISOString(),
             cliente: document.getElementById('v-cli').value,
-            desc: document.getElementById('v-desc').value, // Pega do campo de descrição preenchido
+            desc: document.getElementById('v-desc').value,
             valor: parseFloat(document.getElementById('v-val').value)
         };
         if(!item.desc || !item.valor) { alert("SELECIONE UM ITEM!"); return; }
-        
         if(tipoVendaAtual === 'produto') {
             let pIdx = db.produtos.findIndex(p => p.nome === item.desc);
             if(pIdx !== -1) { item.lucro = item.valor - (db.produtos[pIdx].precoCompra || 0); }
             else { item.lucro = item.valor; }
         } else { item.lucro = item.valor; }
-        
         db.logs.push(item);
-        localStorage.setItem('filhao_v8', JSON.stringify(db));
+        localStorage.setItem('filhão_v8', JSON.stringify(db));
         alert("VENDA CONCLUÍDA!");
         location.reload();
     }
@@ -406,7 +395,6 @@
     }
 
     function zapOS(cli, mod) { window.open(`https://wa.me/5581999999999?text=Olá ${cli}, atualização sobre seu aparelho ${mod}.`); }
-    function zap() { window.open(`https://wa.me/5581999999999`); }
     
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e => {}); }); }
     renderKanban();
