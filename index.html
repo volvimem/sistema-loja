@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL - </title>
+    <title>FILHAO.CELL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#003399">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3616/3616230.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
 
     <style>
         :root { --primary: #003399; --accent: #ffcc00; --success: #25d366; --bg: #f4f7fe; }
@@ -32,6 +33,7 @@
         .btn-success { background: var(--success); color: white; }
         .btn-sm { width: auto; padding: 5px 10px; font-size: 10px; margin: 0; }
 
+        /* Estilos de Foto */
         .foto-circulo { width: 80px; height: 80px; background: #eee; border-radius: 50%; margin: 5px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; }
         .foto-circulo img { width: 100%; height: 100%; object-fit: cover; }
         .foto-quadrada { width: 100%; height: 120px; background: #eee; border-radius: 10px; margin-top: 5px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
@@ -49,7 +51,7 @@
 </head>
 <body>
 
-<header><h2>FILHÃO.CELL</h2></header>
+<header><h2>FILHAO.CELL</h2></header>
 
 <div class="container">
 
@@ -81,28 +83,24 @@
     <div id="page-vendas" class="page">
         <div class="card">
             <h3><i class="fas fa-shopping-cart"></i> NOVA VENDA</h3>
-            
             <label>CLIENTE</label>
             <div style="display:flex; gap:5px; align-items: flex-start;">
                 <div class="search-box" style="flex:1">
-                    <input type="text" id="v-cli" placeholder="BUSCAR CLIENTE..." onkeyup="buscar('clientes', this.value, 'v-sug-c')">
+                    <input type="text" id="v-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'v-sug-c')">
                     <div id="v-sug-c" class="sugestoes"></div>
                 </div>
                 <button class="btn btn-primary btn-sm" style="margin-top:4px; height:38px" onclick="nav('cadastros')"><i class="fas fa-plus"></i></button>
             </div>
-
             <label>PRODUTO</label>
             <div style="display:flex; gap:5px; align-items: flex-start;">
                 <div class="search-box" style="flex:1">
-                    <input type="text" id="v-prod" placeholder="BUSCAR PRODUTO..." onkeyup="buscar('produtos', this.value, 'v-sug-p')">
+                    <input type="text" id="v-prod" placeholder="BUSCAR..." onkeyup="buscar('produtos', this.value, 'v-sug-p')">
                     <div id="v-sug-p" class="sugestoes"></div>
                 </div>
                 <button class="btn btn-primary btn-sm" style="margin-top:4px; height:38px" onclick="nav('cadastros')"><i class="fas fa-plus"></i></button>
             </div>
-
-            <label>VALOR DE VENDA R$</label>
-            <input type="number" id="v-val" placeholder="0.00">
-            
+            <label>VALOR R$</label>
+            <input type="number" id="v-val">
             <button class="btn btn-success" onclick="registrar('V')">CONCLUIR VENDA</button>
         </div>
     </div>
@@ -262,7 +260,7 @@
     }
 
     function zap() {
-        const msg = `*FILHÃO.CELL*\nCLIENTE: ${document.getElementById('s-cli').value}\nAPARELHO: ${document.getElementById('s-apa').value}\nSENHA: ${document.getElementById('s-pw').value}`;
+        const msg = `*FILHAO.CELL*\nCLIENTE: ${document.getElementById('s-cli').value}\nAPARELHO: ${document.getElementById('s-apa').value}\nSENHA: ${document.getElementById('s-pw').value}`;
         window.open(`https://wa.me/5581999999999?text=${encodeURIComponent(msg)}`);
     }
 
