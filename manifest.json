@@ -1,7 +1,7 @@
 {
-  "name": "Filhão.Cell Gestão 360",
-  "short_name": "FilhãoCell",
-  "description": "Sistema de Gestão para Assistência Técnica",
+  "name": "FILHAO.CELL",
+  "short_name": "FILHAO.CELL",
+  "description": "Sistema de Gestão Filhão Cell",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f7fe",
@@ -10,7 +10,8 @@
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3616/3616230.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
