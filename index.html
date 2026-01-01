@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHAO.CELL (v26)</title>
+    <title>FILHAO.CELL (v34)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="manifest" href="manifest.json">
@@ -68,16 +68,15 @@
         }
         input:focus { border-color: var(--primary); background: #fff; }
 
-        /* BUSCA COM LUPA OPERACIONAL */
+        /* BUSCA COM LUPA */
         .search-box { position: relative; margin-top: 5px; }
         .search-box input { padding-right: 45px; margin-top: 0; }
         
-        /* Botão Lupa CORRIGIDO */
         .search-btn { 
             position: absolute; right: 5px; top: 2px; bottom: 2px;
             background: var(--primary); color: white; border: none; width: 40px; 
             border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            z-index: 20; /* Garante que fique acima do texto */
+            z-index: 20;
         }
         .search-btn:active { background: var(--primary-dark); transform: scale(0.95); }
         
@@ -85,6 +84,16 @@
         .sugestoes div.item-sug { padding: 12px; border-bottom: 1px solid #f1f1f1; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; }
         .sugestoes div.item-sug:active { background: #f0f0f0; }
         .sug-header { background: #eee; color: #555; font-size: 10px; font-weight: 900; padding: 5px 12px; letter-spacing: 1px; }
+
+        /* FOTOS OS */
+        .os-foto-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 5px; }
+        .os-foto-slot {
+            aspect-ratio: 1; background: #eee; border-radius: 8px; border: 2px dashed #ccc;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            overflow: hidden; position: relative;
+        }
+        .os-foto-slot img { width: 100%; height: 100%; object-fit: cover; }
+        .os-foto-slot i { color: #999; font-size: 20px; }
 
         /* KANBAN */
         .kanban-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; align-items: start; }
@@ -106,6 +115,7 @@
         .btn-info { background: #0288d1; }
         .btn-success { background: var(--success); }
         .btn-zap { background: #25D366; }
+        .btn-add-mini { background: #2e7d32; color:white; border:none; border-radius:8px; width:44px; font-size:18px; cursor:pointer; margin-top:5px; }
 
         /* FOTOS E MODAL */
         .foto-preview { 
@@ -133,11 +143,25 @@
         .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
         .nav-item.active i { color: var(--primary); }
 
+        /* IMPRESSÃO (TÉRMICA 80MM) */
         @media print { 
             body * { visibility: hidden; } 
             #area-print, #area-print * { visibility: visible; }
-            #area-print { position: absolute; left: 0; top: 0; width: 80mm; color: black; background: white; } 
-            .ticket-line { border-bottom: 1px dashed #000; margin-bottom: 5px; padding-bottom: 5px; }
+            #area-print { 
+                position: absolute; left: 0; top: 0; width: 100%; 
+                font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white;
+                padding: 5px;
+            } 
+            .p-header { text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+            .p-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+            .p-info { font-size: 10px; margin-bottom: 2px; }
+            .p-line { border-bottom: 1px dashed #000; margin: 10px 0; }
+            .p-table { width: 100%; text-align: left; font-size: 11px; }
+            .p-table th { border-bottom: 1px solid #000; }
+            .p-total { text-align: right; font-size: 16px; font-weight: bold; margin-top: 10px; }
+            .p-sign { margin-top: 40px; text-align: center; border-top: 1px solid #000; padding-top: 5px; font-size: 10px; width: 80%; margin-left: auto; margin-right: auto; }
+            .p-imgs { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; }
+            .p-imgs img { width: 45%; border: 1px solid #000; }
         }
     </style>
 </head>
@@ -160,7 +184,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHAO.CELL <span class="version">v26</span></h2>
+    <h2><i class="fas fa-fire"></i> FILHAO.CELL <span class="version">v34</span></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -203,10 +227,13 @@
             <input type="hidden" id="os-id">
             
             <label>CLIENTE</label>
-            <div class="search-box">
-                <input type="text" id="s-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'sug-s-cli')">
-                <button type="button" class="search-btn" onclick="buscar('clientes', document.getElementById('s-cli').value, 'sug-s-cli', false, true)"><i class="fas fa-search"></i></button>
-                <div id="sug-s-cli" class="sugestoes"></div>
+            <div style="display:flex; gap:5px; align-items:flex-end">
+                <div class="search-box" style="flex:1">
+                    <input type="text" id="s-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'sug-s-cli')">
+                    <button type="button" class="search-btn" onclick="buscar('clientes', document.getElementById('s-cli').value, 'sug-s-cli', false, true)"><i class="fas fa-search"></i></button>
+                    <div id="sug-s-cli" class="sugestoes"></div>
+                </div>
+                <button class="btn-add-mini" onclick="cadastrarNovoNaOS()"><i class="fas fa-plus"></i></button>
             </div>
             
             <div style="display:flex; gap:10px">
@@ -216,6 +243,16 @@
             
             <label>DEFEITO / OBS</label>
             <input id="s-def">
+            
+            <label>FOTOS DO APARELHO (MÁX 4)</label>
+            <div class="os-foto-grid">
+                <div class="os-foto-slot" onclick="addFotoOS(0)"><i class="fas fa-camera"></i></div>
+                <div class="os-foto-slot" onclick="addFotoOS(1)"><i class="fas fa-camera"></i></div>
+                <div class="os-foto-slot" onclick="addFotoOS(2)"><i class="fas fa-camera"></i></div>
+                <div class="os-foto-slot" onclick="addFotoOS(3)"><i class="fas fa-camera"></i></div>
+            </div>
+            <input type="file" id="os-foto-input" hidden onchange="processFotoOS(this)">
+
             <label>VALOR R$</label>
             <input type="number" id="s-valor">
 
@@ -228,7 +265,7 @@
                 <div id="k-pecas"></div>
             </div>
             <div class="k-col">
-                <div class="k-head" style="color:#ff9800">PGTO</div>
+                <div class="k-head" style="color:#ff9800; font-size:8px">AGUARDANDO PAGAMENTO</div>
                 <div id="k-pgto"></div>
             </div>
             <div class="k-col">
@@ -304,7 +341,7 @@
 
     <div id="page-relatorio" class="page">
         <div class="card">
-            <h3>GESTÃO FINANCEIRA</h3>
+            <h3>RELATÓRIOS FINANCEIROS</h3>
             <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:15px">
                 <option value="dia">HOJE</option>
                 <option value="semana">ÚLTIMOS 7 DIAS</option>
@@ -318,6 +355,13 @@
             </div>
 
             <h3 style="margin-top:25px; font-size:12px; color:#666">HISTÓRICO DETALHADO</h3>
+            
+            <div class="search-box" style="margin-bottom:10px">
+                <input type="text" id="r-search" placeholder="BUSCAR NO HISTÓRICO..." onkeyup="buscar('clientes', this.value, 'sug-r-cli'); renderRelatorio()">
+                <button class="search-btn" onclick="buscar('clientes', document.getElementById('r-search').value, 'sug-r-cli', false, true)"><i class="fas fa-search"></i></button>
+                <div id="sug-r-cli" class="sugestoes"></div>
+            </div>
+
             <div id="r-hist" style="max-height:250px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:5px"></div>
 
             <h3 style="margin-top:20px; font-size:12px; color:#666">RANKINGS DE DESEMPENHO</h3>
@@ -345,7 +389,7 @@
     <button class="nav-item" onclick="nav('servicos', this)"><i class="fas fa-wrench"></i>OS</button>
     <button class="nav-item" onclick="nav('clientes', this)"><i class="fas fa-users"></i>CLIENTES</button>
     <button class="nav-item" onclick="nav('estoque', this)"><i class="fas fa-box"></i>ESTOQUE</button>
-    <button class="nav-item" onclick="nav('relatorio', this)"><i class="fas fa-chart-line"></i>GESTÃO</button>
+    <button class="nav-item" onclick="nav('relatorio', this)"><i class="fas fa-chart-line"></i>RELATÓRIOS</button>
 </nav>
 
 <script type="module">
@@ -364,24 +408,43 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const SENHA = "000800"; // Senha ADM
+    
+    const EMPRESA = {
+        nome: "FILHAO.CELL",
+        cnpj: "31.926.078/0001-65",
+        tel: "(81) 9 9507-4007",
+        end: "Rua Jose Medeiros Rego, 09, Centro",
+        cid: "Surubim - PE",
+        email: "filhao.cell@gmail.com"
+    };
 
     window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[] };
     window.carrinho = [];
     window.shareData = null;
     window.tempImg = null;
     window.retornoVenda = false;
+    window.retornoOS = false;
+    window.osFotos = [null, null, null, null];
+    window.currentFotoIndex = 0;
 
     // --- CARREGAMENTO ---
     onSnapshot(collection(db, "clientes"), s => { window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('clientes')) listarCli(); });
     onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); });
     onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); });
     onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); renderKanban(); document.getElementById('loading').style.display='none'; });
-    onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { window.db.logs = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('relatorio')) renderRelatorio(); });
+    
+    onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { 
+        window.db.logs = s.docs.map(d=>({id:d.id, ...d.data()})); 
+        if(isPg('relatorio')) renderRelatorio();
+    });
 
     function isPg(p){ return document.getElementById('page-'+p).classList.contains('active'); }
 
     // --- NAV ---
     window.nav = function(p, el) {
+        if(p === 'relatorio') {
+            if(prompt("SENHA ADM:") !== SENHA) return;
+        }
         document.querySelectorAll('.page').forEach(d=>d.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
         document.getElementById('page-'+p).classList.add('active');
@@ -394,11 +457,7 @@
     // --- BUSCAS ---
     window.buscar = function(col, txt, divId, lista=false, force=false) {
         const box = document.getElementById(divId);
-        
-        // Proteção: Se DB não carregou
         if(!window.db[col]) return alert("AGUARDE CARREGAR O SISTEMA...");
-
-        // Se for digitação (force=false) e vazio, esconde
         if(!txt && !force && !lista) { box.style.display='none'; return; }
         
         let res = window.db[col].filter(i => (i.nome||'').toUpperCase().includes((txt||'').toUpperCase())).slice(0,8);
@@ -424,27 +483,32 @@
 
     window.sel = function(c, id, div) {
         const item = window.db[c].find(i=>i.id===id);
+        
+        if(div === 'sug-r-cli') {
+            document.getElementById('r-search').value = item.nome;
+            document.getElementById(div).style.display='none';
+            renderRelatorio();
+            return;
+        }
+
         const inp = div.includes('v-') ? 'v-cli' : 's-cli';
         document.getElementById(inp).value = item.nome;
         document.getElementById(div).style.display='none';
     }
 
-    // --- VENDAS (BUSCA SEPARADA) ---
+    // --- VENDAS ---
     window.buscarVenda = function(txt, force=false) {
         const box = document.getElementById('sug-v-prod');
         if(!txt && !force) { box.style.display='none'; return; }
         
-        // Filtra separadamente
         const prods = window.db.produtos.filter(i => (i.nome||'').toUpperCase().includes((txt||'').toUpperCase())).slice(0,5);
         const servs = window.db.servicos.filter(i => (i.nome||'').toUpperCase().includes((txt||'').toUpperCase())).slice(0,5);
         
         let html = '';
-        
         if(prods.length > 0) {
             html += `<div class="sug-header">PRODUTOS ESTOQUE</div>`;
             html += prods.map(i => `<div class="item-sug" onclick="addCar('${i.id}','P','${i.nome}',${i.precoVenda})"><span>${i.nome}</span> <b>R$ ${i.precoVenda}</b></div>`).join('');
         }
-        
         if(servs.length > 0) {
             html += `<div class="sug-header" style="border-top:2px solid #ddd">SERVIÇOS</div>`;
             html += servs.map(i => `<div class="item-sug" onclick="addCar('${i.id}','S','${i.nome}',${i.precoVenda})"><span>${i.nome}</span> <b>R$ ${i.precoVenda}</b></div>`).join('');
@@ -481,6 +545,7 @@
     
     window.delCar = function(i) { window.carrinho.splice(i,1); renderCarrinho(); }
     window.cadastrarNovoNaVenda = function() { window.retornoVenda=true; window.nav('clientes'); }
+    window.cadastrarNovoNaOS = function() { window.retornoOS=true; window.nav('clientes'); }
 
     window.finalizarVenda = async function() {
         if(!window.carrinho.length) return alert("VAZIO");
@@ -494,13 +559,45 @@
     }
 
     // --- OS ---
+    
+    window.addFotoOS = function(idx) {
+        window.currentFotoIndex = idx;
+        document.getElementById('os-foto-input').click();
+    }
+    window.processFotoOS = function(inp) {
+        if(inp.files && inp.files[0]) {
+             const r = new FileReader();
+             r.onload = e => {
+                 const i = new Image(); i.src = e.target.result;
+                 i.onload = () => {
+                    const c = document.createElement('canvas'); const x = c.getContext('2d');
+                    let w=i.width, h=i.height; if(w>h){if(w>400){h*=400/w;w=400}}else{if(h>400){w*=400/h;h=400}};
+                    c.width=w; c.height=h; x.drawImage(i,0,0,w,h);
+                    const b64 = c.toDataURL('image/jpeg', 0.6);
+                    window.osFotos[window.currentFotoIndex] = b64;
+                    renderFotosOS();
+                 }
+             }
+             r.readAsDataURL(inp.files[0]);
+        }
+    }
+    function renderFotosOS() {
+        const slots = document.querySelectorAll('.os-foto-slot');
+        window.osFotos.forEach((f, i) => {
+            if(f) slots[i].innerHTML = `<img src="${f}">`;
+            else slots[i].innerHTML = `<i class="fas fa-camera"></i>`;
+        });
+    }
+
     window.salvarOS = async function() {
         const id = document.getElementById('os-id').value;
         const os = {
             cliente: document.getElementById('s-cli').value,
             modelo: document.getElementById('s-mod').value,
-            defeito: document.getElementById('s-def').value + (document.getElementById('s-senha').value ? ` | S: ${document.getElementById('s-senha').value}` : ''),
+            defeito: document.getElementById('s-def').value,
+            senha: document.getElementById('s-senha').value,
             valor: parseFloat(document.getElementById('s-valor').value||0),
+            fotos: window.osFotos,
             status: 'pecas',
             data: new Date().toISOString()
         };
@@ -511,17 +608,32 @@
 
     window.renderKanban = function() {
         const c = {pecas:'', pgto:'', retirado:''};
+        const flow = ['pecas', 'pgto', 'retirado'];
+
         window.db.os.forEach(o => {
+            const currentIdx = flow.indexOf(o.status);
+            
+            // Botões de Navegação (AGRUPADOS ESQUERDA)
+            let navBtns = '';
+            if(currentIdx > 0) navBtns += `<button class="btn-mini btn-dark" onclick="moveOS('${o.id}', -1)"><i class="fas fa-arrow-left"></i></button>`;
+            if(currentIdx < 2) navBtns += `<button class="btn-mini btn-dark" onclick="moveOS('${o.id}', 1)"><i class="fas fa-arrow-right"></i></button>`;
+            else navBtns += `<button class="btn-mini btn-primary" onclick="arqOS('${o.id}')"><i class="fas fa-archive"></i></button>`;
+
             c[o.status] += `
             <div class="os-card ${o.status}">
                 <b>${o.cliente}</b>
                 <div>${o.modelo}</div>
                 <div style="font-weight:bold; color:var(--primary)">R$ ${o.valor}</div>
-                <div style="display:flex; gap:3px; margin-top:5px">
-                    <button class="btn-mini btn-info" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button>
-                    <button class="btn-mini btn-success" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button>
-                    <button class="btn-mini btn-dark" onclick="moveOS('${o.id}')"><i class="fas fa-arrow-right"></i></button>
-                    ${o.status=='retirado' ? `<button class="btn-mini btn-primary" onclick="arqOS('${o.id}')"><i class="fas fa-archive"></i></button>` : ''}
+                
+                <div style="display:flex; justify-content:space-between; margin-top:5px">
+                   <div style="display:flex; gap:5px">
+                      ${navBtns}
+                   </div>
+                   <div style="display:flex; gap:5px">
+                      <button class="btn-mini btn-info" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button>
+                      <button class="btn-mini btn-success" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button>
+                      <button class="btn-mini btn-dark" style="background:#c62828" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button>
+                   </div>
                 </div>
             </div>`;
         });
@@ -530,25 +642,65 @@
         document.getElementById('k-retirado').innerHTML = c.retirado;
     }
     
-    window.moveOS = async function(id) {
-        const s = window.db.os.find(i=>i.id===id).status;
-        const p = s==='pecas'?'pgto':'retirado';
-        if(s!=='retirado') await updateDoc(doc(db,"os_ativa",id), {status:p});
+    window.delOS = async function(id) {
+        if(prompt("SENHA ADM:") !== SENHA) return;
+        if(confirm("Deseja EXCLUIR permanentemente esta OS?")) {
+            await deleteDoc(doc(db, "os_ativa", id));
+        }
     }
+    
+    window.moveOS = async function(id, dir) {
+        const flow = ['pecas', 'pgto', 'retirado'];
+        const o = window.db.os.find(i=>i.id===id);
+        const currentIdx = flow.indexOf(o.status);
+        const nextIdx = currentIdx + dir;
+        if(nextIdx >= 0 && nextIdx < flow.length) {
+            await updateDoc(doc(db,"os_ativa",id), {status: flow[nextIdx]});
+        }
+    }
+
     window.arqOS = async function(id) {
         if(!confirm("Arquivar?")) return;
         const o = window.db.os.find(i=>i.id===id);
         await addDoc(collection(db,"logs"), {tipo:'SERVICO', desc:'OS: '+o.modelo, valor:o.valor, cliente:o.cliente, data:new Date().toISOString()});
         await deleteDoc(doc(db,"os_ativa",id));
     }
+    
     window.editOS = function(id) {
         const o = window.db.os.find(i=>i.id===id);
-        document.getElementById('os-id').value=id; document.getElementById('s-cli').value=o.cliente;
-        document.getElementById('s-mod').value=o.modelo; document.getElementById('s-valor').value=o.valor; document.getElementById('s-def').value=o.defeito;
+        document.getElementById('os-id').value=id; 
+        document.getElementById('s-cli').value=o.cliente;
+        document.getElementById('s-mod').value=o.modelo; 
+        document.getElementById('s-valor').value=o.valor;
+        
+        let def = o.defeito;
+        let sen = o.senha || '';
+        if(!sen && def && def.includes(' | S: ')) {
+            const parts = def.split(' | S: '); def = parts[0]; sen = parts[1];
+        }
+        document.getElementById('s-def').value=def;
+        document.getElementById('s-senha').value=sen;
+        window.osFotos = o.fotos || [null, null, null, null];
+        renderFotosOS();
     }
+    
     window.shareOS = function(id) {
         const o = window.db.os.find(i=>i.id===id);
-        window.shareData={tipo:'OS', cliente:o.cliente, itens:[{nome:o.modelo, val:o.valor}], total:o.valor};
+        let obsTexto = o.defeito;
+        let senhaTexto = o.senha || '';
+        if(!senhaTexto && obsTexto && obsTexto.includes(' | S: ')) {
+             const p = obsTexto.split(' | S: '); obsTexto = p[0]; senhaTexto = p[1];
+        }
+
+        window.shareData={
+            tipo:'OS', 
+            cliente:o.cliente, 
+            itens:[{nome:o.modelo, val:o.valor}], 
+            total:o.valor,
+            obs: obsTexto,
+            senha: senhaTexto,
+            fotos: o.fotos || []
+        };
         abrirModalShare();
     }
 
@@ -560,17 +712,20 @@
         else await addDoc(collection(db,"clientes"), d);
         limparCli();
         if(window.retornoVenda) { window.retornoVenda=false; window.nav('vendas'); document.getElementById('v-cli').value=d.nome; }
+        if(window.retornoOS) { window.retornoOS=false; window.nav('servicos'); document.getElementById('s-cli').value=d.nome; }
     }
     window.listarCli = function() { document.getElementById('lista-clientes').innerHTML = window.db.clientes.map(renderCliCard).join(''); }
     
     function renderCliCard(c) {
-        // Link WhatsApp
         const zapLink = c.tel ? `https://wa.me/55${c.tel.replace(/\D/g,'')}` : '#';
-        
         return `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center">
             <div style="display:flex; gap:10px; align-items:center">
                 ${c.foto?`<img src="${c.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-user"></i></div>`}
-                <div><b>${c.nome}</b><br>${c.tel}</div>
+                <div>
+                    <b>${c.nome}</b><br>
+                    <span style="font-size:11px">${c.tel}</span>
+                    <div style="font-size:9px; color:#666; font-weight:bold">${c.bairro||''} ${c.cidade?'- '+c.cidade:''}</div>
+                </div>
             </div>
             <div style="display:flex; gap:5px">
                 ${c.tel ? `<a href="${zapLink}" target="_blank" class="btn-mini btn-zap" style="width:25px; text-decoration:none"><i class="fab fa-whatsapp"></i></a>` : ''}
@@ -615,13 +770,28 @@
     // --- RELATÓRIOS ---
     window.renderRelatorio = function() {
         const f = document.getElementById('r-filtro').value; const now = new Date();
+        const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
+        
         const logs = window.db.logs.filter(l => {
             const d = new Date(l.data);
-            if(f=='dia') return d.toDateString()===now.toDateString();
-            if(f=='semana') return (now-d) < 604800000;
-            if(f=='mes') return d.getMonth()===now.getMonth();
-            return d.getFullYear()===now.getFullYear();
+            
+            // Filtro de Data
+            let matchDate = false;
+            if(f=='dia') matchDate = d.toDateString()===now.toDateString();
+            else if(f=='semana') matchDate = (now-d) < 604800000;
+            else if(f=='mes') matchDate = d.getMonth()===now.getMonth();
+            else matchDate = d.getFullYear()===now.getFullYear();
+            
+            // Filtro de Texto
+            let matchText = true;
+            if(searchTxt) {
+                matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt)) || 
+                            (l.desc && l.desc.toUpperCase().includes(searchTxt));
+            }
+
+            return matchDate && matchText;
         });
+
         let t = 0;
         document.getElementById('r-hist').innerHTML = logs.map(l => {
             t+=l.valor;
@@ -646,24 +816,32 @@
     }
 
     // --- FUNÇÕES EXTRAS ---
-    window.del = async function(c, id) { if(prompt("SENHA ADM:")===SENHA) await deleteDoc(doc(db,c,id)); }
+    window.del = async function(c, id) { 
+        if(c === 'logs') {
+            if(!confirm("Tem certeza que deseja apagar?")) return;
+            await deleteDoc(doc(db,c,id));
+            return;
+        }
+        if(prompt("SENHA ADM:")===SENHA) await deleteDoc(doc(db,c,id)); 
+    }
+
     window.toggleCusto = function() { if(prompt("SENHA ADM:")===SENHA) document.getElementById('box-custo').style.display='block'; }
+    
     window.editLog = async function(id) {
-        if(prompt("SENHA ADM:") !== SENHA) return;
         const l = window.db.logs.find(i=>i.id===id);
         const novoVal = prompt("NOVO VALOR:", l.valor);
         const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc);
         if(novoVal && novaDesc) await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc });
     }
 
-    // --- SHARE ---
+    // --- SHARE E IMPRESSÃO ---
     window.shareLog = function(id) {
         const l = window.db.logs.find(i=>i.id===id);
         window.shareData = { tipo: 'HISTORICO', cliente: l.cliente, itens: [{nome:l.desc, val:l.valor}], total: l.valor };
         abrirModalShare();
     }
 
-    window.abrirShare = function(m) {
+    window.abrirModalShare = function(m) {
         if(m=='orcamento' && window.carrinho.length) {
             window.shareData = { tipo: 'ORCAMENTO', cliente: document.getElementById('v-cli').value, itens: window.carrinho, total: window.carrinho.reduce((a,b)=>a+b.val,0) };
             abrirModalShare();
@@ -671,19 +849,83 @@
     }
     window.abrirModalShare = function() { document.getElementById('modal-overlay').style.display='flex'; }
     window.fecharModal = function(e) { if(e.target.id=='modal-overlay') document.getElementById('modal-overlay').style.display='none'; }
+    
+    // --- IMPRESSÃO COM FOTOS ---
     window.acaoShare = function(tipo) {
         const d = window.shareData;
-        const txt = `*FILHAO.CELL - ${d.tipo}*\nCLI: ${d.cliente||'Consumidor'}\n----------------\n` + d.itens.map(i=>`${i.nome} R$ ${i.val}`).join('\n') + `\n----------------\n*TOTAL: R$ ${d.total.toFixed(2)}*`;
+        let txt = `*${EMPRESA.nome} - ${d.tipo}*\nCLI: ${d.cliente||'Consumidor'}\n----------------\n` + d.itens.map(i=>`${i.nome} R$ ${i.val}`).join('\n');
+        
+        if(d.obs) txt += `\nOBS: ${d.obs}`;
+        if(d.senha) txt += `\nSENHA: ${d.senha}`;
+        
+        txt += `\n----------------\n*TOTAL: R$ ${d.total.toFixed(2)}*`;
+        
         if(tipo=='zap') window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);
+        
         if(tipo=='print' || tipo=='pdf') {
-            document.getElementById('area-print').innerHTML = `<div style="text-align:center;font-family:monospace"><h3>FILHAO.CELL</h3><p>${new Date().toLocaleString()}</p><p>CLI: ${d.cliente||'Consumidor'}</p><div class="ticket-line"></div>` + d.itens.map(i=>`<div style="display:flex;justify-content:space-between"><span>${i.nome}</span><span>${i.val.toFixed(2)}</span></div>`).join('') + `<div class="ticket-line"></div><h3>TOTAL: R$ ${d.total.toFixed(2)}</h3></div>`;
+            let htmlPrint = `
+            <div class="p-header">
+                <div class="p-title">${EMPRESA.nome}</div>
+                <div class="p-info">${EMPRESA.end}</div>
+                <div class="p-info">${EMPRESA.cid}</div>
+                <div class="p-info">CNPJ: ${EMPRESA.cnpj}</div>
+                <div class="p-info">Tel: ${EMPRESA.tel}</div>
+                <div class="p-info">${EMPRESA.email}</div>
+            </div>
+            
+            <div style="text-align:center; margin-bottom:10px">
+                <b>${d.tipo}</b><br>
+                ${new Date().toLocaleString()}
+            </div>
+            
+            <div style="margin-bottom:10px; font-weight:bold">
+                CLIENTE: ${d.cliente || 'CONSUMIDOR'}
+            </div>
+
+            <table class="p-table">
+                <thead><tr><th>ITEM</th><th style="text-align:right">R$</th></tr></thead>
+                <tbody>
+                    ${d.itens.map(i => `<tr><td>${i.nome}</td><td style="text-align:right">${i.val.toFixed(2)}</td></tr>`).join('')}
+                </tbody>
+            </table>`;
+            
+            if(d.obs || d.senha) {
+                htmlPrint += `<div class="p-line"></div><div style="text-align:left; font-size:11px">`;
+                if(d.obs) htmlPrint += `<b>OBS:</b> ${d.obs}<br>`;
+                if(d.senha) htmlPrint += `<b>SENHA:</b> ${d.senha}<br>`;
+                htmlPrint += `</div>`;
+            }
+
+            htmlPrint += `<div class="p-total">TOTAL: R$ ${d.total.toFixed(2)}</div>`;
+            
+            if(d.fotos && d.fotos.some(f=>f)) {
+                htmlPrint += `<div class="p-imgs">`;
+                d.fotos.forEach(f => {
+                    if(f) htmlPrint += `<img src="${f}">`;
+                });
+                htmlPrint += `</div>`;
+            }
+
+            htmlPrint += `
+            <div class="p-sign">
+                ASSINATURA DO CLIENTE
+            </div>
+            <div style="text-align:center; margin-top:15px; font-size:9px">OBRIGADO PELA PREFERÊNCIA!</div>
+            `;
+            
+            document.getElementById('area-print').innerHTML = htmlPrint;
             window.print();
         }
         document.getElementById('modal-overlay').style.display='none';
     }
 
     // --- UTIL ---
-    window.limparOS = function() { document.querySelectorAll('#page-servicos input').forEach(i=>i.value=''); document.getElementById('os-id').value=''; }
+    window.limparOS = function() { 
+        document.querySelectorAll('#page-servicos input').forEach(i=>i.value=''); 
+        document.getElementById('os-id').value=''; 
+        window.osFotos = [null, null, null, null];
+        renderFotosOS();
+    }
     window.limparCli = function() { document.querySelectorAll('#page-clientes input').forEach(i=>i.value=''); window.tempImg=null; 
         const v = document.getElementById('c-foto-view'); v.src=''; v.classList.remove('has-img'); document.getElementById('c-id').value=''; }
     window.limparEstoque = function() { document.querySelectorAll('#page-estoque input').forEach(i=>i.value=''); window.tempImg=null; 
