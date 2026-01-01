@@ -3,226 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL (ONLINE)</title>
+    <title>FILHAO.CELL (v26)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#003399">
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
+    <meta name="theme-color" content="#d50000">
 
     <style>
-        :root { --primary: #003399; --accent: #ffcc00; --success: #25d366; --bg: #f4f7fe; --warning: #ffbb33; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; text-transform: uppercase; }
-        body { background: var(--bg); color: #333; padding-bottom: 90px; }
+        :root { 
+            --primary: #d50000;      
+            --primary-dark: #b71c1c; 
+            --accent: #000000;       
+            --text: #212121;         
+            --bg: #f5f5f5;           
+            --card-bg: #ffffff;      
+            --success: #2e7d32;      
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 85px; text-transform: uppercase; user-select: none; }
+        
+        /* HEADER */
+        header { 
+            background: linear-gradient(135deg, var(--accent) 30%, var(--primary) 100%); 
+            color: white; padding: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            position: sticky; top: 0; z-index: 100; 
+            display:flex; justify-content:space-between; align-items:center; 
+            border-bottom: 3px solid var(--primary);
+        }
+        header h2 { font-size: 16px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; font-style: italic; }
+        .version { font-size: 9px; opacity: 0.8; font-weight: normal; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-style: normal; }
 
-        header { background: var(--primary); color: white; padding: 15px; text-align: center; border-bottom: 5px solid var(--accent); }
-        .container { padding: 5px; max-width: 600px; margin: auto; }
-
-        .page { display: none; }
+        .container { padding: 12px; max-width: 800px; margin: auto; }
+        .page { display: none; animation: slideUp 0.3s ease-out; }
         .page.active { display: block; }
+        @keyframes slideUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
 
-        .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        h3 { color: var(--primary); font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        /* CARDS */
+        .card { background: var(--card-bg); padding: 18px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 15px; position: relative; border-left: 5px solid transparent; }
+        .card:hover { border-left-color: var(--primary); transition: 0.3s; }
         
-        label { font-size: 10px; font-weight: bold; color: #666; display: block; margin-top: 8px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-top: 4px; font-size: 14px; outline: none; background: #fff; }
+        h3 { 
+            color: var(--accent); font-size: 14px; margin-bottom: 15px; 
+            border-bottom: 2px solid #eee; padding-bottom: 8px; 
+            display:flex; justify-content:space-between; align-items:center; font-weight: 800; 
+        }
+
+        /* BOTÃO NOVO */
+        .btn-novo {
+            background: var(--accent); color: white; border: none; 
+            padding: 6px 16px; border-radius: 20px; font-size: 10px; font-weight: bold; 
+            cursor: pointer; display: flex; align-items: center; gap: 5px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .btn-novo:active { transform: scale(0.95); background: var(--primary); }
+
+        /* INPUTS & LABELS */
+        label { font-size: 10px; font-weight: 800; color: #666; margin-top: 10px; display: block; letter-spacing: 0.5px; }
+        input, textarea, select { 
+            width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; 
+            background: #fafafa; margin-top: 5px; font-size: 14px; outline: none; transition: 0.2s; font-weight: 600; color: #333;
+        }
+        input:focus { border-color: var(--primary); background: #fff; }
+
+        /* BUSCA COM LUPA OPERACIONAL */
+        .search-box { position: relative; margin-top: 5px; }
+        .search-box input { padding-right: 45px; margin-top: 0; }
         
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; font-size: 13px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-sm { width: auto; padding: 5px 10px; font-size: 10px; margin: 0; }
-        .btn-del { background: #ff4444; color: white; border: none; width: 30px; height: 30px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        /* Botão Lupa CORRIGIDO */
+        .search-btn { 
+            position: absolute; right: 5px; top: 2px; bottom: 2px;
+            background: var(--primary); color: white; border: none; width: 40px; 
+            border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            z-index: 20; /* Garante que fique acima do texto */
+        }
+        .search-btn:active { background: var(--primary-dark); transform: scale(0.95); }
+        
+        .sugestoes { background: white; border-radius: 0 0 10px 10px; max-height: 250px; overflow-y: auto; position: absolute; top: 100%; width: 100%; z-index: 999; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: none; border: 1px solid #eee; }
+        .sugestoes div.item-sug { padding: 12px; border-bottom: 1px solid #f1f1f1; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; }
+        .sugestoes div.item-sug:active { background: #f0f0f0; }
+        .sug-header { background: #eee; color: #555; font-size: 10px; font-weight: 900; padding: 5px 12px; letter-spacing: 1px; }
 
-        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .item-info { flex: 1; margin-left: 10px; font-size: 11px; }
+        /* KANBAN */
+        .kanban-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; align-items: start; }
+        .k-col { background: #f0f0f0; padding: 5px; border-radius: 10px; min-height: 100px; }
+        .k-head { font-size: 9px; font-weight: 900; text-align: center; margin-bottom: 8px; color: var(--accent); background: white; padding: 4px; border-radius: 6px; border: 1px solid #ddd; }
+        
+        .os-card { background: white; padding: 8px; border-radius: 8px; margin-bottom: 6px; border-top: 4px solid #ccc; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .os-card.pecas { border-top-color: var(--primary); } 
+        .os-card.pgto { border-top-color: #ff9800; } 
+        .os-card.retirado { border-top-color: var(--success); }
+        
+        .btn-mini { border: none; border-radius: 6px; padding: 4px; color: white; cursor: pointer; font-size: 9px; flex: 1; transition: 0.2s; display:flex; justify-content:center; align-items:center; }
+        .btn-mini:active { transform: scale(0.9); }
 
-        .kanban-container { display: flex; gap: 4px; padding-bottom: 10px; }
-        .kanban-col { flex: 1; background: #eef2f9; padding: 4px; border-radius: 6px; min-width: 0; }
-        .k-title { font-size: 9px; font-weight: bold; margin-bottom: 5px; text-align: center; color: #555; white-space: nowrap; overflow: hidden; }
-        .os-card { background: white; padding: 6px; border-radius: 4px; margin-bottom: 5px; border-left: 3px solid #ccc; font-size: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .os-card b { display: block; margin-bottom: 2px; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .os-card.pecas { border-left-color: #003399; }
-        .os-card.pgto { border-left-color: #ffcc00; }
-        .os-card.retirado { border-left-color: #25d366; }
+        /* BOTÕES GERAIS */
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; font-size: 13px; color: white; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .btn-primary { background: var(--primary); } 
+        .btn-dark { background: var(--accent); } 
+        .btn-info { background: #0288d1; }
+        .btn-success { background: var(--success); }
+        .btn-zap { background: #25D366; }
 
-        #loading { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); }
+        /* FOTOS E MODAL */
+        .foto-preview { 
+            width: 80px; height: 80px; border-radius: 50%; 
+            background-color: #eee; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23999'%3E%3Cpath d='M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z'/%3E%3C/svg%3E");
+            background-size: 40%; background-position: center; background-repeat: no-repeat;
+            object-fit: cover; border: 3px solid var(--primary); margin: 10px auto; display: block; cursor: pointer; 
+        }
+        .foto-preview.has-img { background-image: none; }
 
-        .foto-circulo { width: 80px; height: 80px; background: #eee; border-radius: 50%; margin: 5px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; }
-        .foto-circulo img { width: 100%; height: 100%; object-fit: cover; }
-        .foto-quadrada { width: 100%; height: 120px; background: #eee; border-radius: 10px; margin-top: 5px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
-        .foto-quadrada img { width: 100%; height: 100%; object-fit: cover; }
+        #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 2000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; border: 2px solid var(--primary); }
 
-        .search-box { position: relative; }
-        .sugestoes { background: white; border: 1px solid #ddd; border-radius: 8px; max-height: 150px; overflow-y: auto; position: absolute; width: 100%; z-index: 100; box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
-        .sugestoes div { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 12px; }
+        /* RANKING */
+        .rank-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
+        .rank-box { background: #fafafa; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
+        .rank-title { font-size: 10px; font-weight: 900; text-align: center; color: var(--primary); margin-bottom: 8px; border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
+        .rank-item { font-size: 9px; margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
 
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; }
-        .nav-item { flex: 1; border: none; background: none; color: #aaa; font-size: 9px; font-weight: bold; text-align: center; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { display: block; font-size: 18px; margin-bottom: 3px; }
+        /* NAV */
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 2px solid var(--primary); padding: 10px 0 25px 0; z-index: 900; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+        .nav-item { flex: 1; border: none; background: none; color: #999; font-size: 9px; font-weight: bold; text-align: center; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); transform: translateY(-3px); }
+        .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
+        .nav-item.active i { color: var(--primary); }
+
+        @media print { 
+            body * { visibility: hidden; } 
+            #area-print, #area-print * { visibility: visible; }
+            #area-print { position: absolute; left: 0; top: 0; width: 80mm; color: black; background: white; } 
+            .ticket-line { border-bottom: 1px dashed #000; margin-bottom: 5px; padding-bottom: 5px; }
+        }
     </style>
 </head>
 <body>
 
-<div id="loading"><i class="fas fa-spinner fa-spin"></i> CONECTANDO...</div>
+<div id="loading" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#d50000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:bold;">
+    <i class="fas fa-mobile-alt fa-3x" style="margin-bottom:15px"></i>
+    <div>FILHAO.CELL</div>
+</div>
+
+<div id="area-print"></div>
+
+<div id="modal-overlay" onclick="fecharModal(event)">
+    <div class="modal-content">
+        <h3 style="justify-content:center">AÇÕES</h3>
+        <button class="btn" style="background:#25d366; margin-top:10px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
+        <button class="btn" style="background:#333; margin-top:10px" onclick="acaoShare('print')"><i class="fas fa-print"></i> TÉRMICA 80MM</button>
+        <button class="btn" style="background:#d32f2f; margin-top:10px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / A4</button>
+    </div>
+</div>
 
 <header>
-    <h2>FILHÃO.CELL <span style="font-size:10px; opacity:0.6; font-weight:normal; vertical-align:middle">v13.0</span></h2>
+    <h2><i class="fas fa-fire"></i> FILHAO.CELL <span class="version">v26</span></h2>
+    <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
 <div class="container">
 
-    <div id="page-servicos" class="page active">
+    <div id="page-vendas" class="page active">
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <h3><i class="fas fa-wrench"></i> NOVA O.S.</h3>
-                <button class="btn btn-primary btn-sm" onclick="nav('cadastros')">+ CLIENTE</button>
-            </div>
+            <h3><i class="fas fa-cash-register"></i> CAIXA</h3>
+            
             <label>CLIENTE</label>
             <div class="search-box">
-                <input type="text" id="s-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 's-sug')">
-                <div id="s-sug" class="sugestoes"></div>
+                <input type="text" id="v-cli" placeholder="BUSCAR CLIENTE..." onkeyup="buscar('clientes', this.value, 'sug-v-cli')">
+                <button type="button" class="search-btn" onclick="buscar('clientes', document.getElementById('v-cli').value, 'sug-v-cli', false, true)"><i class="fas fa-search"></i></button>
+                <div id="sug-v-cli" class="sugestoes"></div>
             </div>
-            <label>APARELHO / SENHA</label>
-            <div style="display:flex; gap:10px"><input type="text" id="s-apa" placeholder="MODELO"><input type="text" id="s-pw" placeholder="SENHA"></div>
-            <label>DEFEITO</label>
-            <textarea id="s-def" rows="2"></textarea>
-            <label>VALOR PREVISTO R$</label>
-            <input type="number" id="s-valor" placeholder="0.00">
-            <button class="btn btn-primary" onclick="criarOS()">ABRIR O.S.</button>
-        </div>
+            <button class="btn-novo" style="margin-top:10px" onclick="cadastrarNovoNaVenda()"><i class="fas fa-plus"></i> NOVO CLIENTE</button>
 
-        <h3 style="margin: 5px; color:#666; font-size:12px">ANDAMENTO DE O.S. (TEMPO REAL)</h3>
-        <div class="kanban-container">
-            <div class="kanban-col">
-                <div class="k-title" style="color:#003399">ANÁLISE</div>
-                <div id="col-pecas"></div>
+            <label style="margin-top:15px">ADICIONAR ITEM</label>
+            <div class="search-box">
+                <input type="text" id="v-busca" placeholder="BIPAR OU DIGITAR..." onkeyup="buscarVenda(this.value)">
+                <button type="button" class="search-btn" onclick="buscarVenda(document.getElementById('v-busca').value, true)"><i class="fas fa-search"></i></button>
+                <div id="sug-v-prod" class="sugestoes"></div>
             </div>
-            <div class="kanban-col">
-                <div class="k-title" style="color:#e6b800">AGUARD. PGTO</div>
-                <div id="col-pgto"></div>
+
+            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:15px; margin-top:20px; border-radius:12px">
+                <div id="carrinho-lista" style="font-size:12px; color:#888; text-align:center; padding:10px">CARRINHO VAZIO</div>
+                <div style="text-align:right; font-size:18px; font-weight:900; margin-top:15px; color:var(--primary); border-top:1px solid #ddd; padding-top:10px" id="v-total">TOTAL: R$ 0,00</div>
             </div>
-            <div class="kanban-col">
-                <div class="k-title" style="color:#009933">RETIRADO</div>
-                <div id="col-retirado"></div>
+
+            <div style="display:flex; gap:10px">
+                <button class="btn btn-dark" style="flex:1" onclick="abrirShare('orcamento')"><i class="fas fa-share-alt"></i></button>
+                <button class="btn btn-primary" style="flex:2" onclick="finalizarVenda()">FINALIZAR VENDA</button>
             </div>
         </div>
     </div>
 
-    <div id="page-vendas" class="page">
+    <div id="page-servicos" class="page">
         <div class="card">
-            <h3><i class="fas fa-shopping-cart"></i> CAIXA</h3>
+            <h3>NOVA O.S. <button class="btn-novo" onclick="limparOS()"><i class="fas fa-file"></i> NOVA</button></h3>
+            <input type="hidden" id="os-id">
+            
             <label>CLIENTE</label>
-            <div style="display:flex; gap:5px; align-items: flex-start;">
-                <div class="search-box" style="flex:1">
-                    <input type="text" id="v-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'v-sug-c')">
-                    <div id="v-sug-c" class="sugestoes"></div>
-                </div>
-                <button class="btn btn-primary btn-sm" style="margin-top:4px; height:38px" onclick="nav('cadastros')"><i class="fas fa-plus"></i></button>
+            <div class="search-box">
+                <input type="text" id="s-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'sug-s-cli')">
+                <button type="button" class="search-btn" onclick="buscar('clientes', document.getElementById('s-cli').value, 'sug-s-cli', false, true)"><i class="fas fa-search"></i></button>
+                <div id="sug-s-cli" class="sugestoes"></div>
             </div>
-
-            <label style="margin-top:15px; color:var(--primary)">BUSCAR PRODUTO</label>
-            <div style="display:flex; gap:5px; align-items: flex-start;">
-                <div class="search-box" style="flex:1">
-                    <input type="text" id="v-busca-prod" placeholder="DIGITE O PRODUTO..." onkeyup="buscarVenda('produto', this.value)">
-                    <div id="v-sug-prod" class="sugestoes"></div>
-                </div>
-                <button class="btn btn-primary btn-sm" style="margin-top:4px; height:38px" onclick="nav('cadastros')"><i class="fas fa-plus"></i></button>
+            
+            <div style="display:flex; gap:10px">
+                <div style="flex:1"><label>MODELO</label><input id="s-mod"></div>
+                <div style="flex:1"><label>SENHA</label><input id="s-senha"></div>
             </div>
-
-            <label style="margin-top:15px; color:#666">BUSCAR SERVIÇO</label>
-            <div style="display:flex; gap:5px; align-items: flex-start;">
-                <div class="search-box" style="flex:1">
-                    <input type="text" id="v-busca-serv" placeholder="DIGITE O SERVIÇO..." onkeyup="buscarVenda('servico', this.value)">
-                    <div id="v-sug-serv" class="sugestoes"></div>
-                </div>
-                <button class="btn btn-primary btn-sm" style="margin-top:4px; height:38px" style="background:#666" onclick="nav('cadastros')"><i class="fas fa-plus"></i></button>
-            </div>
-
-            <hr style="margin:15px 0; border-top:1px dashed #ccc">
-            <label>ITEM SELECIONADO</label>
-            <input type="text" id="v-desc" placeholder="..." readonly style="background:#eee; font-weight:bold">
+            
+            <label>DEFEITO / OBS</label>
+            <input id="s-def">
             <label>VALOR R$</label>
-            <input type="number" id="v-val">
-            <button class="btn btn-success" onclick="finalizarVenda()">CONCLUIR VENDA</button>
+            <input type="number" id="s-valor">
+
+            <button class="btn btn-primary" onclick="salvarOS()">SALVAR ORDEM</button>
+        </div>
+
+        <div class="kanban-grid">
+            <div class="k-col">
+                <div class="k-head" style="color:#555">ANÁLISE</div>
+                <div id="k-pecas"></div>
+            </div>
+            <div class="k-col">
+                <div class="k-head" style="color:#ff9800">PGTO</div>
+                <div id="k-pgto"></div>
+            </div>
+            <div class="k-col">
+                <div class="k-head" style="color:green">PRONTO</div>
+                <div id="k-retirado"></div>
+            </div>
         </div>
     </div>
 
-    <div id="page-cadastros" class="page">
-        <div class="card" style="border: 2px solid var(--accent)">
-            <h3><i class="fas fa-database"></i> GERENCIAR DADOS</h3>
-            <div style="display:flex; gap:5px; margin-bottom:10px">
-                <button class="btn-sm btn-primary" style="flex:1" onclick="listar('clientes')">CLIENTES</button>
-                <button class="btn-sm btn-primary" style="flex:1" onclick="listar('produtos')">PRODUTOS</button>
-                <button class="btn-sm btn-primary" style="flex:1" onclick="listar('servicos')">SERVIÇOS</button>
-            </div>
-            <div id="lista-bd" style="max-height: 250px; overflow-y: auto; background:#f9f9f9; border-radius:8px; padding:5px;">
-                <div style="text-align:center; color:#999; padding:10px; font-size:11px">SELECIONE UMA OPÇÃO</div>
-            </div>
-        </div>
+    <div id="page-clientes" class="page">
+        <div class="card" id="form-cli">
+            <h3>CLIENTES <button class="btn-novo" onclick="limparCli()"><i class="fas fa-user-plus"></i> NOVO</button></h3>
+            <input type="hidden" id="c-id">
+            
+            <img id="c-foto-view" src="" class="foto-preview" onclick="document.getElementById('c-foto').click()">
+            <input type="file" id="c-foto" hidden onchange="lerFoto(this, 'c-foto-view')">
 
-        <div class="card">
-            <h3>NOVO CLIENTE</h3>
-            <div class="foto-circulo" onclick="document.getElementById('f-cli').click()">
-                <img id="p-cli" style="display:none"><i class="fas fa-user" id="i-cli"></i>
+            <input type="text" id="c-nome" placeholder="NOME COMPLETO *">
+            <input type="tel" id="c-tel" placeholder="WHATSAPP" oninput="maskTel(this)">
+            <div style="display:flex; gap:10px">
+                <input type="text" id="c-bairro" placeholder="BAIRRO">
+                <input type="text" id="c-cidade" placeholder="CIDADE">
             </div>
-            <input type="file" id="f-cli" hidden accept="image/*" onchange="resizeAndRead(this, 'p-cli', 'i-cli')">
-            <input type="text" id="c-nome" placeholder="NOME COMPLETO">
-            <input type="text" id="c-tel" placeholder="WHATSAPP">
-            <button class="btn btn-primary" onclick="salvar('cliente')">CADASTRAR CLIENTE</button>
+            
+            <button class="btn btn-primary" onclick="salvarCliente()">SALVAR CLIENTE</button>
+        </div>
+        <div class="card">
+            <h3>MEUS CLIENTES</h3>
+            <div class="search-box">
+                <input type="text" id="cli-search-input" placeholder="FILTRAR LISTA..." onkeyup="buscar('clientes', this.value, 'lista-clientes', true)">
+                <button type="button" class="search-btn" onclick="buscar('clientes', document.getElementById('cli-search-input').value, 'lista-clientes', true, true)"><i class="fas fa-search"></i></button>
+            </div>
+            <div id="lista-clientes" style="margin-top:15px"></div>
+        </div>
+    </div>
+
+    <div id="page-estoque" class="page">
+        <div class="card">
+            <h3>ITEM DE ESTOQUE <button class="btn-novo" onclick="limparEstoque()"><i class="fas fa-plus"></i> NOVO</button></h3>
+            <input type="hidden" id="p-id">
+            
+            <img id="p-foto-view" src="" class="foto-preview" onclick="document.getElementById('p-foto').click()">
+            <input type="file" id="p-foto" hidden onchange="lerFoto(this, 'p-foto-view')">
+
+            <input type="text" id="p-nome" placeholder="DESCRIÇÃO *">
+            <div style="display:flex; gap:10px">
+                <input type="number" id="p-venda" placeholder="R$ VENDA *">
+                <input type="number" id="p-qtd" placeholder="QTD">
+            </div>
+            
+            <div style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px">
+                <div id="box-custo" style="display:none; background:#ffebee; padding:10px; border-radius:8px; border:1px solid #ffcdd2">
+                    <label style="margin-top:0; color:#c62828">PREÇO DE CUSTO (ADM)</label>
+                    <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
+                </div>
+                <button class="btn-novo" style="width:100%; justify-content:center; background:#444; margin-top:5px" onclick="toggleCusto()">VER CUSTO</button>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:10px">
+                <button class="btn btn-primary" onclick="salvarProduto('prod')">SALVAR PRODUTO</button>
+                <button class="btn btn-dark" onclick="salvarProduto('serv')">SALVAR SERVIÇO</button>
+            </div>
         </div>
         
         <div class="card">
-            <h3>NOVO PRODUTO</h3>
-            <div class="foto-quadrada" onclick="document.getElementById('f-prod-cad').click()">
-                <img id="p-prod-cad" style="display:none"><i class="fas fa-box" id="i-prod-cad"></i>
+            <div style="display:flex; gap:5px; margin-bottom:10px">
+                <button class="btn-mini btn-dark" onclick="listarEstoque('prod')">PRODUTOS</button>
+                <button class="btn-mini btn-dark" style="opacity:0.7" onclick="listarEstoque('serv')">SERVIÇOS</button>
             </div>
-            <input type="file" id="f-prod-cad" hidden accept="image/*" onchange="resizeAndRead(this, 'p-prod-cad', 'i-prod-cad')">
-            <input type="text" id="p-nome" placeholder="NOME PRODUTO">
-            <div style="display:flex; gap:10px">
-                <input type="number" id="p-custo" placeholder="CUSTO">
-                <input type="number" id="p-venda" placeholder="VENDA">
-            </div>
-            <button class="btn btn-primary" onclick="salvar('produto')">SALVAR PRODUTO</button>
-        </div>
-
-        <div class="card">
-            <h3>NOVO SERVIÇO</h3>
-            <input type="text" id="serv-nome" placeholder="NOME (EX: FORMATAÇÃO)">
-            <input type="number" id="serv-venda" placeholder="VALOR PADRÃO">
-            <button class="btn btn-primary" style="background:#666" onclick="salvar('servico')">CADASTRAR SERVIÇO</button>
+            <div id="lista-estoque"></div>
         </div>
     </div>
 
     <div id="page-relatorio" class="page">
         <div class="card">
-            <h3 style="color:red"><i class="fas fa-lock"></i> FINANCEIRO ADM</h3>
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <select id="f-data" onchange="renderHist()">
-                    <option value="hoje">HOJE</option>
-                    <option value="semana">SEMANA</option>
-                    <option value="mes">MÊS</option>
-                    <option value="ano">ANO ATUAL</option>
-                </select>
+            <h3>GESTÃO FINANCEIRA</h3>
+            <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:15px">
+                <option value="dia">HOJE</option>
+                <option value="semana">ÚLTIMOS 7 DIAS</option>
+                <option value="mes">MÊS ATUAL</option>
+                <option value="ano">ESTE ANO</option>
+            </select>
+            
+            <div style="background:var(--accent); color:white; padding:20px; border-radius:12px; text-align:center">
+                <div style="font-size:11px; opacity:0.8">FATURAMENTO TOTAL</div>
+                <div id="r-total" style="font-size:24px; font-weight:900; margin-top:5px">R$ 0,00</div>
             </div>
-            <div id="hist-render" style="margin-top:10px; font-size:11px"></div>
-            <div id="fin-adm" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px; font-weight:bold; color:green;"></div>
+
+            <h3 style="margin-top:25px; font-size:12px; color:#666">HISTÓRICO DETALHADO</h3>
+            <div id="r-hist" style="max-height:250px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:5px"></div>
+
+            <h3 style="margin-top:20px; font-size:12px; color:#666">RANKINGS DE DESEMPENHO</h3>
+            <div class="rank-grid">
+                <div class="rank-box">
+                    <div class="rank-title">CLIENTES</div>
+                    <div id="rank-cli"></div>
+                </div>
+                <div class="rank-box">
+                    <div class="rank-title">PRODUTOS</div>
+                    <div id="rank-prod"></div>
+                </div>
+                <div class="rank-box">
+                    <div class="rank-title">SERVIÇOS</div>
+                    <div id="rank-serv"></div>
+                </div>
+            </div>
         </div>
     </div>
 
 </div>
 
 <nav>
-    <button class="nav-item active" onclick="nav('servicos', this)"><i class="fas fa-wrench"></i>SERVIÇOS</button>
-    <button class="nav-item" onclick="nav('vendas', this)"><i class="fas fa-shopping-cart"></i>VENDAS</button>
-    <button class="nav-item" onclick="nav('cadastros', this)"><i class="fas fa-plus-circle"></i>CADASTROS</button>
-    <button class="nav-item" onclick="nav('relatorio', this)"><i class="fas fa-chart-line"></i>RELATÓRIO</button>
+    <button class="nav-item active" onclick="nav('vendas', this)"><i class="fas fa-shopping-cart"></i>VENDAS</button>
+    <button class="nav-item" onclick="nav('servicos', this)"><i class="fas fa-wrench"></i>OS</button>
+    <button class="nav-item" onclick="nav('clientes', this)"><i class="fas fa-users"></i>CLIENTES</button>
+    <button class="nav-item" onclick="nav('estoque', this)"><i class="fas fa-box"></i>ESTOQUE</button>
+    <button class="nav-item" onclick="nav('relatorio', this)"><i class="fas fa-chart-line"></i>GESTÃO</button>
 </nav>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDeGGqXV4LOB_ENZLkj_QHOIE5_OEp29s0",
@@ -235,280 +363,350 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const SENHA = "000800"; // Senha ADM
 
-    window.dbLocal = { clientes: [], produtos: [], servicosCadastrados: [], activeOS: [], logs: [] };
-    const SENHA_ADM = "000800";
-    window.tipoVendaAtual = 'produto';
+    window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[] };
+    window.carrinho = [];
+    window.shareData = null;
+    window.tempImg = null;
+    window.retornoVenda = false;
 
-    const load = document.getElementById('loading');
+    // --- CARREGAMENTO ---
+    onSnapshot(collection(db, "clientes"), s => { window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('clientes')) listarCli(); });
+    onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); });
+    onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); });
+    onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); renderKanban(); document.getElementById('loading').style.display='none'; });
+    onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { window.db.logs = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('relatorio')) renderRelatorio(); });
 
-    onSnapshot(collection(db, "clientes"), (snap) => {
-        window.dbLocal.clientes = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        if(document.getElementById('lista-bd').innerHTML.includes('CLIENTES')) window.listar('clientes');
-    });
+    function isPg(p){ return document.getElementById('page-'+p).classList.contains('active'); }
 
-    onSnapshot(collection(db, "produtos"), (snap) => {
-        window.dbLocal.produtos = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        if(document.getElementById('lista-bd').innerHTML.includes('PRODUTOS')) window.listar('produtos');
-    });
-
-    onSnapshot(collection(db, "servicos_cad"), (snap) => {
-        window.dbLocal.servicosCadastrados = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        if(document.getElementById('lista-bd').innerHTML.includes('SERVIÇOS')) window.listar('servicos');
-    });
-
-    const qOS = query(collection(db, "os_ativa"), orderBy("dataEntrada", "desc"));
-    onSnapshot(qOS, (snap) => {
-        window.dbLocal.activeOS = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        window.renderKanban();
-        load.style.display = 'none';
-    });
-
-    const qLogs = query(collection(db, "logs"), orderBy("data", "desc"));
-    onSnapshot(qLogs, (snap) => {
-        window.dbLocal.logs = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        if(document.getElementById('page-relatorio').classList.contains('active')) window.renderHist();
-    });
-
-    window.nav = function(p, b) {
-        if(p === 'relatorio') {
-            const pass = prompt("DIGITE A SENHA DO ADMINISTRADOR:");
-            if(pass !== SENHA_ADM) { alert("ACESSO NEGADO!"); return; }
-        }
-        document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(bt => bt.classList.remove('active'));
+    // --- NAV ---
+    window.nav = function(p, el) {
+        document.querySelectorAll('.page').forEach(d=>d.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
         document.getElementById('page-'+p).classList.add('active');
-        if(!b) b = document.querySelector(`.nav-item[onclick*="${p}"]`);
-        if(b) b.classList.add('active');
-        
-        if(p === 'servicos') window.renderKanban();
-        if(p === 'relatorio') {
-            document.getElementById('fin-adm').style.display = 'block';
-            window.renderHist();
-        }
+        if(el) el.classList.add('active');
+        if(p==='clientes') listarCli();
+        if(p==='estoque') listarEstoque('prod');
+        if(p==='relatorio') renderRelatorio();
     }
 
-    window.resizeAndRead = function(input, imgId, iconId) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const maxWidth = 300;
-                    const scaleSize = maxWidth / img.width;
-                    canvas.width = maxWidth;
-                    canvas.height = img.height * scaleSize;
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    document.getElementById(imgId).src = dataUrl;
-                    document.getElementById(imgId).style.display = 'block';
-                    document.getElementById(iconId).style.display = 'none';
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    window.salvar = async function(tipo) {
-        try {
-            if(tipo === 'cliente') {
-                await addDoc(collection(db, "clientes"), {
-                    nome: document.getElementById('c-nome').value,
-                    tel: document.getElementById('c-tel').value,
-                    foto: document.getElementById('p-cli').src
-                });
-                document.getElementById('c-nome').value = ''; document.getElementById('c-tel').value = '';
-            } 
-            else if(tipo === 'produto') {
-                await addDoc(collection(db, "produtos"), {
-                    nome: document.getElementById('p-nome').value,
-                    precoCompra: parseFloat(document.getElementById('p-custo').value||0),
-                    precoVenda: parseFloat(document.getElementById('p-venda').value||0),
-                    foto: document.getElementById('p-prod-cad').src
-                });
-                document.getElementById('p-nome').value = ''; document.getElementById('p-custo').value = ''; document.getElementById('p-venda').value = '';
-            }
-            else if(tipo === 'servico') {
-                await addDoc(collection(db, "servicos_cad"), {
-                    nome: document.getElementById('serv-nome').value,
-                    precoVenda: parseFloat(document.getElementById('serv-venda').value||0)
-                });
-                document.getElementById('serv-nome').value = ''; document.getElementById('serv-venda').value = '';
-            }
-            alert("SALVO NA NUVEM!");
-        } catch(e) { console.error(e); alert("ERRO AO SALVAR"); }
-    }
-
-    window.listar = function(tipo) {
-        const div = document.getElementById('lista-bd');
-        div.innerHTML = "<div style='text-align:center'><i class='fas fa-spinner fa-spin'></i></div>";
-        
-        let dados = [];
-        let labelPreco = false;
-        let col = "";
-
-        if(tipo === 'clientes') { dados = window.dbLocal.clientes; col = "clientes"; }
-        if(tipo === 'produtos') { dados = window.dbLocal.produtos; col = "produtos"; labelPreco = true; }
-        if(tipo === 'servicos') { dados = window.dbLocal.servicosCadastrados; col = "servicos_cad"; labelPreco = true; }
-
-        if(dados.length === 0) { div.innerHTML = "<div style='padding:10px; text-align:center; color:#999'>VAZIO</div>"; return; }
-
-        div.innerHTML = dados.map(item => `
-            <div class="item-lista">
-                ${item.foto && item.foto.length > 100 ? `<img src="${item.foto}" style="width:30px; height:30px; border-radius:50%; object-fit:cover">` : ''}
-                <div class="item-info">
-                    <b>${item.nome}</b><br>
-                    <span style="color:#666">${labelPreco ? 'R$ ' + (item.precoVenda ? item.precoVenda.toFixed(2) : '0.00') : (item.tel || '')}</span>
-                </div>
-                <button class="btn-del" onclick="excluir('${col}', '${item.id}')"><i class="fas fa-trash"></i></button>
-            </div>
-        `).join('');
-    }
-
-    window.excluir = async function(col, id) {
-        if(!confirm("APAGAR PARA SEMPRE?")) return;
-        await deleteDoc(doc(db, col, id));
-    }
-
-    window.buscar = function(tipo, termo, divId) {
+    // --- BUSCAS ---
+    window.buscar = function(col, txt, divId, lista=false, force=false) {
         const box = document.getElementById(divId);
-        if(termo.length < 2) { box.innerHTML = ""; return; }
-        const res = window.dbLocal[tipo].filter(i => i.nome.toLowerCase().includes(termo.toLowerCase()));
-        box.innerHTML = res.map(i => `<div onclick="set('${tipo}','${i.nome}','${divId}','${i.precoVenda||''}')">${i.nome}</div>`).join('');
+        
+        // Proteção: Se DB não carregou
+        if(!window.db[col]) return alert("AGUARDE CARREGAR O SISTEMA...");
+
+        // Se for digitação (force=false) e vazio, esconde
+        if(!txt && !force && !lista) { box.style.display='none'; return; }
+        
+        let res = window.db[col].filter(i => (i.nome||'').toUpperCase().includes((txt||'').toUpperCase())).slice(0,8);
+        
+        if(lista) {
+            if(res.length === 0) {
+                document.getElementById(divId).innerHTML = '<div style="text-align:center;padding:10px;color:#999">NENHUM REGISTRO</div>';
+            } else {
+                document.getElementById(divId).innerHTML = res.map(renderCliCard).join('');
+            }
+            return;
+        }
+        
+        if(res.length) {
+            box.innerHTML = res.map(i => `<div class="item-sug" onclick="sel('${col}','${i.id}','${divId}')">${i.nome}</div>`).join('');
+            box.style.display='block';
+        } else {
+             box.innerHTML = '<div class="item-sug" style="color:#999">NENHUM REGISTRO</div>';
+             box.style.display='block';
+             setTimeout(() => box.style.display='none', 3000); 
+        }
+    }
+
+    window.sel = function(c, id, div) {
+        const item = window.db[c].find(i=>i.id===id);
+        const inp = div.includes('v-') ? 'v-cli' : 's-cli';
+        document.getElementById(inp).value = item.nome;
+        document.getElementById(div).style.display='none';
+    }
+
+    // --- VENDAS (BUSCA SEPARADA) ---
+    window.buscarVenda = function(txt, force=false) {
+        const box = document.getElementById('sug-v-prod');
+        if(!txt && !force) { box.style.display='none'; return; }
+        
+        // Filtra separadamente
+        const prods = window.db.produtos.filter(i => (i.nome||'').toUpperCase().includes((txt||'').toUpperCase())).slice(0,5);
+        const servs = window.db.servicos.filter(i => (i.nome||'').toUpperCase().includes((txt||'').toUpperCase())).slice(0,5);
+        
+        let html = '';
+        
+        if(prods.length > 0) {
+            html += `<div class="sug-header">PRODUTOS ESTOQUE</div>`;
+            html += prods.map(i => `<div class="item-sug" onclick="addCar('${i.id}','P','${i.nome}',${i.precoVenda})"><span>${i.nome}</span> <b>R$ ${i.precoVenda}</b></div>`).join('');
+        }
+        
+        if(servs.length > 0) {
+            html += `<div class="sug-header" style="border-top:2px solid #ddd">SERVIÇOS</div>`;
+            html += servs.map(i => `<div class="item-sug" onclick="addCar('${i.id}','S','${i.nome}',${i.precoVenda})"><span>${i.nome}</span> <b>R$ ${i.precoVenda}</b></div>`).join('');
+        }
+
+        if(html === '') {
+             box.innerHTML = '<div class="item-sug" style="color:#999">NENHUM ITEM</div>';
+             box.style.display = 'block';
+             setTimeout(() => box.style.display='none', 2000);
+        } else {
+            box.innerHTML = html;
+            box.style.display = 'block';
+        }
+    }
+
+    window.addCar = function(id, tipo, nome, val) {
+        window.carrinho.push({ id, tipo, nome, val });
+        renderCarrinho();
+        document.getElementById('v-busca').value = '';
+        document.getElementById('sug-v-prod').style.display='none';
+        document.getElementById('v-busca').focus();
+    }
+
+    window.renderCarrinho = function() {
+        const l = document.getElementById('carrinho-lista');
+        if(!window.carrinho.length) { l.innerHTML = 'CARRINHO VAZIO'; document.getElementById('v-total').innerText='R$ 0,00'; return; }
+        let t = 0;
+        l.innerHTML = window.carrinho.map((i,x) => {
+            t += i.val;
+            return `<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #eee"><span>${i.nome}</span><span>R$ ${i.val} <i class="fas fa-trash" style="color:red;cursor:pointer;margin-left:5px" onclick="delCar(${x})"></i></span></div>`;
+        }).join('');
+        document.getElementById('v-total').innerText = 'TOTAL: R$ ' + t.toFixed(2);
     }
     
-    window.buscarVenda = function(tipo, termo) {
-        const divId = tipo === 'produto' ? 'v-sug-prod' : 'v-sug-serv';
-        const box = document.getElementById(divId);
-        if(termo.length < 2) { box.innerHTML = ""; return; }
-        let lista = (tipo === 'produto') ? window.dbLocal.produtos : window.dbLocal.servicosCadastrados;
-        const res = lista.filter(i => i.nome.toLowerCase().includes(termo.toLowerCase()));
-        box.innerHTML = res.map(i => `<div onclick="selecionarItemVenda('${tipo}', '${i.nome}', '${i.precoVenda}')">${i.nome}</div>`).join('');
-    }
+    window.delCar = function(i) { window.carrinho.splice(i,1); renderCarrinho(); }
+    window.cadastrarNovoNaVenda = function() { window.retornoVenda=true; window.nav('clientes'); }
 
-    window.set = function(tipo, nome, divId, preco) {
-        if(divId.includes('cli')) { document.getElementById(divId.includes('v') ? 'v-cli' : 's-cli').value = nome; }
-        document.getElementById(divId).innerHTML = "";
-    }
-
-    window.selecionarItemVenda = function(tipo, nome, preco) {
-        if(tipo === 'produto') document.getElementById('v-busca-serv').value = '';
-        else document.getElementById('v-busca-prod').value = '';
-        document.getElementById('v-sug-prod').innerHTML = '';
-        document.getElementById('v-sug-serv').innerHTML = '';
-        
-        document.getElementById('v-desc').value = nome;
-        document.getElementById('v-val').value = preco;
-        window.tipoVendaAtual = tipo;
-    }
-
-    window.criarOS = async function() {
-        let os = {
-            cliente: document.getElementById('s-cli').value,
-            modelo: document.getElementById('s-apa').value,
-            defeito: document.getElementById('s-def').value,
-            valor: parseFloat(document.getElementById('s-valor').value || 0),
-            status: 'pecas',
-            dataEntrada: new Date().toISOString()
-        };
-        if(!os.cliente) { alert("INFORME O CLIENTE!"); return; }
-        await addDoc(collection(db, "os_ativa"), os);
-        alert("O.S. SALVA NA NUVEM!");
-        document.getElementById('s-apa').value = ""; document.getElementById('s-def').value = ""; document.getElementById('s-valor').value = "";
-    }
-
-    window.moverOS = async function(id, novoStatus) {
-        await updateDoc(doc(db, "os_ativa", id), { status: novoStatus });
-    }
-
-    window.finalizarOS = async function(id) {
-        const os = window.dbLocal.activeOS.find(o => o.id === id);
-        if(os) {
-            await addDoc(collection(db, "logs"), {
-                tipo: 'SERVIÇO',
-                cliente: os.cliente,
-                desc: os.modelo + " (" + os.defeito + ")",
-                valor: os.valor,
-                lucro: os.valor,
-                data: new Date().toISOString()
-            });
-            await deleteDoc(doc(db, "os_ativa", id));
-            alert("FINALIZADO E SINCRONIZADO!");
+    window.finalizarVenda = async function() {
+        if(!window.carrinho.length) return alert("VAZIO");
+        const cli = document.getElementById('v-cli').value || "CONSUMIDOR";
+        for(let i of window.carrinho) {
+            await addDoc(collection(db,"logs"), {tipo:i.tipo=='P'?'PRODUTO':'SERVICO', desc:i.nome, valor:i.val, cliente:cli, data:new Date().toISOString()});
         }
+        window.shareData = {tipo:'VENDA', cliente:cli, itens:window.carrinho, total:window.carrinho.reduce((a,b)=>a+b.val,0)};
+        window.carrinho=[]; renderCarrinho(); document.getElementById('v-cli').value='';
+        abrirModalShare();
+    }
+
+    // --- OS ---
+    window.salvarOS = async function() {
+        const id = document.getElementById('os-id').value;
+        const os = {
+            cliente: document.getElementById('s-cli').value,
+            modelo: document.getElementById('s-mod').value,
+            defeito: document.getElementById('s-def').value + (document.getElementById('s-senha').value ? ` | S: ${document.getElementById('s-senha').value}` : ''),
+            valor: parseFloat(document.getElementById('s-valor').value||0),
+            status: 'pecas',
+            data: new Date().toISOString()
+        };
+        if(id) await updateDoc(doc(db,"os_ativa",id), os);
+        else await addDoc(collection(db,"os_ativa"), os);
+        limparOS();
     }
 
     window.renderKanban = function() {
-        const colPecas = document.getElementById('col-pecas');
-        const colPgto = document.getElementById('col-pgto');
-        const colRetirado = document.getElementById('col-retirado');
-        colPecas.innerHTML = ""; colPgto.innerHTML = ""; colRetirado.innerHTML = "";
-
-        window.dbLocal.activeOS.forEach(os => {
-            let card = `
-                <div class="os-card ${os.status}">
-                    <b>${os.cliente}</b>
-                    ${os.modelo}
-                    <br><span style="color:#777">R$ ${os.valor.toFixed(2)}</span>
-                    <div style="margin-top:5px; display:flex; gap:2px">
-                        ${os.status === 'pecas' ? `<button class="btn-sm btn-primary" style="flex:1" onclick="moverOS('${os.id}', 'pgto')">PRONTO</button>` : ''}
-                        ${os.status === 'pgto' ? `<button class="btn-sm btn-success" style="flex:1" onclick="moverOS('${os.id}', 'retirado')">SAÍDA</button>` : ''}
-                        ${os.status === 'retirado' ? `<button class="btn-sm btn-primary" style="flex:1; background:#444" onclick="finalizarOS('${os.id}')">ARQUIVAR</button>` : ''}
-                        <button class="btn-sm" style="background:#ddd; width:25px" onclick="zapOS('${os.cliente}','${os.modelo}')"><i class="fab fa-whatsapp"></i></button>
-                    </div>
-                </div>`;
-            if(os.status === 'pecas') colPecas.innerHTML += card;
-            else if(os.status === 'pgto') colPgto.innerHTML += card;
-            else if(os.status === 'retirado') colRetirado.innerHTML += card;
+        const c = {pecas:'', pgto:'', retirado:''};
+        window.db.os.forEach(o => {
+            c[o.status] += `
+            <div class="os-card ${o.status}">
+                <b>${o.cliente}</b>
+                <div>${o.modelo}</div>
+                <div style="font-weight:bold; color:var(--primary)">R$ ${o.valor}</div>
+                <div style="display:flex; gap:3px; margin-top:5px">
+                    <button class="btn-mini btn-info" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button>
+                    <button class="btn-mini btn-success" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button>
+                    <button class="btn-mini btn-dark" onclick="moveOS('${o.id}')"><i class="fas fa-arrow-right"></i></button>
+                    ${o.status=='retirado' ? `<button class="btn-mini btn-primary" onclick="arqOS('${o.id}')"><i class="fas fa-archive"></i></button>` : ''}
+                </div>
+            </div>`;
         });
+        document.getElementById('k-pecas').innerHTML = c.pecas;
+        document.getElementById('k-pgto').innerHTML = c.pgto;
+        document.getElementById('k-retirado').innerHTML = c.retirado;
     }
-
-    window.finalizarVenda = async function() {
-        let item = { 
-            tipo: window.tipoVendaAtual === 'produto' ? 'VENDA' : 'SERVIÇO', 
-            data: new Date().toISOString(),
-            cliente: document.getElementById('v-cli').value,
-            desc: document.getElementById('v-desc').value,
-            valor: parseFloat(document.getElementById('v-val').value)
-        };
-        if(!item.desc || !item.valor) { alert("SELECIONE UM ITEM!"); return; }
-        
-        if(window.tipoVendaAtual === 'produto') {
-            let pIdx = window.dbLocal.produtos.findIndex(p => p.nome === item.desc);
-            if(pIdx !== -1) { item.lucro = item.valor - (window.dbLocal.produtos[pIdx].precoCompra || 0); }
-            else { item.lucro = item.valor; }
-        } else { item.lucro = item.valor; }
-        
-        await addDoc(collection(db, "logs"), item);
-        alert("VENDA SINCRONIZADA!");
-        location.reload();
-    }
-
-    window.renderHist = function() {
-        const f = document.getElementById('f-data').value;
-        const r = document.getElementById('hist-render');
-        const h = new Date();
-        let logs = window.dbLocal.logs.filter(l => {
-            const d = new Date(l.data);
-            if(f === 'hoje') return d.toDateString() === h.toDateString();
-            if(f === 'semana') { const start = new Date(h); start.setDate(h.getDate() - h.getDay()); return d >= start; }
-            if(f === 'mes') return d.getMonth() === h.getMonth();
-            if(f === 'ano') return d.getFullYear() === h.getFullYear();
-            return true;
-        });
-        r.innerHTML = logs.map(l => `<div style="padding:8px; background:#fff; margin-bottom:5px; border-radius:8px; border-left: 4px solid ${l.tipo === 'SERVIÇO' ? '#003399' : '#25d366'}"><b>${l.tipo}:</b> ${l.cliente} - ${l.desc} <span style="float:right">R$ ${l.valor?l.valor.toFixed(2):'0.00'}</span></div>`).join('');
-        const fat = logs.reduce((a, b) => a + (b.valor || 0), 0);
-        const luc = logs.reduce((a, b) => a + (b.lucro || 0), 0);
-        document.getElementById('fin-adm').innerHTML = `TOTAL: FAT R$ ${fat.toFixed(2)} | LUC R$ ${luc.toFixed(2)}`;
-    }
-
-    window.zapOS = function(cli, mod) { window.open(`https://wa.me/5581999999999?text=Olá ${cli}, atualização sobre seu aparelho ${mod}.`); }
     
-    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e => {}); }); }
+    window.moveOS = async function(id) {
+        const s = window.db.os.find(i=>i.id===id).status;
+        const p = s==='pecas'?'pgto':'retirado';
+        if(s!=='retirado') await updateDoc(doc(db,"os_ativa",id), {status:p});
+    }
+    window.arqOS = async function(id) {
+        if(!confirm("Arquivar?")) return;
+        const o = window.db.os.find(i=>i.id===id);
+        await addDoc(collection(db,"logs"), {tipo:'SERVICO', desc:'OS: '+o.modelo, valor:o.valor, cliente:o.cliente, data:new Date().toISOString()});
+        await deleteDoc(doc(db,"os_ativa",id));
+    }
+    window.editOS = function(id) {
+        const o = window.db.os.find(i=>i.id===id);
+        document.getElementById('os-id').value=id; document.getElementById('s-cli').value=o.cliente;
+        document.getElementById('s-mod').value=o.modelo; document.getElementById('s-valor').value=o.valor; document.getElementById('s-def').value=o.defeito;
+    }
+    window.shareOS = function(id) {
+        const o = window.db.os.find(i=>i.id===id);
+        window.shareData={tipo:'OS', cliente:o.cliente, itens:[{nome:o.modelo, val:o.valor}], total:o.valor};
+        abrirModalShare();
+    }
 
+    // --- CLIENTE/ESTOQUE ---
+    window.salvarCliente = async function() {
+        const id = document.getElementById('c-id').value;
+        const d = { nome: document.getElementById('c-nome').value, tel: document.getElementById('c-tel').value, bairro: document.getElementById('c-bairro').value, cidade: document.getElementById('c-cidade').value, foto: window.tempImg||'' };
+        if(id) await updateDoc(doc(db,"clientes",id), d);
+        else await addDoc(collection(db,"clientes"), d);
+        limparCli();
+        if(window.retornoVenda) { window.retornoVenda=false; window.nav('vendas'); document.getElementById('v-cli').value=d.nome; }
+    }
+    window.listarCli = function() { document.getElementById('lista-clientes').innerHTML = window.db.clientes.map(renderCliCard).join(''); }
+    
+    function renderCliCard(c) {
+        // Link WhatsApp
+        const zapLink = c.tel ? `https://wa.me/55${c.tel.replace(/\D/g,'')}` : '#';
+        
+        return `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center">
+            <div style="display:flex; gap:10px; align-items:center">
+                ${c.foto?`<img src="${c.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-user"></i></div>`}
+                <div><b>${c.nome}</b><br>${c.tel}</div>
+            </div>
+            <div style="display:flex; gap:5px">
+                ${c.tel ? `<a href="${zapLink}" target="_blank" class="btn-mini btn-zap" style="width:25px; text-decoration:none"><i class="fab fa-whatsapp"></i></a>` : ''}
+                <button class="btn-mini btn-info" onclick="edtCli('${c.id}')"><i class="fas fa-pen"></i></button> 
+                <button class="btn-mini btn-dark" onclick="del('clientes','${c.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+    }
+    
+    window.edtCli = function(id) {
+        const c = window.db.clientes.find(i=>i.id===id);
+        document.getElementById('c-id').value=id; document.getElementById('c-nome').value=c.nome; document.getElementById('c-tel').value=c.tel;
+        document.getElementById('c-bairro').value=c.bairro||''; document.getElementById('c-cidade').value=c.cidade||'';
+        window.tempImg=c.foto; 
+        const view = document.getElementById('c-foto-view');
+        view.src=c.foto||''; 
+        if(c.foto) view.classList.add('has-img'); else view.classList.remove('has-img');
+        document.getElementById('form-cli').scrollIntoView();
+    }
+
+    window.salvarProduto = async function(t) {
+        const col = t==='prod'?'produtos':'servicos_cad';
+        const d = { nome: document.getElementById('p-nome').value, precoVenda: parseFloat(document.getElementById('p-venda').value||0), qtd: document.getElementById('p-qtd').value, custo: document.getElementById('p-custo').value, foto: window.tempImg||'' };
+        const id = document.getElementById('p-id').value;
+        if(id) await updateDoc(doc(db,col,id), d); else await addDoc(collection(db,col), d);
+        limparEstoque();
+    }
+    window.listarEstoque = function(t) {
+        const l = t==='prod'?window.db.produtos:window.db.servicos; const col=t==='prod'?'produtos':'servicos_cad';
+        document.getElementById('lista-estoque').innerHTML = l.map(i => `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex;gap:10px;align-items:center">${i.foto?`<img src="${i.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-box"></i></div>`}<div><b>${i.nome}</b><br>R$ ${i.precoVenda}</div></div><div><button class="btn-mini btn-info" onclick="edtProd('${col}','${i.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini btn-dark" onclick="del('${col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
+    }
+    window.edtProd = function(col, id) {
+        const i = (col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id);
+        document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||'';
+        window.tempImg=i.foto; 
+        const view = document.getElementById('p-foto-view');
+        view.src=i.foto||'';
+        if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img');
+        document.getElementById('page-estoque').querySelector('.card').scrollIntoView();
+    }
+    
+    // --- RELATÓRIOS ---
+    window.renderRelatorio = function() {
+        const f = document.getElementById('r-filtro').value; const now = new Date();
+        const logs = window.db.logs.filter(l => {
+            const d = new Date(l.data);
+            if(f=='dia') return d.toDateString()===now.toDateString();
+            if(f=='semana') return (now-d) < 604800000;
+            if(f=='mes') return d.getMonth()===now.getMonth();
+            return d.getFullYear()===now.getFullYear();
+        });
+        let t = 0;
+        document.getElementById('r-hist').innerHTML = logs.map(l => {
+            t+=l.valor;
+            return `<div style="padding:8px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center">
+                <div style="font-size:10px"><b>${l.desc}</b><br>${l.cliente}</div>
+                <div style="text-align:right">
+                    <b style="color:var(--primary)">R$ ${l.valor.toFixed(2)}</b><br>
+                    <i class="fas fa-share-alt" style="color:#555; cursor:pointer; margin-right:5px" onclick="shareLog('${l.id}')"></i>
+                    <i class="fas fa-pen" style="color:blue; cursor:pointer; margin-right:5px" onclick="editLog('${l.id}')"></i>
+                    <i class="fas fa-trash" style="color:red; cursor:pointer" onclick="del('logs','${l.id}')"></i>
+                </div>
+            </div>`;
+        }).join('');
+        document.getElementById('r-total').innerText = "R$ " + t.toFixed(2);
+        
+        // Ranking
+        const rank = (k, d) => {
+            const c={}; window.db.logs.forEach(i => { if((k=='CLI' || (k=='PROD' && i.tipo=='PRODUTO') || (k=='SERV' && i.tipo!='PRODUTO'))) { const n = k=='CLI'?i.cliente:i.desc; c[n]=(c[n]||0)+1; } });
+            document.getElementById(d).innerHTML = Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>`<div class="rank-item"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
+        }
+        rank('CLI','rank-cli'); rank('PROD','rank-prod'); rank('SERV','rank-serv');
+    }
+
+    // --- FUNÇÕES EXTRAS ---
+    window.del = async function(c, id) { if(prompt("SENHA ADM:")===SENHA) await deleteDoc(doc(db,c,id)); }
+    window.toggleCusto = function() { if(prompt("SENHA ADM:")===SENHA) document.getElementById('box-custo').style.display='block'; }
+    window.editLog = async function(id) {
+        if(prompt("SENHA ADM:") !== SENHA) return;
+        const l = window.db.logs.find(i=>i.id===id);
+        const novoVal = prompt("NOVO VALOR:", l.valor);
+        const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc);
+        if(novoVal && novaDesc) await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc });
+    }
+
+    // --- SHARE ---
+    window.shareLog = function(id) {
+        const l = window.db.logs.find(i=>i.id===id);
+        window.shareData = { tipo: 'HISTORICO', cliente: l.cliente, itens: [{nome:l.desc, val:l.valor}], total: l.valor };
+        abrirModalShare();
+    }
+
+    window.abrirShare = function(m) {
+        if(m=='orcamento' && window.carrinho.length) {
+            window.shareData = { tipo: 'ORCAMENTO', cliente: document.getElementById('v-cli').value, itens: window.carrinho, total: window.carrinho.reduce((a,b)=>a+b.val,0) };
+            abrirModalShare();
+        }
+    }
+    window.abrirModalShare = function() { document.getElementById('modal-overlay').style.display='flex'; }
+    window.fecharModal = function(e) { if(e.target.id=='modal-overlay') document.getElementById('modal-overlay').style.display='none'; }
+    window.acaoShare = function(tipo) {
+        const d = window.shareData;
+        const txt = `*FILHAO.CELL - ${d.tipo}*\nCLI: ${d.cliente||'Consumidor'}\n----------------\n` + d.itens.map(i=>`${i.nome} R$ ${i.val}`).join('\n') + `\n----------------\n*TOTAL: R$ ${d.total.toFixed(2)}*`;
+        if(tipo=='zap') window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);
+        if(tipo=='print' || tipo=='pdf') {
+            document.getElementById('area-print').innerHTML = `<div style="text-align:center;font-family:monospace"><h3>FILHAO.CELL</h3><p>${new Date().toLocaleString()}</p><p>CLI: ${d.cliente||'Consumidor'}</p><div class="ticket-line"></div>` + d.itens.map(i=>`<div style="display:flex;justify-content:space-between"><span>${i.nome}</span><span>${i.val.toFixed(2)}</span></div>`).join('') + `<div class="ticket-line"></div><h3>TOTAL: R$ ${d.total.toFixed(2)}</h3></div>`;
+            window.print();
+        }
+        document.getElementById('modal-overlay').style.display='none';
+    }
+
+    // --- UTIL ---
+    window.limparOS = function() { document.querySelectorAll('#page-servicos input').forEach(i=>i.value=''); document.getElementById('os-id').value=''; }
+    window.limparCli = function() { document.querySelectorAll('#page-clientes input').forEach(i=>i.value=''); window.tempImg=null; 
+        const v = document.getElementById('c-foto-view'); v.src=''; v.classList.remove('has-img'); document.getElementById('c-id').value=''; }
+    window.limparEstoque = function() { document.querySelectorAll('#page-estoque input').forEach(i=>i.value=''); window.tempImg=null; 
+        const v = document.getElementById('p-foto-view'); v.src=''; v.classList.remove('has-img'); document.getElementById('box-custo').style.display='none'; document.getElementById('p-id').value=''; }
+    window.maskTel = function(v){ v.value=v.value.replace(/\D/g,"").replace(/^(\d{2})(\d)/g,"($1) $2").replace(/(\d)(\d{4})$/,"$1-$2"); }
+    window.lerFoto = function(inp, vId) { 
+        if(inp.files && inp.files[0]) { 
+            const r = new FileReader(); 
+            r.onload = e => { 
+                const i = new Image(); i.src=e.target.result; 
+                i.onload = () => { 
+                    const c = document.createElement('canvas'); const x = c.getContext('2d'); 
+                    let w=i.width, h=i.height; if(w>h){if(w>300){h*=300/w;w=300}}else{if(h>300){w*=300/h;h=300}}; 
+                    c.width=w; c.height=h; x.drawImage(i,0,0,w,h); 
+                    window.tempImg = c.toDataURL('image/jpeg',0.6); 
+                    const view = document.getElementById(vId);
+                    view.src=window.tempImg; 
+                    view.classList.add('has-img');
+                } 
+            }; 
+            r.readAsDataURL(inp.files[0]); 
+        } 
+    }
 </script>
 </body>
 </html>
