@@ -12,10 +12,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const SENHA = "0800"; // NOVA SENHA ADM
+const SENHA = "0800"; 
 
 const EMPRESA = {
-    nome: "FILHAO.CELL",
+    nome: "FILHÃO.CELL",
     cnpj: "31.926.078/0001-65",
     tel: "(81) 9 9507-4007",
     end: "Rua Jose Medeiros Rego, 09, Centro",
@@ -32,6 +32,7 @@ window.retornoVenda = false;
 window.retornoOS = false;
 window.osFotos = [null, null, null, null];
 window.currentFotoIndex = 0;
+window.extratoAtual = null;
 
 // --- CARREGAMENTO ---
 onSnapshot(collection(db, "clientes"), s => { window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('clientes')) listarCli(); });
@@ -292,7 +293,22 @@ window.salvarOS = async function() {
         data: new Date().toISOString()
     };
     if(id) await updateDoc(doc(db,"os_ativa",id), os); else await addDoc(collection(db,"os_ativa"), os);
+    
+    alert("OS SALVA COM SUCESSO!");
     limparOS();
+    
+    // ATUALIZA PAGINA APÓS SALVAR
+    window.location.reload(); 
+}
+
+// --- FILTRO DO KANBAN (NOVO) ---
+window.filtrarKanban = function(txt) {
+    const t = txt.toUpperCase();
+    const cards = document.querySelectorAll('.os-card');
+    cards.forEach(c => {
+        if(c.innerText.toUpperCase().includes(t)) c.style.display = 'block';
+        else c.style.display = 'none';
+    });
 }
 
 window.renderKanban = function() {
@@ -366,6 +382,8 @@ window.editOS = function(id) {
     renderItemsOS();
     window.osFotos = o.fotos || [null, null, null, null];
     renderFotosOS();
+    
+    document.getElementById('page-servicos').scrollIntoView();
 }
 
 window.shareOS = function(id) {
@@ -450,12 +468,13 @@ window.edtProd = function(col, id) {
 }
 window.revelarCusto = function() { if(prompt("SENHA ADM:") === SENHA) { document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; } }
 
-// --- RELATÓRIOS ---
+// --- RELATÓRIOS (LÓGICA AGRUPADA POR CLIENTE) ---
 window.renderRelatorio = function() {
     const f = document.getElementById('r-filtro').value; const now = new Date();
     const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
     
-    const logs = window.db.logs.filter(l => {
+    // Filtra primeiro
+    const logsFiltrados = window.db.logs.filter(l => {
         const d = new Date(l.data);
         let matchDate = false;
         if(f=='dia') matchDate = d.toDateString()===now.toDateString();
@@ -465,34 +484,45 @@ window.renderRelatorio = function() {
         
         let matchText = true;
         if(searchTxt) {
-            matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt)) || 
-                        (l.desc && l.desc.toUpperCase().includes(searchTxt));
+            matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt));
         }
         return matchDate && matchText;
     });
 
-    let t = 0;
-    document.getElementById('r-hist').innerHTML = logs.map(l => {
-        t+=l.valor;
-        // ITEM DE HISTORICO COM CLIQUE NO NOME PARA FILTRAR
-        return `<div style="padding:8px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center">
-            <div style="font-size:10px">
-                <b>${l.desc}</b><br>
-                <span style="color:blue; cursor:pointer; text-decoration:underline" onclick="filtrarCliente('${l.cliente}')">${l.cliente}</span>
+    // Agrupa por Cliente
+    const clientesMap = {};
+    let totalGeral = 0;
+
+    logsFiltrados.forEach(l => {
+        totalGeral += l.valor;
+        if(!clientesMap[l.cliente]) {
+            clientesMap[l.cliente] = { nome: l.cliente, total: 0, count: 0 };
+        }
+        clientesMap[l.cliente].total += l.valor;
+        clientesMap[l.cliente].count++;
+    });
+
+    // Converte para array e ordena
+    const clientesArray = Object.values(clientesMap).sort((a,b) => b.total - a.total);
+
+    document.getElementById('r-hist').innerHTML = clientesArray.map(c => {
+        return `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center">
+            <div style="font-size:11px">
+                <b>${c.nome}</b><br>
+                <span style="color:#777">${c.count} movimentações</span>
             </div>
             <div style="text-align:right">
-                <b style="color:${l.valor<0?'red':'var(--primary)'}">R$ ${l.valor.toFixed(2)}</b><br>
-                <div style="display:flex; justify-content:flex-end; gap:5px">
-                   <i class="fas fa-eye" style="color:green; cursor:pointer" onclick="verExtratoCliente('${l.cliente}')" title="Ver Histórico Completo"></i>
-                   <i class="fas fa-share-alt" style="color:#555; cursor:pointer" onclick="shareLog('${l.id}')"></i>
-                   <i class="fas fa-pen" style="color:blue; cursor:pointer" onclick="editLog('${l.id}')"></i>
-                   <i class="fas fa-trash" style="color:red; cursor:pointer" onclick="del('logs','${l.id}')"></i>
-                </div>
+                <b style="color:var(--primary); font-size:12px">R$ ${c.total.toFixed(2)}</b><br>
+                <i class="fas fa-eye" style="color:green; cursor:pointer; font-size:16px; margin-top:5px" onclick="abrirExtratoCliente('${c.nome}')" title="Ver Detalhes"></i>
             </div>
         </div>`;
     }).join('');
-    document.getElementById('r-total').innerText = "R$ " + t.toFixed(2);
+
+    if(clientesArray.length === 0) document.getElementById('r-hist').innerHTML = '<div style="text-align:center; padding:20px; color:#ccc">NENHUM DADO ENCONTRADO</div>';
     
+    document.getElementById('r-total').innerText = "R$ " + totalGeral.toFixed(2);
+    
+    // Rankings simples
     const rank = (k, d) => {
         const c={}; window.db.logs.forEach(i => { if((k=='CLI' || (k=='PROD' && i.tipo=='PRODUTO') || (k=='SERV' && i.tipo!='PRODUTO'))) { const n = k=='CLI'?i.cliente:i.desc; c[n]=(c[n]||0)+1; } });
         document.getElementById(d).innerHTML = Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>`<div class="rank-item"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
@@ -500,24 +530,77 @@ window.renderRelatorio = function() {
     rank('CLI','rank-cli'); rank('PROD','rank-prod'); rank('SERV','rank-serv');
 }
 
-window.filtrarCliente = function(nome) {
-    document.getElementById('r-search').value = nome;
-    document.getElementById('r-filtro').value = 'ano'; // Muda para ano para ver tudo
-    renderRelatorio();
+// NOVO: ABRIR EXTRATO AGRUPADO POR DATA
+window.abrirExtratoCliente = function(nome) {
+    const logs = window.db.logs.filter(l => l.cliente === nome).sort((a,b) => new Date(b.data) - new Date(a.data));
+    
+    // Agrupar por data
+    const porData = {};
+    let totalExtrato = 0;
+
+    logs.forEach(l => {
+        const dataStr = new Date(l.data).toLocaleDateString('pt-BR');
+        if(!porData[dataStr]) porData[dataStr] = [];
+        porData[dataStr].push(l);
+        totalExtrato += l.valor;
+    });
+
+    let html = '';
+    for (const [data, itens] of Object.entries(porData)) {
+        html += `<div style="margin-bottom:15px; background:white; padding:10px; border-radius:8px; border:1px solid #eee">
+                    <div style="font-weight:bold; color:var(--primary); font-size:11px; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:5px"><i class="far fa-calendar-alt"></i> ${data}</div>`;
+        
+        let subDia = 0;
+        itens.forEach(i => {
+            subDia += i.valor;
+            html += `<div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:3px">
+                        <span>${i.desc}</span>
+                        <span style="font-weight:bold">${i.valor < 0 ? '- ' : ''}R$ ${Math.abs(i.valor).toFixed(2)}</span>
+                     </div>`;
+        });
+        html += `<div style="text-align:right; font-size:10px; font-weight:900; color:#555; margin-top:5px; border-top:1px dashed #ccc; padding-top:2px">TOTAL DIA: R$ ${subDia.toFixed(2)}</div></div>`;
+    }
+    
+    // Salva dados para compartilhar
+    window.extratoAtual = {
+        cliente: nome,
+        html: html, // Para visualizacao
+        dados: porData, // Para impressao
+        total: totalExtrato
+    };
+
+    document.getElementById('ext-nome').innerText = nome;
+    document.getElementById('ext-lista').innerHTML = html + `<div style="text-align:center; font-size:18px; font-weight:900; margin-top:20px; color:var(--primary)">TOTAL GERAL: R$ ${totalExtrato.toFixed(2)}</div>`;
+    document.getElementById('modal-extrato').style.display = 'flex';
 }
 
-window.verExtratoCliente = function(nome) {
-    const itens = window.db.logs.filter(l => l.cliente === nome).map(l => ({nome: l.desc + ` (${new Date(l.data).toLocaleDateString()})`, val: l.valor}));
-    const total = itens.reduce((a,b)=>a+b.val,0);
-    window.shareData = { tipo: 'EXTRATO CLIENTE', cliente: nome, itens: itens, subtotal: total, desconto: 0, total: total };
-    abrirModalShare();
+window.fecharExtrato = function(e) {
+    if(e.target.id === 'modal-extrato') document.getElementById('modal-extrato').style.display = 'none';
 }
+
+window.shareExtratoTotal = function() {
+    if(!window.extratoAtual) return;
+    const d = window.extratoAtual;
+    
+    // Fecha modal
+    document.getElementById('modal-extrato').style.display='none';
+
+    let txt = `*EXTRATO - ${EMPRESA.nome}*\nCLI: ${d.cliente}\n\n`;
+    for (const [data, itens] of Object.entries(d.dados)) {
+        txt += `*${data}*\n`;
+        itens.forEach(i => txt += `- ${i.desc}: R$ ${i.valor.toFixed(2)}\n`);
+        txt += `\n`;
+    }
+    txt += `*TOTAL GERAL: R$ ${d.total.toFixed(2)}*`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);
+}
+
 
 // --- EXTRAS E SHARE ---
 window.del = async function(c, id) { if(c === 'logs') { if(!confirm("Apagar?")) return; await deleteDoc(doc(db,c,id)); return; } if(prompt("SENHA ADM:")===SENHA) await deleteDoc(doc(db,c,id)); }
 window.toggleCusto = function() { if(prompt("SENHA ADM:")===SENHA) document.getElementById('box-custo').style.display='block'; }
 window.editLog = async function(id) { const l = window.db.logs.find(i=>i.id===id); const novoVal = prompt("NOVO VALOR:", l.valor); const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc); if(novoVal && novaDesc) await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc }); }
-window.shareLog = function(id) { const l = window.db.logs.find(i=>i.id===id); window.shareData = { tipo: 'HISTORICO', cliente: l.cliente, itens: [{nome:l.desc, val:l.valor}], subtotal:l.valor, desconto:0, total: l.valor }; abrirModalShare(); }
 
 window.abrirModalShare = function(m) {
     if(m=='orcamento' && window.carrinho.length) {
@@ -530,10 +613,10 @@ window.abrirModalShare = function(m) {
 window.abrirModalShare = function() { document.getElementById('modal-overlay').style.display='flex'; }
 window.fecharModal = function(e) { if(e.target.id=='modal-overlay') document.getElementById('modal-overlay').style.display='none'; }
 
-// --- IMPRESSÃO AVANÇADA ---
+// --- IMPRESSÃO AVANÇADA (CORRIGIDA) ---
 window.acaoShare = function(tipo) {
     const d = window.shareData;
-    document.getElementById('modal-overlay').style.display='none'; // Fecha o modal
+    document.getElementById('modal-overlay').style.display='none';
 
     let txt = `*${EMPRESA.nome}*\n` +
               `*${d.tipo}*\n` +
@@ -616,7 +699,16 @@ window.acaoShare = function(tipo) {
         <div style="text-align:center; margin-top:15px; font-size:9px">OBRIGADO PELA PREFERÊNCIA!</div>
         `;
         
-        document.getElementById('area-print').innerHTML = htmlPrint;
-        window.print();
+        const area = document.getElementById('area-print');
+        area.innerHTML = htmlPrint;
+        
+        // CORREÇÃO DO BUG DE TELA BRANCA/SCROLL
+        setTimeout(() => {
+            window.print();
+            // Após imprimir (ou cancelar), limpa a área para não sobrepor
+            setTimeout(() => {
+                area.innerHTML = '';
+            }, 500); 
+        }, 300);
     }
 }
