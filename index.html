@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL (v39)</title>
+    <title>FILHÃO.CELL (v43)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <link rel="manifest" href="manifest.json">
@@ -29,7 +29,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHAO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v39 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHAO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v43 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -55,6 +55,7 @@
             </div>
 
             <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:15px; margin-top:20px; border-radius:12px">
+                <div style="font-size:10px; color:#999; text-align:center; margin-bottom:5px">CLIQUE NO LÁPIS PARA ALTERAR O VALOR</div>
                 <div id="carrinho-lista" style="font-size:12px; color:#888; text-align:center; padding:10px">CARRINHO VAZIO</div>
                 <div style="text-align:right; font-size:18px; font-weight:900; margin-top:15px; color:var(--primary); border-top:1px solid #ddd; padding-top:10px" id="v-total">TOTAL: R$ 0,00</div>
             </div>
@@ -106,8 +107,11 @@
                 <div id="sug-os-item" class="sugestoes"></div>
             </div>
 
-            <label>VALOR R$</label>
-            <input type="number" id="s-valor">
+            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:12px">
+                <div style="font-size:10px; color:#999; text-align:center; margin-bottom:5px">CLIQUE NO LÁPIS PARA ALTERAR O VALOR</div>
+                <div id="os-lista-itens"></div>
+                <div style="text-align:right; font-size:16px; font-weight:900; margin-top:10px; color:var(--primary); padding-top:5px; border-top:1px solid #ddd" id="s-total-display">TOTAL: R$ 0,00</div>
+            </div>
 
             <button class="btn btn-primary" onclick="salvarOS()">SALVAR ORDEM</button>
         </div>
@@ -170,11 +174,11 @@
             </div>
             
             <div style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px">
-                <div id="box-custo" style="display:none; background:#ffebee; padding:10px; border-radius:8px; border:1px solid #ffcdd2">
-                    <label style="margin-top:0; color:#c62828">PREÇO DE CUSTO (ADM)</label>
+                <label style="margin-top:0; color:#c62828"><i class="fas fa-lock"></i> PREÇO DE CUSTO</label>
+                <div style="display:flex; gap:5px">
                     <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
+                    <button id="btn-ver-custo" class="btn-dark" style="width:50px; border-radius:10px; display:none" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
                 </div>
-                <button class="btn-novo" style="width:100%; justify-content:center; background:#444; margin-top:5px" onclick="toggleCusto()">VER CUSTO</button>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:10px">
