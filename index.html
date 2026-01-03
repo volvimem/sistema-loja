@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v60</title>
+    <title>FILHÃO.CELL v61</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -164,7 +164,7 @@
         .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
         .nav-item.active i { color: var(--primary); }
 
-        /* ÁREA DE IMPRESSÃO - CORREÇÃO PARA UMA FOLHA */
+        /* ÁREA DE IMPRESSÃO - OTIMIZADA PARA 1 PÁGINA */
         #area-print { display: none; } 
         @media print { 
             @page { margin: 0; size: auto; } /* Remove margens do navegador */
@@ -172,18 +172,21 @@
             #area-print, #area-print * { visibility: visible; }
             #area-print { 
                 display: block !important; position: absolute; left: 0; top: 0; width: 100%; 
-                font-family: 'Courier New', monospace; font-size: 11px; color: black; background: white;
-                padding: 5px; min-height: 100vh; z-index: 9999; box-sizing: border-box;
+                font-family: 'Courier New', monospace; font-size: 10px; /* Fonte reduzida */
+                color: black; background: white;
+                padding: 2px; /* Margem interna mínima */
+                box-sizing: border-box;
+                /* Removido min-height para não forçar folha extra */
             } 
             .p-header { text-align: center; margin-bottom: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
             .p-title { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
-            .p-info { font-size: 9px; margin-bottom: 1px; }
+            .p-info { font-size: 9px; margin-bottom: 0px; line-height: 1.1; }
             .p-line { border-bottom: 1px dashed #000; margin: 5px 0; }
-            .p-table { width: 100%; text-align: left; font-size: 10px; border-collapse: collapse; }
+            .p-table { width: 100%; text-align: left; font-size: 9px; border-collapse: collapse; }
             .p-table th { border-bottom: 1px solid #000; padding: 2px 0; }
             .p-table td { padding: 2px 0; }
-            .p-total { text-align: right; font-size: 14px; font-weight: bold; margin-top: 5px; }
-            .p-sign { margin-top: 30px; text-align: center; border-top: 1px solid #000; padding-top: 3px; font-size: 9px; width: 80%; margin-left: auto; margin-right: auto; }
+            .p-total { text-align: right; font-size: 12px; font-weight: bold; margin-top: 5px; }
+            .p-sign { margin-top: 20px; text-align: center; border-top: 1px solid #000; padding-top: 3px; font-size: 9px; width: 80%; margin-left: auto; margin-right: auto; }
         }
 
         .check-log { transform: scale(1.5); margin-right: 10px; accent-color: var(--primary); }
@@ -220,7 +223,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v60 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v61 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -471,7 +474,6 @@ window.sel = function(c, id, div) {
     const inp = div.includes('v-') ? 'v-cli' : 's-cli'; document.getElementById(inp).value = item.nome; document.getElementById(div).style.display='none';
 }
 
-// BUSCAS VENDAS
 window.buscarVenda = function(txt, force=false) {
     const box = document.getElementById('sug-v-prod'); 
     const clearBtn = document.getElementById('v-clear-btn');
@@ -493,7 +495,6 @@ window.limparBuscaVenda = function() {
     document.getElementById('v-clear-btn').style.display = 'none';
     document.getElementById('v-busca').focus();
 }
-// NOVA FUNÇÃO: LIMPAR CAMPOS VENDAS
 window.limparVendas = function() {
     document.getElementById('v-cli').value = '';
     document.getElementById('v-busca').value = '';
@@ -882,7 +883,6 @@ window.shareExtrato = function(tipo) {
         }
         txt += `*TOTAL GERAL: R$ ${d.total.toFixed(2)}*`;
         
-        // BUSCA NUMERO CLIENTE NO DB
         const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === d.cliente.toUpperCase());
         let phone = ''; if(cliObj && cliObj.tel) phone = cliObj.tel.replace(/\D/g, '');
 
