@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v61</title>
+    <title>FILHÃO.CELL v62 BT</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -15,11 +15,11 @@
 
     <style>
         :root { 
-            --primary: #d50000;      
+            --primary: #d50000;        
             --primary-dark: #b71c1c; 
             --accent: #000000;        
-            --text: #212121;           
-            --bg: #f5f5f5;            
+            --text: #212121;            
+            --bg: #f5f5f5;              
             --card-bg: #ffffff;        
             --success: #2e7d32;        
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -151,6 +151,14 @@
         #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 2000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; border: 2px solid var(--primary); }
 
+        /* ESTILO ESPECÍFICO PARA INPUT DE SENHA */
+        .password-container { position: relative; width: 100%; }
+        .password-container input { padding-right: 40px; }
+        .password-container i { 
+            position: absolute; right: 10px; top: 50%; transform: translateY(-30%); 
+            color: #777; cursor: pointer; padding: 5px; font-size: 16px; 
+        }
+
         /* RANKING */
         .rank-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
         .rank-box { background: #fafafa; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
@@ -164,29 +172,27 @@
         .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
         .nav-item.active i { color: var(--primary); }
 
-        /* ÁREA DE IMPRESSÃO - OTIMIZADA PARA 1 PÁGINA */
+        /* ÁREA DE IMPRESSÃO (PDF/PC) */
         #area-print { display: none; } 
         @media print { 
-            @page { margin: 0; size: auto; } /* Remove margens do navegador */
+            @page { margin: 0; size: auto; }
+            body, html { margin: 0; padding: 0; height: auto; overflow: hidden; background: white; }
             body * { visibility: hidden; } 
             #area-print, #area-print * { visibility: visible; }
             #area-print { 
                 display: block !important; position: absolute; left: 0; top: 0; width: 100%; 
-                font-family: 'Courier New', monospace; font-size: 10px; /* Fonte reduzida */
-                color: black; background: white;
-                padding: 2px; /* Margem interna mínima */
-                box-sizing: border-box;
-                /* Removido min-height para não forçar folha extra */
+                font-family: 'Courier New', monospace; font-size: 11px; color: black; background: white;
+                padding: 5px 10px; height: auto; min-height: 0; overflow: visible; box-sizing: border-box;
             } 
             .p-header { text-align: center; margin-bottom: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
             .p-title { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
-            .p-info { font-size: 9px; margin-bottom: 0px; line-height: 1.1; }
+            .p-info { font-size: 9px; margin-bottom: 1px; }
             .p-line { border-bottom: 1px dashed #000; margin: 5px 0; }
-            .p-table { width: 100%; text-align: left; font-size: 9px; border-collapse: collapse; }
+            .p-table { width: 100%; text-align: left; font-size: 10px; border-collapse: collapse; }
             .p-table th { border-bottom: 1px solid #000; padding: 2px 0; }
             .p-table td { padding: 2px 0; }
-            .p-total { text-align: right; font-size: 12px; font-weight: bold; margin-top: 5px; }
-            .p-sign { margin-top: 20px; text-align: center; border-top: 1px solid #000; padding-top: 3px; font-size: 9px; width: 80%; margin-left: auto; margin-right: auto; }
+            .p-total { text-align: right; font-size: 14px; font-weight: bold; margin-top: 5px; }
+            .p-sign { margin-top: 30px; text-align: center; border-top: 1px solid #000; padding-top: 3px; font-size: 9px; width: 80%; margin-left: auto; margin-right: auto; }
         }
 
         .check-log { transform: scale(1.5); margin-right: 10px; accent-color: var(--primary); }
@@ -215,7 +221,7 @@
             <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:5px">COMPARTILHAR EXTRATO</div>
             <button class="btn" style="background:#25d366; margin:0; padding:10px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
             <div style="display:flex; gap:8px">
-                <button class="btn" style="background:#333; margin:0; padding:10px; flex:1" onclick="shareExtrato('print')"><i class="fas fa-print"></i> 80MM</button>
+                <button class="btn" style="background:#0277bd; margin:0; padding:10px; flex:1" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH</button>
                 <button class="btn" style="background:#d32f2f; margin:0; padding:10px; flex:1" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
             </div>
         </div>
@@ -223,7 +229,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v61 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v62 BT <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -352,7 +358,7 @@
                 <label style="margin-top:0; color:#c62828"><i class="fas fa-lock"></i> PREÇO DE CUSTO</label>
                 <div style="display:flex; gap:5px">
                     <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
-                    <button id="btn-ver-custo" class="btn-dark" style="width:50px; border-radius:10px; display:none" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
+                    <button id="btn-ver-custo" class="btn-dark" style="width:50px; border-radius:10px; display:block" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:10px">
@@ -428,6 +434,7 @@ const EMPRESA = { nome: "FILHÃO.CELL", cnpj: "31.926.078/0001-65", tel: "(81) 9
 
 window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[] };
 window.carrinho = []; window.carrinhoOS = []; window.shareData = null; window.tempImg = null; window.retornoVenda = false; window.retornoOS = false; window.osFotos = [null, null, null, null]; window.currentFotoIndex = 0; window.extratoAtual = null; window.editingDateId = null;
+window.callbackSenha = null;
 
 onSnapshot(collection(db, "clientes"), s => { window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('clientes')) listarCli(); });
 onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque')) listarEstoque('prod'); });
@@ -437,15 +444,67 @@ onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { window
 
 function isPg(p){ return document.getElementById('page-'+p).classList.contains('active'); }
 
+/* --- LÓGICA DE SENHA ADM VISUAL --- */
+window.abrirModalSenha = function(callback) {
+    window.callbackSenha = callback;
+    document.getElementById('modal-overlay').style.display = 'flex';
+    document.getElementById('modal-content-default').innerHTML = `
+        <h3 style="justify-content:center; border:none; margin-bottom:5px">ADMINISTRADOR</h3>
+        <i class="fas fa-user-shield" style="font-size:30px; color:var(--primary); margin-bottom:15px; display:block"></i>
+        <div class="password-container">
+            <input type="password" id="input-senha-adm" placeholder="SENHA" onkeydown="if(event.key==='Enter') verificarSenha()">
+            <i class="fas fa-eye" onclick="togglePass()" id="eye-icon"></i>
+        </div>
+        <button class="btn btn-primary" onclick="verificarSenha()" style="margin-top:15px">CONFIRMAR</button>
+        <button class="btn" style="background:#666; margin-top:5px" onclick="fecharModal({target:{id:'modal-overlay'}})">CANCELAR</button>
+    `;
+    setTimeout(() => document.getElementById('input-senha-adm').focus(), 100);
+}
+
+window.togglePass = function() {
+    const inp = document.getElementById('input-senha-adm');
+    const ico = document.getElementById('eye-icon');
+    if (inp.type === "password") {
+        inp.type = "text";
+        ico.classList.remove('fa-eye');
+        ico.classList.add('fa-eye-slash');
+        ico.style.color = "var(--primary)";
+    } else {
+        inp.type = "password";
+        ico.classList.remove('fa-eye-slash');
+        ico.classList.add('fa-eye');
+        ico.style.color = "#777";
+    }
+}
+
+window.verificarSenha = function() {
+    const digitada = document.getElementById('input-senha-adm').value;
+    if (digitada === SENHA) {
+        document.getElementById('modal-overlay').style.display = 'none';
+        if (window.callbackSenha) window.callbackSenha();
+    } else {
+        alert("SENHA INCORRETA");
+        document.getElementById('input-senha-adm').value = '';
+    }
+}
+
 window.nav = function(p, el) {
-    if(p === 'relatorio') { if(prompt("SENHA ADM:") !== SENHA) return; }
+    if(p === 'relatorio') { 
+        abrirModalSenha(() => {
+            document.querySelectorAll('.page').forEach(d=>d.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
+            document.getElementById('page-'+p).classList.add('active');
+            if(el) el.classList.add('active');
+            renderRelatorio();
+        });
+        return;
+    }
     document.querySelectorAll('.page').forEach(d=>d.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
     document.getElementById('page-'+p).classList.add('active');
     if(el) el.classList.add('active');
     if(p==='clientes') listarCli();
     if(p==='estoque') listarEstoque('prod');
-    if(p==='relatorio') renderRelatorio();
 }
 window.forcarAtualizacao = async function() { if(!confirm("Atualizar sistema?")) return; window.location.reload(true); }
 
@@ -474,6 +533,7 @@ window.sel = function(c, id, div) {
     const inp = div.includes('v-') ? 'v-cli' : 's-cli'; document.getElementById(inp).value = item.nome; document.getElementById(div).style.display='none';
 }
 
+// BUSCAS VENDAS
 window.buscarVenda = function(txt, force=false) {
     const box = document.getElementById('sug-v-prod'); 
     const clearBtn = document.getElementById('v-clear-btn');
@@ -495,6 +555,7 @@ window.limparBuscaVenda = function() {
     document.getElementById('v-clear-btn').style.display = 'none';
     document.getElementById('v-busca').focus();
 }
+
 window.limparVendas = function() {
     document.getElementById('v-cli').value = '';
     document.getElementById('v-busca').value = '';
@@ -643,7 +704,7 @@ window.renderKanban = function() {
     });
     document.getElementById('k-pecas').innerHTML = c.pecas; document.getElementById('k-pgto').innerHTML = c.pgto; document.getElementById('k-retirado').innerHTML = c.retirado;
 }
-window.delOS = async function(id) { if(prompt("SENHA ADM:") !== SENHA) return; if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }
+window.delOS = async function(id) { abrirModalSenha(async () => { if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }); }
 window.moveOS = async function(id, dir) { const o = window.db.os.find(i=>i.id===id); const idx = ['pecas', 'pgto', 'retirado'].indexOf(o.status) + dir; await updateDoc(doc(db,"os_ativa",id), {status: ['pecas', 'pgto', 'retirado'][idx]}); }
 
 window.arqOS = async function(id) {
@@ -714,7 +775,7 @@ window.listarEstoque = function(t) {
     document.getElementById('lista-estoque').innerHTML = l.map(i => `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex;gap:10px;align-items:center">${i.foto?`<img src="${i.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-box"></i></div>`}<div><b>${i.nome}</b><br>R$ ${i.precoVenda}</div></div><div><button class="btn-mini btn-info" onclick="edtProd('${col}','${i.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini btn-dark" onclick="del('${col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
 }
 window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id); document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||''; document.getElementById('p-custo').type='password'; document.getElementById('btn-ver-custo').style.display='block'; window.tempImg=i.foto; const view=document.getElementById('p-foto-view'); view.src=i.foto||''; if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('page-estoque').querySelector('.card').scrollIntoView(); }
-window.revelarCusto = function() { if(prompt("SENHA ADM:") === SENHA) { document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; } }
+window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
 
 window.renderRelatorio = function() {
     const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
@@ -795,12 +856,13 @@ window.toggleBtnDelete = function() {
 }
 
 window.excluirSelecionados = async function(nome) {
-    if(prompt("SENHA ADM:") !== SENHA) return;
-    const checked = document.querySelectorAll('.check-log:checked');
-    if(!confirm(`Excluir ${checked.length} itens?`)) return;
-    for(const cb of checked) { await deleteDoc(doc(db, "logs", cb.value)); }
-    alert("Excluídos!");
-    window.editarMovimentacaoCliente(nome); 
+    abrirModalSenha(async () => {
+        const checked = document.querySelectorAll('.check-log:checked');
+        if(!confirm(`Excluir ${checked.length} itens?`)) return;
+        for(const cb of checked) { await deleteDoc(doc(db, "logs", cb.value)); }
+        alert("Excluídos!");
+        window.editarMovimentacaoCliente(nome); 
+    });
 }
 
 window.toggleEditDate = function(id) { document.getElementById(`date-display-${id}`).style.display='none'; document.getElementById(`date-edit-${id}`).style.display='flex'; }
@@ -813,14 +875,15 @@ window.saveNewDate = async function(id, nome) {
 }
 
 window.editLog = async function(id, nome) { 
-    if(prompt("SENHA ADM:") !== SENHA) return; 
-    const l = window.db.logs.find(i=>i.id===id); const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc); const novoVal = prompt("NOVO VALOR:", l.valor); 
-    if(novaDesc && novoVal) { 
-        await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc.toUpperCase() }); 
-        alert("Atualizado!"); window.editarMovimentacaoCliente(nome); 
-    } 
+    abrirModalSenha(async () => {
+        const l = window.db.logs.find(i=>i.id===id); const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc); const novoVal = prompt("NOVO VALOR:", l.valor); 
+        if(novaDesc && novoVal) { 
+            await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc.toUpperCase() }); 
+            alert("Atualizado!"); window.editarMovimentacaoCliente(nome); 
+        } 
+    });
 }
-window.delLog = async function(id) { if(prompt("SENHA ADM PARA EXCLUIR:") !== SENHA) return; await deleteDoc(doc(db, "logs", id)); alert("Excluído!"); document.getElementById('modal-extrato').style.display='none'; renderRelatorio(); }
+window.delLog = async function(id) { abrirModalSenha(async () => { await deleteDoc(doc(db, "logs", id)); alert("Excluído!"); document.getElementById('modal-extrato').style.display='none'; renderRelatorio(); }); }
 
 window.abrirExtratoCliente = function(nome) {
     const logs = window.db.logs.filter(l => l.cliente === nome).sort((a,b) => new Date(b.data) - new Date(a.data));
@@ -849,7 +912,7 @@ window.acaoShare = function(tipo) {
     let txt = `*${EMPRESA.nome}*\n*${d.tipo}*\nDATA: ${new Date().toLocaleString()}\nCLI: ${d.cliente||'Consumidor'}\n----------------\n` + d.itens.map(i=>`${i.qtd||1}x ${i.nome} ... R$ ${i.val.toFixed(2)} ${i.garantia?'('+i.garantia+')':''}`).join('\n') + `\n----------------\n`;
     if(d.desconto > 0) txt += `SUBTOTAL: R$ ${d.subtotal.toFixed(2)}\nDESCONTO: -R$ ${d.desconto.toFixed(2)}\n`; txt += `*TOTAL FINAL: R$ ${d.total.toFixed(2)}*`; if(d.obs) txt += `\nOBS: ${d.obs}`;
     
-    // ZAP DIRETO VENDAS/OS
+    // ZAP
     if(tipo=='zap') { 
         const cliName = d.cliente || '';
         const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === cliName.toUpperCase());
@@ -858,7 +921,8 @@ window.acaoShare = function(tipo) {
         if(phone.length >= 10) urlZap = `https://wa.me/55${phone}?text=${encodeURIComponent(txt)}`; 
         window.open(urlZap); 
     }
-    if(tipo=='print' || tipo=='pdf') {
+    // PDF (WINDOW.PRINT)
+    if(tipo=='pdf') {
         let htmlPrint = `<div class="p-header"><div class="p-title">${EMPRESA.nome}</div><div class="p-info">${EMPRESA.end}</div><div class="p-info">${EMPRESA.cid}</div><div class="p-info">CNPJ: ${EMPRESA.cnpj}</div><div class="p-info">Tel: ${EMPRESA.tel}</div><div class="p-info">${EMPRESA.email}</div></div><div style="text-align:center; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px"><b>${d.tipo}</b><br>${new Date().toLocaleString()}</div><div style="margin-bottom:5px; font-weight:bold; font-size:12px">CLIENTE: ${d.cliente || 'CONSUMIDOR'}</div>
         <table class="p-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">R$</th></tr></thead><tbody>${d.itens.map(i => `<tr><td style="width:20px">${i.qtd||1}x</td><td>${i.nome}<br><small>GAR: ${i.garantia||'--'}</small></td><td style="text-align:right">${i.val.toFixed(2)}</td></tr>`).join('')}</tbody></table>
         <div class="p-line"></div><div style="display:flex; justify-content:space-between; font-size:11px"><span>SUBTOTAL:</span><span>R$ ${d.subtotal.toFixed(2)}</span></div>`;
@@ -868,12 +932,23 @@ window.acaoShare = function(tipo) {
         htmlPrint += `<div class="p-sign">ASSINATURA DO CLIENTE</div><div style="text-align:center; margin-top:15px; font-size:9px">OBRIGADO PELA PREFERÊNCIA!</div>`;
         const area = document.getElementById('area-print'); area.innerHTML = htmlPrint; setTimeout(() => { window.print(); setTimeout(() => { area.innerHTML = ''; }, 500); }, 300);
     }
+    // BLUETOOTH (RAWBT)
+    if(tipo=='bluetooth') {
+        let btTxt = `${EMPRESA.nome}%0A${EMPRESA.end}%0A${EMPRESA.cid}%0ACNPJ: ${EMPRESA.cnpj}%0A--------------------------------%0A${d.tipo}%0A${new Date().toLocaleString()}%0ACLIENTE: ${d.cliente || 'CONSUMIDOR'}%0A--------------------------------%0A`;
+        d.itens.forEach(i => { btTxt += `${i.qtd||1}x ${i.nome}%0A   R$ ${i.val.toFixed(2)}%0A`; });
+        btTxt += `--------------------------------%0A`;
+        if(d.desconto > 0) btTxt += `SUBTOTAL: R$ ${d.subtotal.toFixed(2)}%0ADESCONTO: -R$ ${d.desconto.toFixed(2)}%0A`;
+        btTxt += `TOTAL:    R$ ${d.total.toFixed(2)}%0A--------------------------------%0A${d.obs ? 'OBS: '+d.obs+'%0A' : ''}%0A%0A%0A`;
+        window.location.href = 'rawbt:' + btTxt;
+    }
 }
 
 // ZAP DIRETO EXTRATO
 window.shareExtrato = function(tipo) {
     if(!window.extratoAtual) return; const d = window.extratoAtual;
     if(tipo === 'zap') document.getElementById('modal-extrato').style.display='none';
+    
+    // ZAP
     if(tipo === 'zap') {
         let txt = `*EXTRATO - ${EMPRESA.nome}*\nCLI: ${d.cliente}\n\n`;
         for (const [data, itens] of Object.entries(d.dados)) {
@@ -882,14 +957,14 @@ window.shareExtrato = function(tipo) {
             txt += `\n`;
         }
         txt += `*TOTAL GERAL: R$ ${d.total.toFixed(2)}*`;
-        
         const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === d.cliente.toUpperCase());
         let phone = ''; if(cliObj && cliObj.tel) phone = cliObj.tel.replace(/\D/g, '');
-
         let urlZap = `https://wa.me/?text=${encodeURIComponent(txt)}`;
         if(phone.length >= 10) urlZap = `https://wa.me/55${phone}?text=${encodeURIComponent(txt)}`;
         window.open(urlZap);
-    } else {
+    } 
+    // PDF
+    else if(tipo === 'pdf') {
         let htmlPrint = `<div class="p-header"><div class="p-title">${EMPRESA.nome}</div><div class="p-info">${EMPRESA.end}</div><div class="p-info">${EMPRESA.cid}</div><div class="p-info">CNPJ: ${EMPRESA.cnpj}</div><div class="p-info">Tel: ${EMPRESA.tel}</div><div class="p-info">${EMPRESA.email}</div></div><div style="text-align:center; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px"><b>EXTRATO DO CLIENTE</b><br>${d.cliente}</div>`;
         for (const [data, itens] of Object.entries(d.dados)) {
             htmlPrint += `<div style="font-weight:bold; margin-top:5px; border-bottom:1px solid #000">${data}</div><table class="p-table"><tbody>`;
@@ -899,11 +974,25 @@ window.shareExtrato = function(tipo) {
         htmlPrint += `<div class="p-total" style="font-size:14px; border-top:1px solid #000; margin-top:5px; padding-top:5px">TOTAL GERAL: R$ ${d.total.toFixed(2)}</div><div style="text-align:center; margin-top:10px; font-size:9px">EMITIDO EM ${new Date().toLocaleString()}</div>`;
         const area = document.getElementById('area-print'); area.innerHTML = htmlPrint; setTimeout(() => { window.print(); setTimeout(() => { area.innerHTML = ''; }, 500); }, 300);
     }
+    // BLUETOOTH
+    else if(tipo === 'bluetooth') {
+        let btTxt = `${EMPRESA.nome}%0AEXTRATO DE CLIENTE%0ACLIENTE: ${d.cliente}%0A--------------------------------%0A`;
+        for (const [data, itens] of Object.entries(d.dados)) {
+            btTxt += `[${data}]%0A`;
+            itens.forEach(i => { const qtd = (i.qtd > 1 && i.tipo !== 'DESCONTO') ? `${i.qtd}x ` : ''; btTxt += `${qtd}${i.desc}: R$ ${i.valor.toFixed(2)}%0A`; });
+            btTxt += `%0A`;
+        }
+        btTxt += `--------------------------------%0ATOTAL GERAL: R$ ${d.total.toFixed(2)}%0A--------------------------------%0A%0A%0A`;
+        window.location.href = 'rawbt:' + btTxt;
+    }
 }
 
 window.fecharExtrato = function(e) { if(e.target.id === 'modal-extrato') document.getElementById('modal-extrato').style.display = 'none'; }
-window.del = async function(c, id) { if(c === 'logs') { if(!confirm("Apagar?")) return; await deleteDoc(doc(db,c,id)); return; } if(prompt("SENHA ADM:")===SENHA) await deleteDoc(doc(db,c,id)); }
-window.abrirModalShare = function() { document.getElementById('modal-content-default').innerHTML = `<h3 style="justify-content:center">AÇÕES</h3><button class="btn" style="background:#25d366; margin-top:10px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button><button class="btn" style="background:#333; margin-top:10px" onclick="acaoShare('print')"><i class="fas fa-print"></i> TÉRMICA 80MM</button><button class="btn" style="background:#d32f2f; margin-top:10px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / A4</button>`; document.getElementById('modal-overlay').style.display='flex'; }
+window.del = async function(c, id) { 
+    if(c === 'logs') { if(!confirm("Apagar?")) return; await deleteDoc(doc(db,c,id)); return; } 
+    abrirModalSenha(async () => { await deleteDoc(doc(db,c,id)); }); 
+}
+window.abrirModalShare = function() { document.getElementById('modal-content-default').innerHTML = `<h3 style="justify-content:center">AÇÕES</h3><button class="btn" style="background:#25d366; margin-top:10px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button><button class="btn" style="background:#0277bd; margin-top:10px" onclick="acaoShare('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH (RAWBT)</button><button class="btn" style="background:#d32f2f; margin-top:10px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / IMPRIMIR</button>`; document.getElementById('modal-overlay').style.display='flex'; }
 window.fecharModal = function(e) { if(e.target.id=='modal-overlay') document.getElementById('modal-overlay').style.display='none'; }
 </script>
 </body>
