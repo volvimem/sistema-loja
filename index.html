@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v62 BT</title>
+    <title>FILHÃO.CELL v63 BT</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -15,13 +15,13 @@
 
     <style>
         :root { 
-            --primary: #d50000;        
+            --primary: #d50000;         
             --primary-dark: #b71c1c; 
-            --accent: #000000;        
+            --accent: #000000;         
             --text: #212121;            
             --bg: #f5f5f5;              
-            --card-bg: #ffffff;        
-            --success: #2e7d32;        
+            --card-bg: #ffffff;         
+            --success: #2e7d32;         
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
@@ -177,6 +177,8 @@
         @media print { 
             @page { margin: 0; size: auto; }
             body, html { margin: 0; padding: 0; height: auto; overflow: hidden; background: white; }
+            /* CORREÇÃO TELA BRANCA */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color: #000 !important; }
             body * { visibility: hidden; } 
             #area-print, #area-print * { visibility: visible; }
             #area-print { 
@@ -229,7 +231,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v62 BT <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v63 BT <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -575,8 +577,23 @@ window.renderCarrinho = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinho.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:5px;border-bottom:1px solid #eee;"><div style="display:flex; justify-content:space-between; align-items:center;"><span onclick="editItemVenda(${x})" style="flex:1; cursor:pointer; font-weight:bold">${i.qtd}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span><i class="fas fa-trash" style="color:red;cursor:pointer;margin-left:10px" onclick="delCar(${x})"></i></div>
-        <div style="display:flex; align-items:center; gap:5px; margin-top:5px;"><label style="margin:0; font-size:9px">GARANTIA:</label><select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaCar(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div></div>`;
+        return `<div style="padding:5px;border-bottom:1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="flex:1; font-weight:bold">${i.qtd}x ${i.nome}</span>
+                <span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span>
+                <i class="fas fa-pen" style="color:blue;cursor:pointer;margin-left:10px" onclick="editItemVenda(${x})"></i>
+                <i class="fas fa-trash" style="color:red;cursor:pointer;margin-left:10px" onclick="delCar(${x})"></i>
+            </div>
+            <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
+                <label style="margin:0; font-size:9px">GARANTIA:</label>
+                <select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaCar(${x}, this.value)">
+                    <option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option>
+                    <option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option>
+                    <option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option>
+                    <option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option>
+                </select>
+            </div>
+        </div>`;
     }).join('');
     const desc = parseFloat(document.getElementById('v-desc').value) || 0;
     document.getElementById('v-total').innerText = 'TOTAL: R$ ' + (subtotal - desc).toFixed(2);
@@ -638,7 +655,23 @@ window.renderItemsOS = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinhoOS.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:5px;border-bottom:1px solid #eee;"><div style="display:flex; justify-content:space-between; align-items:center;"><span onclick="editItemOS(${x})" style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span><i class="fas fa-trash" style="color:red;cursor:pointer;margin-left:8px" onclick="delItemOS(${x})"></i></div><div style="display:flex; align-items:center; gap:5px; margin-top:5px;"><label style="margin:0; font-size:9px">GAR:</label><select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaOS(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div></div>`;
+        return `<div style="padding:5px;border-bottom:1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span>
+                <span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span>
+                <i class="fas fa-pen" style="color:blue;cursor:pointer;margin-left:8px" onclick="editItemOS(${x})"></i>
+                <i class="fas fa-trash" style="color:red;cursor:pointer;margin-left:8px" onclick="delItemOS(${x})"></i>
+            </div>
+            <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
+                <label style="margin:0; font-size:9px">GAR:</label>
+                <select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaOS(${x}, this.value)">
+                    <option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option>
+                    <option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option>
+                    <option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option>
+                    <option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option>
+                </select>
+            </div>
+        </div>`;
     }).join('');
     const desc = parseFloat(document.getElementById('s-desc').value) || 0;
     document.getElementById('s-total-display').innerText = 'TOTAL: R$ ' + (subtotal - desc).toFixed(2);
@@ -690,7 +723,16 @@ window.limparOS = function() {
     window.carrinhoOS = []; window.osFotos = [null,null,null,null]; renderItemsOS(); 
     const slots = document.querySelectorAll('.os-foto-slot'); slots.forEach(s => s.innerHTML = '<i class="fas fa-camera"></i>');
 }
+
+// CORREÇÃO SCROLL KANBAN
 window.renderKanban = function() {
+    // Salva a posição do scroll antes de renderizar
+    const scrollPositions = {
+        pecas: document.getElementById('k-pecas').parentElement.scrollTop,
+        pgto: document.getElementById('k-pgto').parentElement.scrollTop,
+        retirado: document.getElementById('k-retirado').parentElement.scrollTop
+    };
+
     const c = {pecas:'', pgto:'', retirado:''}; const flow = ['pecas', 'pgto', 'retirado']; const term = document.getElementById('busca-kanban') ? document.getElementById('busca-kanban').value.toUpperCase() : '';
     window.db.os.forEach(o => {
         if(term) { const t = (o.cliente+' '+o.modelo+' '+o.status).toUpperCase(); if(!t.includes(term)) return; }
@@ -702,8 +744,17 @@ window.renderKanban = function() {
         const numDisplay = o.num ? `<b>#${o.num}</b> - ` : '';
         c[o.status] += `<div class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">R$ ${o.valor.toFixed(2)}</div><div style="display:flex; justify-content:space-between; margin-top:5px"><div style="display:flex; gap:5px">${nav}</div><div style="display:flex; gap:5px"><button class="btn-mini btn-info" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button><button class="btn-mini btn-success" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini btn-dark" style="background:#c62828" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button></div></div></div>`;
     });
-    document.getElementById('k-pecas').innerHTML = c.pecas; document.getElementById('k-pgto').innerHTML = c.pgto; document.getElementById('k-retirado').innerHTML = c.retirado;
+    
+    document.getElementById('k-pecas').innerHTML = c.pecas; 
+    document.getElementById('k-pgto').innerHTML = c.pgto; 
+    document.getElementById('k-retirado').innerHTML = c.retirado;
+
+    // Restaura a posição do scroll
+    document.getElementById('k-pecas').parentElement.scrollTop = scrollPositions.pecas;
+    document.getElementById('k-pgto').parentElement.scrollTop = scrollPositions.pgto;
+    document.getElementById('k-retirado').parentElement.scrollTop = scrollPositions.retirado;
 }
+
 window.delOS = async function(id) { abrirModalSenha(async () => { if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }); }
 window.moveOS = async function(id, dir) { const o = window.db.os.find(i=>i.id===id); const idx = ['pecas', 'pgto', 'retirado'].indexOf(o.status) + dir; await updateDoc(doc(db,"os_ativa",id), {status: ['pecas', 'pgto', 'retirado'][idx]}); }
 
@@ -912,18 +963,21 @@ window.acaoShare = function(tipo) {
     let txt = `*${EMPRESA.nome}*\n*${d.tipo}*\nDATA: ${new Date().toLocaleString()}\nCLI: ${d.cliente||'Consumidor'}\n----------------\n` + d.itens.map(i=>`${i.qtd||1}x ${i.nome} ... R$ ${i.val.toFixed(2)} ${i.garantia?'('+i.garantia+')':''}`).join('\n') + `\n----------------\n`;
     if(d.desconto > 0) txt += `SUBTOTAL: R$ ${d.subtotal.toFixed(2)}\nDESCONTO: -R$ ${d.desconto.toFixed(2)}\n`; txt += `*TOTAL FINAL: R$ ${d.total.toFixed(2)}*`; if(d.obs) txt += `\nOBS: ${d.obs}`;
     
-    // ZAP
+    // ZAP (PROTOCOL UPDATE)
     if(tipo=='zap') { 
         const cliName = d.cliente || '';
         const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === cliName.toUpperCase());
         let phone = ''; if(cliObj && cliObj.tel) phone = cliObj.tel.replace(/\D/g, '');
-        let urlZap = `https://wa.me/?text=${encodeURIComponent(txt)}`; 
-        if(phone.length >= 10) urlZap = `https://wa.me/55${phone}?text=${encodeURIComponent(txt)}`; 
-        window.open(urlZap); 
+        let urlZap = `whatsapp://send?text=${encodeURIComponent(txt)}`; 
+        if(phone.length >= 10) urlZap = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(txt)}`; 
+        window.location.href = urlZap; 
     }
     // PDF (WINDOW.PRINT)
     if(tipo=='pdf') {
-        let htmlPrint = `<div class="p-header"><div class="p-title">${EMPRESA.nome}</div><div class="p-info">${EMPRESA.end}</div><div class="p-info">${EMPRESA.cid}</div><div class="p-info">CNPJ: ${EMPRESA.cnpj}</div><div class="p-info">Tel: ${EMPRESA.tel}</div><div class="p-info">${EMPRESA.email}</div></div><div style="text-align:center; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px"><b>${d.tipo}</b><br>${new Date().toLocaleString()}</div><div style="margin-bottom:5px; font-weight:bold; font-size:12px">CLIENTE: ${d.cliente || 'CONSUMIDOR'}</div>
+        let htmlPrint = `<div class="p-header"><div class="p-title">${EMPRESA.nome}</div><div class="p-info">${EMPRESA.end}</div><div class="p-info">${EMPRESA.cid}</div><div class="p-info">CNPJ: ${EMPRESA.cnpj}</div><div class="p-info">Tel: ${EMPRESA.tel}</div><div class="p-info">${EMPRESA.email}</div></div><div style="text-align:center; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px"><b>${new Date().toLocaleString()}</b></div>
+        
+        <div style="margin-bottom:10px; font-weight:900; font-size:16px; border: 2px solid #000; padding: 5px;">CLIENTE: ${d.cliente || 'CONSUMIDOR'} <br> ${d.tipo}</div>
+
         <table class="p-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">R$</th></tr></thead><tbody>${d.itens.map(i => `<tr><td style="width:20px">${i.qtd||1}x</td><td>${i.nome}<br><small>GAR: ${i.garantia||'--'}</small></td><td style="text-align:right">${i.val.toFixed(2)}</td></tr>`).join('')}</tbody></table>
         <div class="p-line"></div><div style="display:flex; justify-content:space-between; font-size:11px"><span>SUBTOTAL:</span><span>R$ ${d.subtotal.toFixed(2)}</span></div>`;
         if(d.desconto > 0) htmlPrint += `<div style="display:flex; justify-content:space-between; font-size:11px; color:black"><span>DESCONTO:</span><span>- R$ ${d.desconto.toFixed(2)}</span></div>`;
@@ -959,9 +1013,9 @@ window.shareExtrato = function(tipo) {
         txt += `*TOTAL GERAL: R$ ${d.total.toFixed(2)}*`;
         const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === d.cliente.toUpperCase());
         let phone = ''; if(cliObj && cliObj.tel) phone = cliObj.tel.replace(/\D/g, '');
-        let urlZap = `https://wa.me/?text=${encodeURIComponent(txt)}`;
-        if(phone.length >= 10) urlZap = `https://wa.me/55${phone}?text=${encodeURIComponent(txt)}`;
-        window.open(urlZap);
+        let urlZap = `whatsapp://send?text=${encodeURIComponent(txt)}`;
+        if(phone.length >= 10) urlZap = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(txt)}`;
+        window.location.href = urlZap;
     } 
     // PDF
     else if(tipo === 'pdf') {
