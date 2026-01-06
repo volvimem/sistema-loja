@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v63 BT</title>
+    <title>FILHÃO.CELL v66 BT</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -15,9 +15,9 @@
 
     <style>
         :root { 
-            --primary: #d50000;         
+            --primary: #d50000;          
             --primary-dark: #b71c1c; 
-            --accent: #000000;         
+            --accent: #000000;          
             --text: #212121;            
             --bg: #f5f5f5;              
             --card-bg: #ffffff;         
@@ -128,7 +128,35 @@
         .os-card.pgto { border-top-color: #ff9800; } 
         .os-card.retirado { border-top-color: var(--success); }
 
-        .btn-mini { border: none; border-radius: 6px; padding: 4px; color: white; cursor: pointer; font-size: 9px; flex: 1; transition: 0.2s; display:flex; justify-content:center; align-items:center; }
+        /* --- BOTÕES DE AÇÃO PADRONIZADOS (MINI) --- */
+        .btn-mini { 
+            border: none; 
+            border-radius: 8px; 
+            padding: 10px 0; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 14px; 
+            flex: 1; 
+            transition: 0.2s; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
+            min-width: 35px; /* Garante tamanho mínimo */
+            text-decoration: none; /* Para links */
+        }
+        .btn-mini:active { transform: scale(0.95); }
+        
+        /* Cores Padronizadas */
+        .btn-mini.blue { background: #0288d1; }
+        .btn-mini.red { background: #d32f2f; }
+        .btn-mini.green { background: #2e7d32; }
+        .btn-mini.dark { background: var(--accent); }
+        .btn-mini.orange { background: #f57c00; }
+        .btn-mini.zap { background: #25D366; }
+
+        /* Container para alinhar botões mini */
+        .actions-row { display: flex; gap: 8px; margin-top: 5px; width: 100%; }
 
         /* BOTÕES GERAIS */
         .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; font-size: 13px; color: white; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
@@ -176,16 +204,19 @@
         #area-print { display: none; } 
         @media print { 
             @page { margin: 0; size: auto; }
-            body, html { margin: 0; padding: 0; height: auto; overflow: hidden; background: white; }
-            /* CORREÇÃO TELA BRANCA */
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color: #000 !important; }
-            body * { visibility: hidden; } 
-            #area-print, #area-print * { visibility: visible; }
+            body > *:not(#area-print) { display: none !important; }
+            body, html { margin: 0; padding: 0; height: auto; background: white; }
             #area-print { 
-                display: block !important; position: absolute; left: 0; top: 0; width: 100%; 
+                display: block !important; 
+                position: absolute; left: 0; top: 0; width: 100%; 
                 font-family: 'Courier New', monospace; font-size: 11px; color: black; background: white;
-                padding: 5px 10px; height: auto; min-height: 0; overflow: visible; box-sizing: border-box;
-            } 
+                padding: 5px 10px; box-sizing: border-box;
+            }
+            #area-print * { visibility: visible; display: block; }
+            #area-print table { display: table; width: 100%; }
+            #area-print tr { display: table-row; }
+            #area-print td, #area-print th { display: table-cell; }
+
             .p-header { text-align: center; margin-bottom: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
             .p-title { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
             .p-info { font-size: 9px; margin-bottom: 1px; }
@@ -201,10 +232,6 @@
     </style>
 </head>
 <body>
-
-<div id="loading" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#d50000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:bold;">
-    <div>FILHÃO.CELL</div>
-</div>
 
 <div id="area-print"></div>
 
@@ -231,7 +258,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v63 BT <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v66 BT <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -360,7 +387,7 @@
                 <label style="margin-top:0; color:#c62828"><i class="fas fa-lock"></i> PREÇO DE CUSTO</label>
                 <div style="display:flex; gap:5px">
                     <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
-                    <button id="btn-ver-custo" class="btn-dark" style="width:50px; border-radius:10px; display:block" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
+                    <button id="btn-ver-custo" class="btn-mini dark" style="flex:0; width:50px" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:10px">
@@ -370,8 +397,8 @@
         </div>
         <div class="card">
             <div style="display:flex; gap:5px; margin-bottom:10px">
-                <button class="btn-mini btn-dark" onclick="listarEstoque('prod')">PRODUTOS</button>
-                <button class="btn-mini btn-dark" style="opacity:0.7" onclick="listarEstoque('serv')">SERVIÇOS</button>
+                <button class="btn-mini dark" onclick="listarEstoque('prod')">PRODUTOS</button>
+                <button class="btn-mini dark" style="opacity:0.7" onclick="listarEstoque('serv')">SERVIÇOS</button>
             </div>
             <div id="lista-estoque"></div>
         </div>
@@ -441,7 +468,7 @@ window.callbackSenha = null;
 onSnapshot(collection(db, "clientes"), s => { window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('clientes')) listarCli(); });
 onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque')) listarEstoque('prod'); });
 onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque')) listarEstoque('serv'); });
-onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); renderKanban(); document.getElementById('loading').style.display='none'; });
+onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); renderKanban(); });
 onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { window.db.logs = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('relatorio')) renderRelatorio(); });
 
 function isPg(p){ return document.getElementById('page-'+p).classList.contains('active'); }
@@ -577,21 +604,23 @@ window.renderCarrinho = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinho.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:5px;border-bottom:1px solid #eee;">
+        return `<div style="padding:10px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:5px">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="flex:1; font-weight:bold">${i.qtd}x ${i.nome}</span>
                 <span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span>
-                <i class="fas fa-pen" style="color:blue;cursor:pointer;margin-left:10px" onclick="editItemVenda(${x})"></i>
-                <i class="fas fa-trash" style="color:red;cursor:pointer;margin-left:10px" onclick="delCar(${x})"></i>
             </div>
             <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
-                <label style="margin:0; font-size:9px">GARANTIA:</label>
+                <label style="margin:0; font-size:9px">GAR:</label>
                 <select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaCar(${x}, this.value)">
                     <option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option>
                     <option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option>
                     <option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option>
                     <option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option>
                 </select>
+            </div>
+            <div class="actions-row">
+                <button class="btn-mini blue" onclick="editItemVenda(${x})"><i class="fas fa-pen"></i></button>
+                <button class="btn-mini red" onclick="delCar(${x})"><i class="fas fa-trash"></i></button>
             </div>
         </div>`;
     }).join('');
@@ -655,12 +684,10 @@ window.renderItemsOS = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinhoOS.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:5px;border-bottom:1px solid #eee;">
+        return `<div style="padding:10px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:5px">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span>
                 <span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span>
-                <i class="fas fa-pen" style="color:blue;cursor:pointer;margin-left:8px" onclick="editItemOS(${x})"></i>
-                <i class="fas fa-trash" style="color:red;cursor:pointer;margin-left:8px" onclick="delItemOS(${x})"></i>
             </div>
             <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
                 <label style="margin:0; font-size:9px">GAR:</label>
@@ -670,6 +697,10 @@ window.renderItemsOS = function() {
                     <option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option>
                     <option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option>
                 </select>
+            </div>
+            <div class="actions-row">
+                <button class="btn-mini blue" onclick="editItemOS(${x})"><i class="fas fa-pen"></i></button>
+                <button class="btn-mini red" onclick="delItemOS(${x})"><i class="fas fa-trash"></i></button>
             </div>
         </div>`;
     }).join('');
@@ -726,7 +757,6 @@ window.limparOS = function() {
 
 // CORREÇÃO SCROLL KANBAN
 window.renderKanban = function() {
-    // Salva a posição do scroll antes de renderizar
     const scrollPositions = {
         pecas: document.getElementById('k-pecas').parentElement.scrollTop,
         pgto: document.getElementById('k-pgto').parentElement.scrollTop,
@@ -738,18 +768,17 @@ window.renderKanban = function() {
         if(term) { const t = (o.cliente+' '+o.modelo+' '+o.status).toUpperCase(); if(!t.includes(term)) return; }
         const idx = flow.indexOf(o.status);
         let nav = '';
-        if(idx > 0) nav += `<button class="btn-mini btn-dark" onclick="moveOS('${o.id}', -1)"><i class="fas fa-arrow-left"></i></button>`;
-        if(idx < 2) nav += `<button class="btn-mini btn-dark" onclick="moveOS('${o.id}', 1)"><i class="fas fa-arrow-right"></i></button>`;
-        else nav += `<button class="btn-mini btn-primary" onclick="arqOS('${o.id}')"><i class="fas fa-archive"></i></button>`;
+        if(idx > 0) nav += `<button class="btn-mini dark" onclick="moveOS('${o.id}', -1)"><i class="fas fa-arrow-left"></i></button>`;
+        if(idx < 2) nav += `<button class="btn-mini dark" onclick="moveOS('${o.id}', 1)"><i class="fas fa-arrow-right"></i></button>`;
+        else nav += `<button class="btn-mini primary" style="background:var(--primary)" onclick="arqOS('${o.id}')"><i class="fas fa-archive"></i></button>`;
         const numDisplay = o.num ? `<b>#${o.num}</b> - ` : '';
-        c[o.status] += `<div class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">R$ ${o.valor.toFixed(2)}</div><div style="display:flex; justify-content:space-between; margin-top:5px"><div style="display:flex; gap:5px">${nav}</div><div style="display:flex; gap:5px"><button class="btn-mini btn-info" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button><button class="btn-mini btn-success" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini btn-dark" style="background:#c62828" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button></div></div></div>`;
+        c[o.status] += `<div class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">R$ ${o.valor.toFixed(2)}</div><div class="actions-row">${nav}</div><div class="actions-row"><button class="btn-mini blue" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button><button class="btn-mini zap" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini red" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button></div></div>`;
     });
     
     document.getElementById('k-pecas').innerHTML = c.pecas; 
     document.getElementById('k-pgto').innerHTML = c.pgto; 
     document.getElementById('k-retirado').innerHTML = c.retirado;
 
-    // Restaura a posição do scroll
     document.getElementById('k-pecas').parentElement.scrollTop = scrollPositions.pecas;
     document.getElementById('k-pgto').parentElement.scrollTop = scrollPositions.pgto;
     document.getElementById('k-retirado').parentElement.scrollTop = scrollPositions.retirado;
@@ -807,7 +836,7 @@ window.listarCli = function() { document.getElementById('lista-clientes').innerH
 window.limparCli = function() { document.getElementById('c-id').value = ''; document.getElementById('c-nome').value = ''; document.getElementById('c-tel').value = ''; document.getElementById('c-bairro').value = ''; document.getElementById('c-cidade').value = ''; window.tempImg = null; document.getElementById('c-foto-view').src = ''; document.getElementById('c-foto-view').classList.remove('has-img'); }
 function renderCliCard(c) {
     const zap = c.tel ? `https://wa.me/55${c.tel.replace(/\D/g,'')}` : '#';
-    return `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex; gap:10px; align-items:center">${c.foto?`<img src="${c.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-user"></i></div>`}<div><b>${c.nome}</b><br><span style="font-size:11px">${c.tel}</span><div style="font-size:9px; color:#666; font-weight:bold">${c.bairro||''} ${c.cidade?'- '+c.cidade:''}</div></div></div><div style="display:flex; gap:5px">${c.tel?`<a href="${zap}" target="_blank" class="btn-mini btn-zap" style="width:25px; text-decoration:none"><i class="fab fa-whatsapp"></i></a>`:''} <button class="btn-mini btn-info" onclick="edtCli('${c.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini btn-dark" onclick="del('clientes','${c.id}')"><i class="fas fa-trash"></i></button></div></div>`;
+    return `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex; gap:10px; align-items:center">${c.foto?`<img src="${c.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-user"></i></div>`}<div><b>${c.nome}</b><br><span style="font-size:11px">${c.tel}</span><div style="font-size:9px; color:#666; font-weight:bold">${c.bairro||''} ${c.cidade?'- '+c.cidade:''}</div></div></div><div class="actions-row">${c.tel?`<a href="${zap}" target="_blank" class="btn-mini zap"><i class="fab fa-whatsapp"></i></a>`:''} <button class="btn-mini blue" onclick="edtCli('${c.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" onclick="del('clientes','${c.id}')"><i class="fas fa-trash"></i></button></div></div>`;
 }
 window.edtCli = function(id) { const c=window.db.clientes.find(i=>i.id===id); document.getElementById('c-id').value=id; document.getElementById('c-nome').value=c.nome; document.getElementById('c-tel').value=c.tel; document.getElementById('c-bairro').value=c.bairro||''; document.getElementById('c-cidade').value=c.cidade||''; window.tempImg=c.foto; const view=document.getElementById('c-foto-view'); view.src=c.foto||''; if(c.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('form-cli').scrollIntoView(); }
 
@@ -823,7 +852,7 @@ window.salvarProduto = async function(t) {
 window.limparEstoque = function() { document.getElementById('p-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-venda').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('p-custo').value = ''; window.tempImg = null; document.getElementById('p-foto-view').src = ''; document.getElementById('p-foto-view').classList.remove('has-img'); }
 window.listarEstoque = function(t) {
     const l = t==='prod'?window.db.produtos:window.db.servicos; const col=t==='prod'?'produtos':'servicos_cad';
-    document.getElementById('lista-estoque').innerHTML = l.map(i => `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex;gap:10px;align-items:center">${i.foto?`<img src="${i.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-box"></i></div>`}<div><b>${i.nome}</b><br>R$ ${i.precoVenda}</div></div><div><button class="btn-mini btn-info" onclick="edtProd('${col}','${i.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini btn-dark" onclick="del('${col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
+    document.getElementById('lista-estoque').innerHTML = l.map(i => `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex;gap:10px;align-items:center">${i.foto?`<img src="${i.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-box"></i></div>`}<div><b>${i.nome}</b><br>R$ ${i.precoVenda}</div></div><div class="actions-row" style="width:auto; gap:5px"><button class="btn-mini blue" onclick="edtProd('${col}','${i.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" onclick="del('${col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
 }
 window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id); document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||''; document.getElementById('p-custo').type='password'; document.getElementById('btn-ver-custo').style.display='block'; window.tempImg=i.foto; const view=document.getElementById('p-foto-view'); view.src=i.foto||''; if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('page-estoque').querySelector('.card').scrollIntoView(); }
 window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
@@ -842,7 +871,7 @@ window.renderRelatorio = function() {
         clientesMap[l.cliente].total += l.valor; clientesMap[l.cliente].count++;
     });
     const clientesArray = Object.values(clientesMap).sort((a,b) => b.total - a.total);
-    document.getElementById('r-hist').innerHTML = clientesArray.map(c => `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center"><div style="font-size:11px"><b>${c.nome}</b><br><span style="color:#777">${c.count} mov.</span></div><div style="text-align:right"><b style="color:var(--primary); font-size:12px">R$ ${c.total.toFixed(2)}</b><br><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:5px; font-size:16px"><i class="fas fa-eye" style="color:green; cursor:pointer" onclick="abrirExtratoCliente('${c.nome}')"></i> <i class="fas fa-pen" style="color:blue; cursor:pointer" onclick="abrirOpcoesEdicao('${c.nome}')"></i></div></div></div>`).join('');
+    document.getElementById('r-hist').innerHTML = clientesArray.map(c => `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center"><div style="font-size:11px"><b>${c.nome}</b><br><span style="color:#777">${c.count} mov.</span></div><div style="text-align:right"><b style="color:var(--primary); font-size:12px">R$ ${c.total.toFixed(2)}</b><br><div class="actions-row" style="justify-content:flex-end"><button class="btn-mini green" onclick="abrirExtratoCliente('${c.nome}')"><i class="fas fa-eye"></i></button> <button class="btn-mini blue" onclick="abrirOpcoesEdicao('${c.nome}')"><i class="fas fa-pen"></i></button></div></div></div>`).join('');
     if(clientesArray.length === 0) document.getElementById('r-hist').innerHTML = '<div style="text-align:center; padding:20px; color:#ccc">NENHUM DADO ENCONTRADO</div>';
     document.getElementById('r-total').innerText = "R$ " + totalGeral.toFixed(2);
     
@@ -888,9 +917,9 @@ window.editarMovimentacaoCliente = function(nome) {
             </div>
             <div style="text-align:right">
                 <b>R$ ${i.valor.toFixed(2)}</b><br>
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:2px">
-                    <span style="font-size:10px; color:blue; cursor:pointer" onclick="editLog('${i.id}', '${nome}')"><i class="fas fa-pen"></i></span>
-                    <span style="font-size:10px; color:red; cursor:pointer" onclick="delLog('${i.id}')"><i class="fas fa-trash"></i></span>
+                <div class="actions-row" style="width:auto; gap:5px">
+                    <button class="btn-mini blue" onclick="editLog('${i.id}', '${nome}')"><i class="fas fa-pen"></i></button>
+                    <button class="btn-mini red" onclick="delLog('${i.id}')"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
          </div>`;
