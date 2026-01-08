@@ -936,13 +936,12 @@ window.toggleBtnDelete = function() {
 }
 
 window.excluirSelecionados = async function(nome) {
-    abrirModalSenha(async () => {
-        const checked = document.querySelectorAll('.check-log:checked');
-        if(!confirm(`Excluir ${checked.length} itens?`)) return;
-        for(const cb of checked) { await deleteDoc(doc(db, "logs", cb.value)); }
-        alert("Excluídos!");
-        window.editarMovimentacaoCliente(nome); 
-    });
+    // REMOVIDO PEDIDO DE SENHA
+    const checked = document.querySelectorAll('.check-log:checked');
+    if(!confirm(`Excluir ${checked.length} itens selecionados?`)) return;
+    for(const cb of checked) { await deleteDoc(doc(db, "logs", cb.value)); }
+    alert("Excluídos!");
+    window.editarMovimentacaoCliente(nome); 
 }
 
 window.toggleEditDate = function(id) { document.getElementById(`date-display-${id}`).style.display='none'; document.getElementById(`date-edit-${id}`).style.display='flex'; }
@@ -955,15 +954,23 @@ window.saveNewDate = async function(id, nome) {
 }
 
 window.editLog = async function(id, nome) { 
-    abrirModalSenha(async () => {
-        const l = window.db.logs.find(i=>i.id===id); const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc); const novoVal = prompt("NOVO VALOR:", l.valor); 
-        if(novaDesc && novoVal) { 
-            await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc.toUpperCase() }); 
-            alert("Atualizado!"); window.editarMovimentacaoCliente(nome); 
-        } 
-    });
+    // REMOVIDO PEDIDO DE SENHA
+    const l = window.db.logs.find(i=>i.id===id); 
+    const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc); 
+    const novoVal = prompt("NOVO VALOR:", l.valor); 
+    if(novaDesc && novoVal) { 
+        await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc.toUpperCase() }); 
+        alert("Atualizado!"); window.editarMovimentacaoCliente(nome); 
+    } 
 }
-window.delLog = async function(id) { abrirModalSenha(async () => { await deleteDoc(doc(db, "logs", id)); alert("Excluído!"); document.getElementById('modal-extrato').style.display='none'; renderRelatorio(); }); }
+window.delLog = async function(id) { 
+    // REMOVIDO PEDIDO DE SENHA
+    if(!confirm("Excluir este lançamento permanentemente?")) return;
+    await deleteDoc(doc(db, "logs", id)); 
+    alert("Excluído!"); 
+    document.getElementById('modal-extrato').style.display='none'; 
+    renderRelatorio(); 
+}
 
 window.abrirExtratoCliente = function(nome) {
     const logs = window.db.logs.filter(l => l.cliente === nome).sort((a,b) => new Date(b.data) - new Date(a.data));
