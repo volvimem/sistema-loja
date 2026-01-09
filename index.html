@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v70 PRIV</title>
+    <title>FILHÃO.CELL v73 PRIV</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -222,7 +222,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v70 PRIV <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v73 PRIV <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -471,13 +471,17 @@ window.togglePass = function() {
 
 window.verificarSenha = function() {
     const digitada = document.getElementById('input-senha-adm').value;
-    if (digitada === SENHA) { document.getElementById('modal-overlay').style.display = 'none'; if (window.callbackSenha) window.callbackSenha(); } 
+    if (digitada === SENHA) { 
+        // Não fecha o modal overlay, apenas limpa para o callback preencher
+        if (window.callbackSenha) window.callbackSenha(); 
+    } 
     else { alert("SENHA INCORRETA"); document.getElementById('input-senha-adm').value = ''; }
 }
 
 window.nav = function(p, el) {
     if(p === 'relatorio') { 
         abrirModalSenha(() => {
+            document.getElementById('modal-overlay').style.display='none'; // Fecha o modal após senha
             document.querySelectorAll('.page').forEach(d=>d.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
             document.getElementById('page-'+p).classList.add('active');
@@ -694,7 +698,7 @@ window.renderKanban = function() {
     });
     document.getElementById('k-pecas').innerHTML = c.pecas; document.getElementById('k-pgto').innerHTML = c.pgto; document.getElementById('k-retirado').innerHTML = c.retirado;
 }
-window.delOS = async function(id) { abrirModalSenha(async () => { if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }); }
+window.delOS = async function(id) { abrirModalSenha(async () => { document.getElementById('modal-overlay').style.display='none'; if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }); }
 window.moveOS = async function(id, dir) { const o = window.db.os.find(i=>i.id===id); const idx = ['pecas', 'pgto', 'retirado'].indexOf(o.status) + dir; await updateDoc(doc(db,"os_ativa",id), {status: ['pecas', 'pgto', 'retirado'][idx]}); }
 
 window.arqOS = async function(id) {
@@ -841,29 +845,76 @@ window.gerenciarDividas = function(nome) {
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
+// MASCARAS
+window.maskMoney = function(o) {
+    let v = o.value.replace(/\D/g, "");
+    v = (v/100).toFixed(2) + "";
+    v = v.replace(".", ",");
+    v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    o.value = v;
+}
+
+window.maskDate = function(o) {
+    let v = o.value.replace(/\D/g, "").slice(0,8);
+    if (v.length > 4) v = v.slice(0,2) + '-' + v.slice(2,4) + '-' + v.slice(4);
+    else if (v.length > 2) v = v.slice(0,2) + '-' + v.slice(2);
+    o.value = v;
+}
+
 window.abaterDivida = function(id, nome, max) {
-    abrirModalSenha(async () => {
-        const val = parseFloat(prompt(`Valor a pagar/abater (Máx: ${max.toFixed(2)}):`));
-        if(!val || val <= 0 || val > max) return alert("Valor inválido");
-        const div = window.db.dividas.find(d => d.id === id);
-        const novoPago = div.valor_pago + val;
-        const novoRestante = div.restante - val;
-        await updateDoc(doc(db,"dividas",id), { valor_pago: novoPago, restante: novoRestante });
-        // Logar pagamento
-        await addDoc(collection(db,"logs"), { tipo: 'PAGAMENTO DÍVIDA', desc: 'ABATIMENTO: '+nome, valor: val, qtd: 1, cliente: nome, data: new Date().toISOString() });
-        alert("PAGAMENTO REGISTRADO!");
-        gerenciarDividas(nome);
-    });
+    document.getElementById('modal-extrato').style.display = 'none'; // Fecha lista
+    document.getElementById('modal-overlay').style.display = 'flex'; // Abre ação
+    document.getElementById('modal-content-default').innerHTML = `
+        <h3 style="justify-content:center">PAGAR DÍVIDA</h3>
+        <div style="font-size:12px; margin-bottom:10px">${nome}</div>
+        <div style="color:red; font-weight:bold; font-size:10px; margin-bottom:5px">RESTANTE: R$ ${max.toFixed(2)}</div>
+        <input type="tel" id="input-pagar-val" placeholder="0,00" oninput="maskMoney(this)" style="font-size:24px; text-align:center; font-weight:bold; color:#2e7d32">
+        <button class="btn btn-primary" onclick="confirmarAbater('${id}', '${nome}', ${max})">CONFIRMAR</button>
+        <button class="btn" style="background:#666; margin-top:5px" onclick="fecharModal({target:{id:'modal-overlay'}})">CANCELAR</button>
+    `;
+    setTimeout(()=>document.getElementById('input-pagar-val').focus(),100);
+}
+
+window.confirmarAbater = async function(id, nome, max) {
+    const raw = document.getElementById('input-pagar-val').value;
+    const val = parseFloat(raw.replace(/\./g,'').replace(',','.'));
+    if(!val || val <= 0 || val > max) return alert("Valor inválido");
+
+    const div = window.db.dividas.find(d => d.id === id);
+    const novoPago = div.valor_pago + val;
+    const novoRestante = div.restante - val;
+    await updateDoc(doc(db,"dividas",id), { valor_pago: novoPago, restante: novoRestante });
+    await addDoc(collection(db,"logs"), { tipo: 'PAGAMENTO DÍVIDA', desc: 'ABATIMENTO: '+nome, valor: val, qtd: 1, cliente: nome, data: new Date().toISOString() });
+    
+    alert("PAGAMENTO REGISTRADO!");
+    document.getElementById('modal-overlay').style.display='none';
+    gerenciarDividas(nome); // Reabre lista atualizada
 }
 
 window.agendarLembrete = function(id, nome) {
-    abrirModalSenha(async () => {
-        const data = prompt("Data do lembrete (AAAA-MM-DD):");
-        if(!data) return;
-        await updateDoc(doc(db,"dividas",id), { data_lembrete: data });
-        alert("LEMBRETE DEFINIDO!");
-        gerenciarDividas(nome);
-    });
+    document.getElementById('modal-extrato').style.display = 'none'; // Fecha lista
+    document.getElementById('modal-overlay').style.display = 'flex'; // Abre ação
+    document.getElementById('modal-content-default').innerHTML = `
+        <h3 style="justify-content:center">NOVO LEMBRETE</h3>
+        <div style="font-size:12px; margin-bottom:10px">${nome}</div>
+        <input type="tel" id="input-lembrete-date" placeholder="DD-MM-AAAA" oninput="maskDate(this)" maxlength="10" style="font-size:20px; text-align:center; font-weight:bold">
+        <button class="btn btn-primary" onclick="confirmarLembrete('${id}', '${nome}')">SALVAR</button>
+        <button class="btn" style="background:#666; margin-top:5px" onclick="fecharModal({target:{id:'modal-overlay'}})">CANCELAR</button>
+    `;
+    setTimeout(()=>document.getElementById('input-lembrete-date').focus(),100);
+}
+
+window.confirmarLembrete = async function(id, nome) {
+    const raw = document.getElementById('input-lembrete-date').value; // DD-MM-AAAA
+    if(raw.length !== 10) return alert("Data inválida");
+    // Converter para ISO AAAA-MM-DD
+    const parts = raw.split('-');
+    const iso = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    
+    await updateDoc(doc(db,"dividas",id), { data_lembrete: iso });
+    alert("LEMBRETE DEFINIDO!");
+    document.getElementById('modal-overlay').style.display='none';
+    gerenciarDividas(nome); // Reabre lista atualizada
 }
 
 window.salvarProduto = async function(t) {
@@ -881,7 +932,7 @@ window.listarEstoque = function(t) {
     document.getElementById('lista-estoque').innerHTML = l.map(i => `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex;gap:10px;align-items:center">${i.foto?`<img src="${i.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-box"></i></div>`}<div><b>${i.nome}</b><br>R$ ${i.precoVenda}</div></div><div class="actions-row" style="width:auto; gap:5px"><button class="btn-mini blue" onclick="edtProd('${col}','${i.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" onclick="del('${col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
 }
 window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id); document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||''; document.getElementById('p-custo').type='password'; document.getElementById('btn-ver-custo').style.display='block'; window.tempImg=i.foto; const view=document.getElementById('p-foto-view'); view.src=i.foto||''; if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('page-estoque').querySelector('.card').scrollIntoView(); }
-window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
+window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('modal-overlay').style.display='none'; document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
 
 window.togglePriv = function() {
     window.verValores = !window.verValores;
@@ -1122,7 +1173,7 @@ window.shareExtrato = function(tipo) {
 window.fecharExtrato = function(e) { if(e.target.id === 'modal-extrato') document.getElementById('modal-extrato').style.display = 'none'; }
 window.del = async function(c, id) { 
     if(c === 'logs') { if(!confirm("Apagar?")) return; await deleteDoc(doc(db,c,id)); return; } 
-    abrirModalSenha(async () => { await deleteDoc(doc(db,c,id)); }); 
+    abrirModalSenha(async () => { document.getElementById('modal-overlay').style.display='none'; await deleteDoc(doc(db,c,id)); }); 
 }
 window.abrirModalShare = function() { document.getElementById('modal-content-default').innerHTML = `<h3 style="justify-content:center">AÇÕES</h3><button class="btn" style="background:#25d366; margin-top:10px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button><button class="btn" style="background:#0277bd; margin-top:10px" onclick="acaoShare('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH (RAWBT)</button><button class="btn" style="background:#d32f2f; margin-top:10px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / IMPRIMIR</button>`; document.getElementById('modal-overlay').style.display='flex'; }
 window.fecharModal = function(e) { if(e.target.id=='modal-overlay') document.getElementById('modal-overlay').style.display='none'; }
