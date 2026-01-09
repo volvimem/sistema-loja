@@ -19,10 +19,10 @@
             --primary: #d50000;            
             --primary-dark: #b71c1c; 
             --accent: #000000;            
-            --text: #212121;               
-            --bg: #f5f5f5;              
-            --card-bg: #ffffff;           
-            --success: #2e7d32;           
+            --text: #212121;                
+            --bg: #f5f5f5;               
+            --card-bg: #ffffff;            
+            --success: #2e7d32;            
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
@@ -198,16 +198,15 @@
         /* --- ESTILO DO CUPOM FISCAL (VISUAL E IMPRESSÃO) --- */
         .cupom-wrapper {
             width: 100%;
-            max-width: 380px; /* Largura padrão térmica 80mm */
+            /* Remover max-width fixo aqui para impressão */
             background: #fff;
             color: #000;
-            font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada estilo cupom */
-            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 5px;
             margin: 0 auto;
             font-size: 12px;
             text-transform: uppercase;
             line-height: 1.2;
-            border: 1px solid #ccc; /* Borda apenas na tela */
             text-align: left;
         }
 
@@ -229,19 +228,45 @@
 
         .c-footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
 
-        /* --- IMPRESSÃO NATIVA (PDF) --- */
+        /* --- ÁREA OCULTA PARA IMPRESSÃO LIMPA (Fix do Problema) --- */
+        #area-print-oculta {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 380px; /* Largura fixa para html2canvas capturar direito para térmica */
+            background: white;
+            z-index: 5000;
+        }
+
+        /* --- IMPRESSÃO NATIVA (PDF) RIGOROSA --- */
         @media print {
             @page { margin: 0; size: auto; }
-            body * { visibility: hidden; } /* Esconde tudo */
-            #modal-overlay, #modal-overlay * { visibility: visible; } /* Mostra só o modal */
-            #modal-overlay { position: absolute; left: 0; top: 0; background: white; width: 100%; height: auto; display: block !important; }
-            .modal-content { border: none; width: 100%; max-width: 100%; padding: 0; margin: 0; box-shadow: none; }
-            .cupom-wrapper { border: none; width: 100%; max-width: 100%; padding: 0; margin: 0 auto; }
-            .no-print { display: none !important; } /* Botões de ação somem na impressão */
+            body * { 
+                visibility: hidden; 
+                height: 0; 
+                overflow: hidden; 
+            } 
+            
+            /* O SEGREDO: Mostra APENAS a div oculta de impressão */
+            #area-print-oculta, #area-print-oculta * { 
+                visibility: visible; 
+                display: block !important;
+                height: auto;
+                overflow: visible;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            #modal-overlay { display: none !important; } 
+            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body>
+
+<div id="area-print-oculta"></div>
 
 <div id="modal-overlay" onclick="fecharModal(event)">
     <div class="modal-content" id="modal-content-default"></div>
@@ -1245,22 +1270,27 @@ window.abrirModalShare = function() {
     const d = window.shareData;
     const htmlCupom = montarHtmlCupom(d);
     
-    document.getElementById('modal-content-default').innerHTML = `
-        <h3 class="no-print" style="justify-content:center"><i class="fas fa-print"></i> PRÉ-VISUALIZAÇÃO</h3>
-        
-        <div style="background:#888; padding:10px; max-height:400px; overflow-y:auto; border-radius:4px; margin-bottom:10px;">
-            ${htmlCupom}
-        </div>
+    // 1. MONTAR CUPOM NA ÁREA INVISÍVEL PARA IMPRESSÃO REAL
+    document.getElementById('area-print-oculta').innerHTML = htmlCupom;
 
-        <div class="no-print" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px">
+    // 2. MONTAR MODAL DE DECISÃO
+    document.getElementById('modal-content-default').innerHTML = `
+        <h3 class="no-print" style="justify-content:center"><i class="fas fa-check-circle"></i> SALVO!</h3>
+        
+        <div class="no-print" style="text-align:center; font-size:12px; margin-bottom:15px">O que deseja fazer?</div>
+
+        <div class="no-print" style="display:flex; flex-direction:column; gap:8px">
+            <button class="btn" style="background:#007bff; margin:0" onclick="acaoShare('bluetooth')">
+                <i class="fas fa-print"></i> IMPRIMIR BLUETOOTH
+            </button>
+            <button class="btn" style="background:#28a745; margin:0" onclick="verComprovanteTela()">
+                <i class="fas fa-eye"></i> VER COMPROVANTE
+            </button>
             <button class="btn" style="background:#333; margin:0" onclick="acaoShare('pdf')">
-                <i class="fas fa-file-pdf"></i> PDF / IMPRIMIR
+                <i class="fas fa-file-pdf"></i> SALVAR PDF / IMPRIMIR PC
             </button>
-            <button class="btn" style="background:#0277bd; margin:0" onclick="acaoShare('bluetooth')">
-                <i class="fab fa-bluetooth"></i> RAWBT (TERMICA)
-            </button>
-            <button class="btn" style="background:#25d366; margin:0" onclick="acaoShare('zap')">
-                <i class="fab fa-whatsapp"></i> WHATSAPP
+             <button class="btn" style="background:#25d366; margin:0" onclick="acaoShare('zap')">
+                <i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP
             </button>
             <button class="btn" style="background:#d32f2f; margin:0" onclick="fecharModal({target:{id:'modal-overlay'}})">
                 <i class="fas fa-times"></i> FECHAR
@@ -1270,17 +1300,44 @@ window.abrirModalShare = function() {
     document.getElementById('modal-overlay').style.display='flex'; 
 }
 
+window.verComprovanteTela = function() {
+    const d = window.shareData;
+    const htmlCupom = montarHtmlCupom(d);
+
+    document.getElementById('modal-content-default').innerHTML = `
+        <h3 class="no-print" style="justify-content:center">VISUALIZAÇÃO</h3>
+        
+        <div style="background:#888; padding:10px; max-height:400px; overflow-y:auto; border-radius:4px; margin-bottom:10px;">
+            ${htmlCupom}
+        </div>
+
+        <div class="no-print" style="display:grid; grid-template-columns: 1fr; gap:8px">
+            <button class="btn" style="background:#007bff; margin:0" onclick="acaoShare('bluetooth')">
+                <i class="fas fa-print"></i> IMPRIMIR BT
+            </button>
+            <button class="btn" style="background:#333; margin:0" onclick="acaoShare('pdf')">
+                <i class="fas fa-file-pdf"></i> PDF
+            </button>
+            <button class="btn" style="background:#d32f2f; margin:0" onclick="fecharModal({target:{id:'modal-overlay'}})">
+                FECHAR
+            </button>
+        </div>
+    `;
+}
+
 window.acaoShare = function(tipo) {
     const d = window.shareData; 
     
-    // 1. PDF / IMPRESSÃO PC
+    // 1. PDF / IMPRESSÃO PC (Usa o CSS @media print rigoroso)
     if(tipo === 'pdf') {
-        window.print(); // O CSS @media print fará o resto
+        window.print(); 
     }
 
-    // 2. BLUETOOTH (RAWBT - VIA IMAGEM)
+    // 2. BLUETOOTH (RAWBT - LÊ A DIV OCULTA)
     else if(tipo === 'bluetooth') {
-        const element = document.getElementById('cupom-imprimir');
+        // Pega a DIV oculta que só tem o cupom
+        const element = document.getElementById('area-print-oculta');
+        
         // Aumentamos a scale para 3 para melhor nitidez na térmica
         html2canvas(element, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
             const imgData = canvas.toDataURL('image/png'); 
