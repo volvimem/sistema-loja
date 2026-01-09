@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v82 FAST-PRINT</title>
+    <title>FILHÃO.CELL v83 PRO</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -32,136 +32,143 @@
         /* HEADER */
         header { 
             background: linear-gradient(135deg, var(--accent) 30%, var(--primary) 100%); 
-            color: white; padding: 12px 15px; 
+            color: white; padding: 15px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
             position: sticky; top: 0; z-index: 100; 
             display:flex; justify-content:space-between; align-items:center; 
             border-bottom: 3px solid var(--primary);
         }
-        header h2 { font-size: 15px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; font-style: italic; }
+        header h2 { font-size: 16px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; font-style: italic; }
 
         .version-btn { 
-            font-size: 9px; font-weight: bold; background: rgba(255,255,255,0.2); 
-            padding: 3px 8px; border-radius: 12px; margin-left: 5px; font-style: normal; 
+            font-size: 10px; font-weight: bold; background: rgba(255,255,255,0.2); 
+            padding: 4px 10px; border-radius: 12px; margin-left: 5px; font-style: normal; 
             cursor: pointer; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 5px; transition: 0.3s;
         }
 
-        .container { padding: 10px; max-width: 800px; margin: auto; }
+        .container { padding: 12px; max-width: 800px; margin: auto; }
         .page { display: none; animation: slideUp 0.3s ease-out; }
         .page.active { display: block; }
         @keyframes slideUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
 
-        .card { background: var(--card-bg); padding: 15px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 12px; position: relative; border-left: 4px solid transparent; }
+        .card { background: var(--card-bg); padding: 18px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 15px; position: relative; border-left: 5px solid transparent; }
         .card:hover { border-left-color: var(--primary); transition: 0.3s; }
 
-        h3 { color: var(--accent); font-size: 13px; margin-bottom: 12px; border-bottom: 2px solid #eee; padding-bottom: 6px; display:flex; justify-content:space-between; align-items:center; font-weight: 800; }
+        h3 { color: var(--accent); font-size: 14px; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; display:flex; justify-content:space-between; align-items:center; font-weight: 800; }
 
-        .btn-novo { background: var(--accent); color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 9px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s; }
+        .btn-novo { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s; }
 
-        label { font-size: 9px; font-weight: 800; color: #666; margin-top: 8px; display: block; letter-spacing: 0.5px; }
+        label { font-size: 10px; font-weight: 800; color: #555; margin-top: 10px; display: block; letter-spacing: 0.5px; }
         
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; margin-top: 4px; font-size: 13px; outline: none; transition: 0.2s; font-weight: 600; color: #333; text-transform: uppercase; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; margin-top: 5px; font-size: 14px; outline: none; transition: 0.2s; font-weight: 600; color: #333; text-transform: uppercase; }
         input:focus { border-color: var(--primary); background: #fff; }
 
         /* BUSCA E SUGESTÕES */
         .search-box { position: relative; margin-top: 5px; }
-        .search-box input { padding-right: 40px; margin-top: 0; }
-        .search-btn { position: absolute; right: 4px; top: 4px; bottom: 4px; background: var(--primary); color: white; border: none; width: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20; font-size: 12px; }
-        .clear-btn { position: absolute; right: 45px; top: 8px; color: #d32f2f; cursor: pointer; font-size: 14px; z-index: 21; display: none; }
+        .search-box input { padding-right: 45px; margin-top: 0; }
+        .search-btn { position: absolute; right: 5px; top: 5px; bottom: 5px; background: var(--primary); color: white; border: none; width: 40px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20; font-size: 14px; }
+        .clear-btn { position: absolute; right: 50px; top: 12px; color: #d32f2f; cursor: pointer; font-size: 16px; z-index: 21; display: none; }
 
         .sugestoes { background: white; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; position: absolute; top: 100%; width: 100%; z-index: 999; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: none; border: 1px solid #eee; }
         .sugestoes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-        .sugestoes div.item-sug { padding: 8px; border-bottom: 1px solid #f1f1f1; border-right: 1px solid #f1f1f1; cursor: pointer; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; }
-        .sug-header { font-size: 9px; font-weight: 900; padding: 5px; text-align:center; border-bottom: 2px solid #ccc; letter-spacing: 1px; position:sticky; top:0; z-index:2; }
+        .sugestoes div.item-sug { padding: 10px; border-bottom: 1px solid #f1f1f1; border-right: 1px solid #f1f1f1; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; flex-direction: column; }
+        .sug-header { font-size: 10px; font-weight: 900; padding: 6px; text-align:center; border-bottom: 2px solid #ccc; letter-spacing: 1px; position:sticky; top:0; z-index:2; }
 
         /* GRID FOTOS E KANBAN */
-        .os-foto-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 5px; }
-        .os-foto-slot { aspect-ratio: 1; background: #eee; border-radius: 6px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; }
+        .os-foto-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+        .os-foto-slot { aspect-ratio: 1; background: #eee; border-radius: 8px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; }
         .os-foto-slot img { width: 100%; height: 100%; object-fit: cover; }
 
-        .kanban-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; align-items: start; }
-        .k-col { background: #f0f0f0; padding: 4px; border-radius: 8px; min-height: 100px; }
-        .k-head { font-size: 8px; font-weight: 900; text-align: center; margin-bottom: 6px; color: var(--accent); background: white; padding: 4px; border-radius: 4px; border: 1px solid #ddd; }
+        .kanban-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: start; }
+        .k-col { background: #f0f0f0; padding: 5px; border-radius: 8px; min-height: 100px; }
+        .k-head { font-size: 9px; font-weight: 900; text-align: center; margin-bottom: 8px; color: var(--accent); background: white; padding: 5px; border-radius: 4px; border: 1px solid #ddd; }
 
-        .os-card { background: white; padding: 6px; border-radius: 6px; margin-bottom: 6px; border-top: 3px solid #ccc; font-size: 9px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .os-card { background: white; padding: 8px; border-radius: 6px; margin-bottom: 8px; border-top: 4px solid #ccc; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .os-card.pecas { border-top-color: var(--primary); } 
         .os-card.pgto { border-top-color: #ff9800; } 
         .os-card.retirado { border-top-color: var(--success); }
 
         /* BOTÕES */
-        .btn-mini { border: none; border-radius: 6px; padding: 6px 0; color: white; cursor: pointer; font-size: 11px; flex: 1; transition: 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); min-width: 28px; text-decoration: none; }
+        .btn-mini { border: none; border-radius: 6px; padding: 8px 0; color: white; cursor: pointer; font-size: 12px; flex: 1; transition: 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); min-width: 30px; text-decoration: none; }
         .btn-mini.blue { background: #0288d1; }
         .btn-mini.red { background: #d32f2f; }
         .btn-mini.green { background: #2e7d32; }
         .btn-mini.dark { background: var(--accent); }
-        .btn-mini.orange { background: #f57c00; }
         .btn-mini.zap { background: #25D366; }
-        .actions-row { display: flex; gap: 6px; margin-top: 5px; width: 100%; }
+        .actions-row { display: flex; gap: 8px; margin-top: 8px; width: 100%; }
 
-        .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; font-size: 12px; color: white; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
-        .btn-primary { background: var(--primary); } .btn-dark { background: var(--accent); } .btn-add-mini { background: #2e7d32; color:white; border:none; border-radius:6px; width:40px; font-size:16px; cursor:pointer; margin-top:4px; }
-        .btn-debt { background: #d32f2f; color: white; width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 6px rgba(211,47,47,0.3); font-size: 11px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; font-size: 13px; color: white; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+        .btn-primary { background: var(--primary); } .btn-dark { background: var(--accent); } .btn-add-mini { background: #2e7d32; color:white; border:none; border-radius:6px; width:45px; font-size:18px; cursor:pointer; margin-top:4px; }
+        .btn-debt { background: #d32f2f; color: white; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(211,47,47,0.3); font-size: 12px; }
 
         /* MODAIS E ELEMENTOS EXTRAS */
-        .foto-preview { width: 70px; height: 70px; border-radius: 50%; background-color: #eee; border: 3px solid var(--primary); margin: 8px auto; display: block; cursor: pointer; object-fit: cover; }
+        .foto-preview { width: 80px; height: 80px; border-radius: 50%; background-color: #eee; border: 4px solid var(--primary); margin: 10px auto; display: block; cursor: pointer; object-fit: cover; }
         #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 2000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; padding: 20px; border-radius: 16px; width: 85%; max-width: 300px; text-align: center; border: 2px solid var(--primary); }
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 320px; text-align: center; border: 2px solid var(--primary); }
         .password-container { position: relative; width: 100%; }
-        .password-container input { padding-right: 40px; }
-        .password-container i { position: absolute; right: 10px; top: 50%; transform: translateY(-30%); color: #777; cursor: pointer; padding: 5px; font-size: 16px; }
+        .password-container input { padding-right: 45px; }
+        .password-container i { position: absolute; right: 10px; top: 50%; transform: translateY(-30%); color: #777; cursor: pointer; padding: 5px; font-size: 18px; }
 
         .rank-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
-        .rank-box { background: #fafafa; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
-        .rank-title { font-size: 9px; font-weight: 900; text-align: center; color: var(--primary); margin-bottom: 6px; border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
-        .rank-item { font-size: 8px; margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
-        .fin-item { background: #fff3e0; padding: 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid #ff9800; text-align: left; }
-        .fin-val { font-weight: 900; color: #d32f2f; font-size: 11px; }
-        .fin-date { font-size: 8px; color: #666; display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+        .rank-box { background: #fafafa; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
+        .rank-title { font-size: 10px; font-weight: 900; text-align: center; color: var(--primary); margin-bottom: 6px; border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
+        .rank-item { font-size: 9px; margin-bottom: 5px; display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding-bottom: 3px; }
+        .fin-item { background: #fff3e0; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff9800; text-align: left; }
+        .fin-val { font-weight: 900; color: #d32f2f; font-size: 12px; }
+        .fin-date { font-size: 9px; color: #666; display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
 
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 2px solid var(--primary); padding: 8px 0 20px 0; z-index: 900; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
-        .nav-item { flex: 1; border: none; background: none; color: #999; font-size: 8px; font-weight: bold; text-align: center; transition: 0.3s; }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 2px solid var(--primary); padding: 10px 0 25px 0; z-index: 900; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+        .nav-item { flex: 1; border: none; background: none; color: #999; font-size: 9px; font-weight: bold; text-align: center; transition: 0.3s; }
         .nav-item.active { color: var(--primary); transform: translateY(-3px); }
-        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; color: var(--accent); }
+        .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
         .nav-item.active i { color: var(--primary); }
 
-        .check-log { transform: scale(1.3); margin-right: 10px; accent-color: var(--primary); }
+        .check-log { transform: scale(1.4); margin-right: 12px; accent-color: var(--primary); }
 
-        /* --- ESTILO DO CUPOM PARA TELA E PDF APENAS --- */
-        /* Isso não afeta o Bluetooth, pois o Bluetooth agora usa Texto Puro */
+        /* --- ESTILO PROFISSIONAL DO CUPOM (HTML/PDF) --- */
         .cupom-wrapper {
             background: #fff; color: #000;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 10px; width: 100%;
-            font-size: 12px; text-transform: uppercase;
-            line-height: 1.2; text-align: left;
-            border: 1px dashed #ccc;
+            font-family: 'Consolas', 'Courier New', monospace; /* Fonte Monoespaçada */
+            padding: 20px; width: 100%;
+            font-size: 13px; text-transform: uppercase;
+            line-height: 1.4; text-align: left;
+            border: 1px solid #ddd;
         }
-        .c-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
-        .c-company { font-size: 16px; font-weight: 900; margin-bottom: 5px; }
-        .c-sub { font-size: 11px; }
-        .c-body { margin-bottom: 10px; }
-        .c-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+        
+        .c-header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
+        .c-company { font-size: 18px; font-weight: 900; margin-bottom: 8px; display: block; }
+        .c-sub { font-size: 12px; display: block; margin-bottom: 2px; }
+
+        .c-section-title { 
+            font-weight: 900; border-bottom: 1px solid #000; 
+            margin: 15px 0 5px 0; padding-bottom: 2px; font-size: 14px; 
+        }
+
+        .c-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
         .c-row.bold { font-weight: 900; }
-        .c-row.border-top { border-top: 1px dashed #000; padding-top: 5px; margin-top: 5px; }
-        .c-row.big { font-size: 16px; margin-top: 10px; font-weight: bold; }
-        .c-table { width: 100%; text-align: left; margin: 10px 0; border-collapse: collapse; }
-        .c-table th { border-bottom: 1px dashed #000; font-size: 11px; padding-bottom: 3px; }
-        .c-table td { padding: 4px 0; vertical-align: top; }
-        .c-footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
+        .c-row.big { font-size: 18px; margin-top: 15px; padding-top: 10px; border-top: 2px dashed #000; }
+        
+        .c-table { width: 100%; text-align: left; margin: 15px 0; border-collapse: collapse; }
+        .c-table th { border-bottom: 1px solid #000; font-size: 12px; padding-bottom: 5px; font-weight: 900; }
+        .c-table td { padding: 6px 0; vertical-align: top; border-bottom: 1px dotted #ccc; }
+        .c-item-name { font-weight: bold; display: block; font-size: 13px; }
+        .c-item-meta { font-size: 11px; color: #444; margin-left: 10px; display: block; font-style: italic; }
+
+        .c-footer { text-align: center; margin-top: 30px; font-size: 11px; border-top: 2px dashed #000; padding-top: 15px; }
 
         /* ÁREA VISUAL ONDE O CUPOM É MONTADO PARA PDF */
         #area-cupom-visual { display: none; } 
 
         /* REGRAS PARA IMPRESSÃO PDF/PC (Ctrl+P) */
         @media print {
-            @page { margin: 0; size: auto; }
+            @page { margin: 10mm; size: auto; }
             body * { visibility: hidden; height: 0; overflow: hidden; }
             #area-cupom-visual { display: block !important; }
             #area-cupom-visual, #area-cupom-visual * {
                 visibility: visible; height: auto; overflow: visible;
                 position: absolute; left: 0; top: 0; width: 100%; background: white;
             }
-            .cupom-wrapper { border: none; padding: 0; }
+            .cupom-wrapper { border: none; padding: 0; width: 100%; }
             #modal-overlay, nav, header { display: none !important; }
         }
     </style>
@@ -176,23 +183,23 @@
 
 <div id="modal-extrato" onclick="fecharExtrato(event)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2001; align-items:center; justify-content:center; backdrop-filter:blur(5px)">
     <div class="modal-content" style="width:90%; max-width:400px; max-height:80vh; display:flex; flex-direction:column; padding:0; overflow:hidden">
-        <div style="background:var(--primary); color:white; padding:12px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; font-size:12px">
+        <div style="background:var(--primary); color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; font-size:14px">
             <span id="ext-nome">CLIENTE</span>
             <i class="fas fa-times" onclick="document.getElementById('modal-extrato').style.display='none'" style="cursor:pointer"></i>
         </div>
-        <div id="ext-lista" style="padding:12px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
-        <div id="ext-share-area" style="padding:12px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:6px">
+        <div id="ext-lista" style="padding:15px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
+        <div id="ext-share-area" style="padding:15px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:8px">
             <div id="ext-preview-box" style="display:none"></div>
-            <div style="font-size:9px; color:#999; text-align:center; font-weight:bold; margin-bottom:4px">COMPARTILHAR</div>
-            <button class="btn" style="background:#25d366; margin:0; padding:8px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
-            <button class="btn" style="background:#0277bd; margin:0; padding:8px" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH (RAWBT)</button>
+            <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:5px">COMPARTILHAR</div>
+            <button class="btn" style="background:#25d366; margin:0; padding:10px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
+            <button class="btn" style="background:#0277bd; margin:0; padding:10px" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH (RAWBT)</button>
         </div>
     </div>
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v82 FAST <i class="fas fa-sync-alt"></i></div></h2>
-    <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v83 PRO <i class="fas fa-sync-alt"></i></div></h2>
+    <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
 <div class="container no-print">
@@ -208,9 +215,9 @@
                 <button type="button" class="search-btn" onclick="toggleSearch('cli', 'v-cli', 'sug-v-cli')"><i class="fas fa-search"></i></button>
                 <div id="sug-v-cli" class="sugestoes"></div>
             </div>
-            <button class="btn-novo" style="margin-top:10px" onclick="cadastrarNovoNaVenda()"><i class="fas fa-plus"></i> NOVO CLIENTE</button>
+            <button class="btn-novo" style="margin-top:12px" onclick="cadastrarNovoNaVenda()"><i class="fas fa-plus"></i> NOVO CLIENTE</button>
 
-            <label style="margin-top:15px">ADICIONAR ITEM</label>
+            <label style="margin-top:18px">ADICIONAR ITEM</label>
             <div class="search-box">
                 <input type="text" id="v-busca" placeholder="BIPAR OU DIGITAR..." onkeyup="buscarVenda(this.value)">
                 <i class="fas fa-times clear-btn" id="v-clear-btn" onclick="limparBuscaVenda()"></i>
@@ -218,16 +225,16 @@
                 <div id="sug-v-prod" class="sugestoes"></div>
             </div>
 
-            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
-                <div style="font-size:9px; color:#999; text-align:center; margin-bottom:5px">ITENS DO CARRINHO</div>
-                <div id="carrinho-lista" style="font-size:11px; color:#888; text-align:center; padding:10px">VAZIO</div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
-                    <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
-                    <input type="number" id="v-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderCarrinho()">
+            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:15px; margin-top:18px; border-radius:10px">
+                <div style="font-size:10px; color:#999; text-align:center; margin-bottom:8px">ITENS DO CARRINHO</div>
+                <div id="carrinho-lista" style="font-size:12px; color:#888; text-align:center; padding:10px">VAZIO</div>
+                <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:15px; padding-top:15px; border-top:1px solid #ddd">
+                    <label style="margin:0; font-size:11px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
+                    <input type="number" id="v-desc" placeholder="0.00" style="width:90px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderCarrinho()">
                 </div>
-                <div style="text-align:right; font-size:16px; font-weight:900; margin-top:8px; color:var(--primary);" id="v-total">TOTAL: R$ 0,00</div>
+                <div style="text-align:right; font-size:18px; font-weight:900; margin-top:10px; color:var(--primary);" id="v-total">TOTAL: R$ 0,00</div>
             </div>
-            <button class="btn btn-primary" style="margin-top:15px; width:100%" onclick="finalizarVenda()">FINALIZAR VENDA</button>
+            <button class="btn btn-primary" style="margin-top:20px; width:100%" onclick="finalizarVenda()">FINALIZAR VENDA</button>
         </div>
     </div>
 
@@ -266,24 +273,24 @@
                 <div id="sug-os-item" class="sugestoes"></div>
             </div>
 
-            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
+            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:15px; margin-top:18px; border-radius:10px">
                 <div id="os-lista-itens"></div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
-                    <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
-                    <input type="number" id="s-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
+                <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:15px; padding-top:15px; border-top:1px solid #ddd">
+                    <label style="margin:0; font-size:11px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
+                    <input type="number" id="s-desc" placeholder="0.00" style="width:90px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
                 </div>
-                <div style="text-align:right; font-size:15px; font-weight:900; margin-top:8px; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
+                <div style="text-align:right; font-size:18px; font-weight:900; margin-top:10px; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
             </div>
             <button class="btn btn-primary" onclick="salvarOS()">SALVAR ORDEM</button>
         </div>
 
-        <div style="padding: 0 5px; margin-bottom: 8px; display:flex; gap:5px">
+        <div style="padding: 0 5px; margin-bottom: 10px; display:flex; gap:8px">
             <div class="search-box" style="flex:1"><input type="text" id="busca-kanban" placeholder="🔍 LOCALIZAR OS..." onkeyup="renderKanban()" style="background:white; border:2px solid #ddd; font-weight:bold"></div>
             <button class="btn-mini dark" onclick="verHistoricoOS()"><i class="fas fa-history"></i></button>
         </div>
         <div class="kanban-grid">
             <div class="k-col"><div class="k-head" style="color:#555">ANÁLISE</div><div id="k-pecas"></div></div>
-            <div class="k-col"><div class="k-head" style="color:#ff9800; font-size:8px">AGUARDANDO PAGAMENTO</div><div id="k-pgto"></div></div>
+            <div class="k-col"><div class="k-head" style="color:#ff9800; font-size:9px">AGUARDANDO PAGAMENTO</div><div id="k-pgto"></div></div>
             <div class="k-col"><div class="k-head" style="color:green">PRONTO</div><div id="k-retirado"></div></div>
         </div>
     </div>
@@ -301,13 +308,13 @@
         </div>
         <div class="card">
             <button class="btn-debt" onclick="abrirCarteiraDevedores()">
-                <i class="fas fa-book" style="font-size:16px"></i> CARTEIRA DE DEVEDORES
+                <i class="fas fa-book" style="font-size:18px"></i> CARTEIRA DE DEVEDORES
             </button>
             <div class="search-box">
                 <input type="text" id="cli-search-input" placeholder="FILTRAR LISTA..." onkeyup="buscar('clientes', this.value, 'lista-clientes', true)">
                 <button type="button" class="search-btn" onclick="toggleSearch('listacli', 'cli-search-input', 'lista-clientes')"><i class="fas fa-search"></i></button>
             </div>
-            <div id="lista-clientes" style="margin-top:15px"></div>
+            <div id="lista-clientes" style="margin-top:18px"></div>
         </div>
     </div>
 
@@ -319,20 +326,20 @@
             <input type="file" id="p-foto" hidden onchange="lerFoto(this, 'p-foto-view')">
             <input type="text" id="p-nome" placeholder="DESCRIÇÃO (OBRIGATÓRIO) *">
             <div style="display:flex; gap:10px"><input type="number" id="p-venda" placeholder="R$ VENDA *"><input type="number" id="p-qtd" placeholder="QTD"></div>
-            <div style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px">
+            <div style="margin-top:12px; border-top:1px dashed #ccc; padding-top:12px">
                 <label style="margin-top:0; color:#c62828"><i class="fas fa-lock"></i> PREÇO DE CUSTO</label>
-                <div style="display:flex; gap:5px">
+                <div style="display:flex; gap:8px">
                     <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
-                    <button id="btn-ver-custo" class="btn-mini dark" style="flex:0; width:40px" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
+                    <button id="btn-ver-custo" class="btn-mini dark" style="flex:0; width:45px" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
-            <div style="display:flex; gap:10px; margin-top:10px">
+            <div style="display:flex; gap:10px; margin-top:12px">
                 <button class="btn btn-primary" onclick="salvarProduto('prod')">SALVAR PRODUTO</button>
                 <button class="btn btn-dark" onclick="salvarProduto('serv')">SALVAR SERVIÇO</button>
             </div>
         </div>
         <div class="card">
-            <div style="display:flex; gap:5px; margin-bottom:10px">
+            <div style="display:flex; gap:8px; margin-bottom:12px">
                 <button class="btn-mini dark" onclick="listarEstoque('prod')">PRODUTOS</button>
                 <button class="btn-mini dark" style="opacity:0.7" onclick="listarEstoque('serv')">SERVIÇOS</button>
             </div>
@@ -342,30 +349,30 @@
 
     <div id="page-relatorio" class="page">
         <div class="card" style="position:relative">
-            <i class="fas fa-eye" id="eye-rel" onclick="togglePriv()" style="position:absolute; top:12px; right:12px; color:var(--primary); font-size:16px; cursor:pointer; padding:5px; z-index:10"></i>
+            <i class="fas fa-eye" id="eye-rel" onclick="togglePriv()" style="position:absolute; top:15px; right:15px; color:var(--primary); font-size:18px; cursor:pointer; padding:5px; z-index:10"></i>
             <h3>RELATÓRIOS FINANCEIROS</h3>
-            <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:12px">
+            <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:15px">
                 <option value="dia">HOJE</option>
                 <option value="semana">ÚLTIMOS 7 DIAS</option>
                 <option value="mes">MÊS ATUAL</option>
                 <option value="ano">ESTE ANO</option>
             </select>
-            <div style="background:var(--accent); color:white; padding:15px; border-radius:10px; text-align:center">
-                <div style="font-size:10px; opacity:0.8">FATURAMENTO TOTAL</div>
-                <div id="r-total" style="font-size:20px; font-weight:900; margin-top:4px">****</div>
+            <div style="background:var(--accent); color:white; padding:18px; border-radius:10px; text-align:center">
+                <div style="font-size:11px; opacity:0.8">FATURAMENTO TOTAL</div>
+                <div id="r-total" style="font-size:24px; font-weight:900; margin-top:5px">****</div>
                 
-                <div style="font-size:10px; opacity:0.8; margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:4px">LUCRO ESTIMADO</div>
-                <div id="r-lucro" style="font-size:16px; font-weight:900; color:#b2fab4">****</div>
+                <div style="font-size:11px; opacity:0.8; margin-top:10px; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px">LUCRO ESTIMADO</div>
+                <div id="r-lucro" style="font-size:18px; font-weight:900; color:#b2fab4">****</div>
             </div>
 
-            <h3 style="margin-top:20px; font-size:11px; color:#666">CLIENTES ATENDIDOS</h3>
-            <div class="search-box" style="margin-bottom:8px">
+            <h3 style="margin-top:25px; font-size:12px; color:#666">CLIENTES ATENDIDOS</h3>
+            <div class="search-box" style="margin-bottom:10px">
                 <input type="text" id="r-search" placeholder="🔍 BUSCAR CLIENTE..." onkeyup="renderRelatorio()" style="background:white; border:2px solid #ddd">
                 <div id="sug-r-cli" class="sugestoes"></div>
             </div>
-            <div id="r-hist" style="max-height:300px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:5px"></div>
+            <div id="r-hist" style="max-height:350px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:8px"></div>
 
-            <h3 style="margin-top:15px; font-size:11px; color:#666">RANKINGS</h3>
+            <h3 style="margin-top:20px; font-size:12px; color:#666">RANKINGS</h3>
             <div class="rank-grid">
                 <div class="rank-box"><div class="rank-title">CLIENTES</div><div id="rank-cli"></div></div>
                 <div class="rank-box"><div class="rank-title">PRODUTOS</div><div id="rank-prod"></div></div>
@@ -525,7 +532,7 @@ window.renderCarrinho = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinho.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:8px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:4px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1; font-weight:bold">${i.qtd}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:5px; margin-top:5px;"><label style="margin:0; font-size:9px">GAR:</label><select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaCar(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemVenda(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delCar(${x})"><i class="fas fa-trash"></i></button></div></div>`;
+        return `<div style="padding:12px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:6px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1; font-weight:bold">${i.qtd}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:8px; margin-top:8px;"><label style="margin:0; font-size:10px">GAR:</label><select style="padding:4px; font-size:11px; width:auto;" onchange="setGarantiaCar(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemVenda(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delCar(${x})"><i class="fas fa-trash"></i></button></div></div>`;
     }).join('');
     const desc = parseFloat(document.getElementById('v-desc').value) || 0;
     document.getElementById('v-total').innerText = 'TOTAL: R$ ' + (subtotal - desc).toFixed(2);
@@ -595,7 +602,7 @@ window.renderItemsOS = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinhoOS.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:8px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:4px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:5px; margin-top:5px;"><label style="margin:0; font-size:9px">GAR:</label><select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaOS(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemOS(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delItemOS(${x})"><i class="fas fa-trash"></i></button></div></div>`;
+        return `<div style="padding:12px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:6px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:8px; margin-top:8px;"><label style="margin:0; font-size:10px">GAR:</label><select style="padding:4px; font-size:11px; width:auto;" onchange="setGarantiaOS(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemOS(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delItemOS(${x})"><i class="fas fa-trash"></i></button></div></div>`;
     }).join('');
     const desc = parseFloat(document.getElementById('s-desc').value) || 0;
     document.getElementById('s-total-display').innerText = 'TOTAL: R$ ' + (subtotal - desc).toFixed(2);
@@ -795,29 +802,85 @@ window.abrirExtratoCliente = function(nome) {
 }
 
 /* ==========================================================================
-   LÓGICA DE IMPRESSÃO PROFISSIONAL (TEXTO PURO NO BLUETOOTH)
+   LÓGICA DE IMPRESSÃO PROFISSIONAL v83
    ========================================================================== */
 
-// 1. GERA HTML PARA PDF E TELA
+// 1. GERA HTML PARA PDF E TELA (Layout Completo)
 window.montarHtmlCupom = function(d) {
-    const agora = new Date(); const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
-    const itensHtml = d.itens.map(i => { const totalItem = (i.val).toFixed(2); return `<tr><td style="width:10%"><strong>${i.qtd || 1}x</strong></td><td style="width:65%"><span class="c-item-name">${i.nome}</span>${i.garantia ? `<span class="c-item-meta">GAR: ${i.garantia}</span>` : ''}</td><td style="width:25%; text-align:right">${totalItem}</td></tr>`; }).join('');
-    return `<div class="cupom-wrapper"><div class="c-header"><div class="c-company">${EMPRESA.nome}</div><div class="c-sub">${EMPRESA.end}</div><div class="c-sub">${EMPRESA.cid}</div><div class="c-sub">CNPJ: ${EMPRESA.cnpj}</div><div class="c-sub">Tel: ${EMPRESA.tel}</div></div><div class="c-body"><div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div><div class="c-row bold"><span>TIPO:</span> <span>${d.tipo}</span></div><div class="c-row"><span>CLIENTE:</span> <span>${d.cliente || 'CONSUMIDOR'}</span></div><table class="c-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead><tbody>${itensHtml}</tbody></table><div class="c-row border-top"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}<div class="c-row bold big"><span>TOTAL A PAGAR:</span> <span>R$ ${d.total.toFixed(2)}</span></div>${d.valorPago ? `<div class="c-row" style="margin-top:5px"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}${d.obs ? `<div style="margin-top:10px; border:1px solid #000; padding:5px; font-weight:bold">OBS: ${d.obs}</div>` : ''}${d.senha ? `<div style="margin-top:5px; font-weight:bold; text-align:center; font-size:14px">SENHA: ${d.senha}</div>` : ''}</div><div class="c-footer"><div style="border-top:1px solid #000; width:80%; margin:20px auto 5px auto;"></div><div>ASSINATURA DO CLIENTE</div><br><div>NÃO É DOCUMENTO FISCAL</div><div><b>OBRIGADO PELA PREFERÊNCIA!</b></div><div style="font-size:9px; margin-top:5px">Sistema: Filhão.Cell v82</div></div></div>`;
+    const agora = new Date(); 
+    const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
+    
+    // Constrói linhas da tabela
+    const itensHtml = d.itens.map(i => {
+        const totalItem = (i.val).toFixed(2);
+        return `
+            <tr>
+                <td style="width:10%"><strong>${i.qtd || 1}x</strong></td>
+                <td style="width:65%">
+                    <span class="c-item-name">${i.nome}</span>
+                    ${i.garantia ? `<span class="c-item-meta">GAR: ${i.garantia}</span>` : ''}
+                </td>
+                <td style="width:25%; text-align:right">R$ ${totalItem}</td>
+            </tr>`;
+    }).join('');
+
+    return `
+        <div class="cupom-wrapper">
+            <div class="c-header">
+                <span class="c-company">${EMPRESA.nome}</span>
+                <span class="c-sub">${EMPRESA.end}</span>
+                <span class="c-sub">${EMPRESA.cid}</span>
+                <span class="c-sub">CNPJ: ${EMPRESA.cnpj}</span>
+                <span class="c-sub">Tel: ${EMPRESA.tel}</span>
+            </div>
+
+            <div class="c-body">
+                <div class="c-section-title">DETALHES DA OPERAÇÃO</div>
+                <div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div>
+                <div class="c-row bold"><span>TIPO:</span> <span>${d.tipo}</span></div>
+                <div class="c-row"><span>CLIENTE:</span> <span>${d.cliente || 'CONSUMIDOR'}</span></div>
+                
+                <table class="c-table">
+                    <thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead>
+                    <tbody>${itensHtml}</tbody>
+                </table>
+
+                <div class="c-section-title">TOTAIS</div>
+                <div class="c-row"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>
+                ${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}
+                
+                <div class="c-row bold big"><span>TOTAL A PAGAR:</span> <span>R$ ${d.total.toFixed(2)}</span></div>
+                
+                ${d.valorPago ? `<div class="c-row" style="margin-top:10px"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}
+                ${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}
+                
+                ${d.obs ? `<div style="margin-top:15px; border:1px solid #000; padding:8px; font-weight:bold">OBS: ${d.obs}</div>` : ''}
+                ${d.senha ? `<div style="margin-top:10px; font-weight:bold; text-align:center; font-size:18px; border:2px solid #000; padding:5px;">SENHA: ${d.senha}</div>` : ''}
+            </div>
+
+            <div class="c-footer">
+                <div style="border-top:1px solid #000; width:70%; margin:40px auto 5px auto;"></div>
+                <div>ASSINATURA DO CLIENTE</div>
+                <br>
+                <div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div>
+                <div style="font-size:10px; margin-top:5px">Sistema: Filhão.Cell v83</div>
+            </div>
+        </div>
+    `;
 }
 
 window.abrirModalShare = function() {
-    // Apenas monta o HTML visual para caso a pessoa queira ver na tela ou imprimir PDF
     const htmlCupom = montarHtmlCupom(window.shareData);
     document.getElementById('area-cupom-visual').innerHTML = htmlCupom;
 
     document.getElementById('modal-content-default').innerHTML = `
         <h3 class="no-print" style="justify-content:center"><i class="fas fa-check-circle"></i> SALVO!</h3>
-        <div class="no-print" style="display:flex; flex-direction:column; gap:8px; margin-top:15px">
-            <button class="btn" style="background:#007bff; margin:0" onclick="acaoShare('bluetooth')"><i class="fas fa-print"></i> IMPRIMIR BLUETOOTH (RÁPIDO)</button>
-            <button class="btn" style="background:#333; margin:0" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / IMPRIMIR PC</button>
-            <button class="btn" style="background:#28a745; margin:0" onclick="verComprovanteTela()"><i class="fas fa-eye"></i> VER NA TELA</button>
-             <button class="btn" style="background:#25d366; margin:0" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
-            <button class="btn" style="background:#d32f2f; margin:0" onclick="fecharModal({target:{id:'modal-overlay'}})"> <i class="fas fa-times"></i> FECHAR</button>
+        <div class="no-print" style="display:flex; flex-direction:column; gap:10px; margin-top:15px">
+            <button class="btn" style="background:#007bff; margin:0; padding:12px" onclick="acaoShare('bluetooth')"><i class="fas fa-print"></i> IMPRIMIR BLUETOOTH (RÁPIDO)</button>
+            <button class="btn" style="background:#333; margin:0; padding:12px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / IMPRIMIR PC</button>
+            <button class="btn" style="background:#28a745; margin:0; padding:12px" onclick="verComprovanteTela()"><i class="fas fa-eye"></i> VER NA TELA</button>
+             <button class="btn" style="background:#25d366; margin:0; padding:12px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
+            <button class="btn" style="background:#d32f2f; margin:0; padding:12px" onclick="fecharModal({target:{id:'modal-overlay'}})"> <i class="fas fa-times"></i> FECHAR</button>
         </div>
     `; 
     document.getElementById('modal-overlay').style.display='flex'; 
@@ -831,37 +894,62 @@ window.acaoShare = function(tipo) {
         window.print(); 
     }
     else if(tipo === 'bluetooth') {
-        // [CORREÇÃO] Gera TEXTO PURO para o RawBT. Isso evita o buffer overflow (loop infinito).
+        // [MODO PROFISSIONAL] Comandos de Texto Puro para RawBT
+        // [C] = Center, [L] = Left, [R] = Right, [B] = Bold, \n = Quebra de linha
         let T = '';
+        
+        // CABEÇALHO
         T += '[C]<b>' + EMPRESA.nome + '</b>\n';
         T += '[C]' + EMPRESA.end + '\n';
         T += '[C]' + EMPRESA.cid + '\n';
+        T += '[C]CNPJ: ' + EMPRESA.cnpj + '\n';
         T += '[C]Tel: ' + EMPRESA.tel + '\n';
-        T += '[L]--------------------------------\n';
+        T += '[C]--------------------------------\n\n'; // Espaço extra
+
+        // DADOS
         T += '[L]DATA: ' + new Date().toLocaleString() + '\n';
-        T += '[L]TIPO: ' + d.tipo + '\n';
+        T += '[L]<b>TIPO: ' + d.tipo + '</b>\n';
         T += '[L]CLIENTE: ' + d.cliente + '\n';
-        T += '[L]--------------------------------\n';
+        T += '[C]--------------------------------\n';
         
+        // ITENS
+        T += '[L]QTD  ITEM                   TOTAL\n';
         d.itens.forEach(i => {
-            T += '[L]' + (i.qtd||1) + 'x ' + i.nome + '\n';
+            let nomeItem = i.nome;
+            if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20) + '..';
+            T += '[L]' + (i.qtd||1) + 'x   ' + nomeItem + '\n';
+            // Alinhamento forçado do preço à direita na linha de baixo para não quebrar
             T += '[R]R$ ' + i.val.toFixed(2) + '\n';
-            if(i.garantia) T += '[L](GAR: ' + i.garantia + ')\n';
+            if(i.garantia) T += '[L]     (GAR: ' + i.garantia + ')\n';
+            T += '[L]- - - - - - - - - - - - - - - -\n';
         });
+        
+        T += '\n'; // Espaço antes dos totais
 
-        T += '[L]--------------------------------\n';
+        // TOTAIS
+        T += '[L]SUBTOTAL:' + '[R]R$ ' + d.subtotal.toFixed(2) + '\n';
+        if(d.desconto > 0) {
+            T += '[L]DESCONTO:' + '[R]- R$ ' + d.desconto.toFixed(2) + '\n';
+        }
+        
         T += '[R]<b>TOTAL: R$ ' + d.total.toFixed(2) + '</b>\n';
-        if(d.desconto > 0) T += '[R](Desc: R$ ' + d.desconto.toFixed(2) + ')\n';
-        if(d.valorPago) T += '[R]PAGO: R$ ' + d.valorPago.toFixed(2) + '\n';
-        if(d.troco) T += '[R]TROCO: R$ ' + d.troco.toFixed(2) + '\n';
-        
-        if(d.obs) T += '\n[L]OBS: ' + d.obs + '\n';
-        if(d.senha) T += '\n[C]<font size="big">SENHA: ' + d.senha + '</font>\n';
-        
-        T += '\n\n[C]OBRIGADO PELA PREFERENCIA!\n';
-        T += '[C]Filhao.Cell v82\n\n\n';
+        T += '[C]--------------------------------\n';
 
-        // Envia para o App RawBT usando esquema de URI seguro
+        if(d.valorPago) T += '[L]VALOR PAGO:' + '[R]R$ ' + d.valorPago.toFixed(2) + '\n';
+        if(d.troco) T += '[L]TROCO:' + '[R]R$ ' + d.troco.toFixed(2) + '\n';
+        
+        if(d.obs) {
+            T += '\n[L]OBSERVACOES:\n[L]' + d.obs + '\n';
+        }
+
+        if(d.senha) {
+            T += '\n\n[C]<font size="big">SENHA: ' + d.senha + '</font>\n';
+        }
+        
+        T += '\n\n\n[C]OBRIGADO PELA PREFERENCIA!\n';
+        T += '[C]Filhao.Cell v83\n\n\n';
+
+        // Envia para o App RawBT
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
     else if(tipo === 'zap') {
@@ -882,10 +970,10 @@ window.verComprovanteTela = function() {
     const htmlCupom = montarHtmlCupom(window.shareData);
     document.getElementById('modal-content-default').innerHTML = `
         <h3 class="no-print" style="justify-content:center">VISUALIZAÇÃO</h3>
-        <div style="background:#eee; padding:5px; max-height:400px; overflow-y:auto; border-radius:4px; margin-bottom:10px;">${htmlCupom}</div>
-        <div class="no-print" style="display:grid; grid-template-columns: 1fr; gap:8px">
-            <button class="btn" style="background:#007bff; margin:0" onclick="acaoShare('bluetooth')">IMPRIMIR BT</button>
-            <button class="btn" style="background:#d32f2f; margin:0" onclick="fecharModal({target:{id:'modal-overlay'}})">FECHAR</button>
+        <div style="background:#eee; padding:5px; max-height:450px; overflow-y:auto; border-radius:4px; margin-bottom:15px;">${htmlCupom}</div>
+        <div class="no-print" style="display:grid; grid-template-columns: 1fr; gap:10px">
+            <button class="btn" style="background:#007bff; margin:0; padding:12px" onclick="acaoShare('bluetooth')">IMPRIMIR BT</button>
+            <button class="btn" style="background:#d32f2f; margin:0; padding:12px" onclick="fecharModal({target:{id:'modal-overlay'}})">FECHAR</button>
         </div>
     `;
 }
@@ -903,12 +991,11 @@ window.shareExtrato = function(tipo) {
         window.location.href = urlZap;
     } 
     else if(tipo === 'bluetooth') {
-        // [CORREÇÃO] Gera TEXTO PURO também para o Extrato
         let T = '';
         T += '[C]<b>' + EMPRESA.nome + '</b>\n';
         T += '[C]EXTRATO DE CONTA\n';
         T += '[L]CLIENTE: ' + d.cliente + '\n';
-        T += '[L]--------------------------------\n';
+        T += '[C]--------------------------------\n\n';
         for (const [data, itens] of Object.entries(d.dados)) { 
             T += '[L][' + data + ']\n'; 
             itens.forEach(i => { 
@@ -918,7 +1005,7 @@ window.shareExtrato = function(tipo) {
             }); 
             T += '\n'; 
         }
-        T += '[L]--------------------------------\n';
+        T += '[C]--------------------------------\n';
         T += '[R]<b>TOTAL GERAL: R$ ' + d.total.toFixed(2) + '</b>\n\n\n';
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
