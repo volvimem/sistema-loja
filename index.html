@@ -16,13 +16,13 @@
 
     <style>
         :root { 
-            --primary: #d50000;           
+            --primary: #d50000;            
             --primary-dark: #b71c1c; 
-            --accent: #000000;           
-            --text: #212121;             
+            --accent: #000000;            
+            --text: #212121;               
             --bg: #f5f5f5;              
-            --card-bg: #ffffff;          
-            --success: #2e7d32;          
+            --card-bg: #ffffff;           
+            --success: #2e7d32;           
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
@@ -194,6 +194,51 @@
         .nav-item.active i { color: var(--primary); }
 
         .check-log { transform: scale(1.3); margin-right: 10px; accent-color: var(--primary); }
+
+        /* --- ESTILO DO CUPOM FISCAL (VISUAL E IMPRESSÃO) --- */
+        .cupom-wrapper {
+            width: 100%;
+            max-width: 380px; /* Largura padrão térmica 80mm */
+            background: #fff;
+            color: #000;
+            font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada estilo cupom */
+            padding: 10px;
+            margin: 0 auto;
+            font-size: 12px;
+            text-transform: uppercase;
+            line-height: 1.2;
+            border: 1px solid #ccc; /* Borda apenas na tela */
+            text-align: left;
+        }
+
+        .c-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
+        .c-company { font-size: 16px; font-weight: 900; margin-bottom: 5px; }
+        .c-sub { font-size: 11px; }
+
+        .c-body { margin-bottom: 10px; }
+        .c-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+        .c-row.bold { font-weight: 900; }
+        .c-row.border-top { border-top: 1px dashed #000; padding-top: 5px; margin-top: 5px; }
+        .c-row.big { font-size: 16px; margin-top: 10px; }
+
+        .c-table { width: 100%; text-align: left; margin: 10px 0; border-collapse: collapse; }
+        .c-table th { border-bottom: 1px dashed #000; font-size: 11px; padding-bottom: 3px; }
+        .c-table td { padding: 4px 0; vertical-align: top; }
+        .c-item-name { font-weight: bold; display: block; }
+        .c-item-meta { font-size: 10px; color: #333; margin-left: 10px; display: block; }
+
+        .c-footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
+
+        /* --- IMPRESSÃO NATIVA (PDF) --- */
+        @media print {
+            @page { margin: 0; size: auto; }
+            body * { visibility: hidden; } /* Esconde tudo */
+            #modal-overlay, #modal-overlay * { visibility: visible; } /* Mostra só o modal */
+            #modal-overlay { position: absolute; left: 0; top: 0; background: white; width: 100%; height: auto; display: block !important; }
+            .modal-content { border: none; width: 100%; max-width: 100%; padding: 0; margin: 0; box-shadow: none; }
+            .cupom-wrapper { border: none; width: 100%; max-width: 100%; padding: 0; margin: 0 auto; }
+            .no-print { display: none !important; } /* Botões de ação somem na impressão */
+        }
     </style>
 </head>
 <body>
@@ -219,12 +264,12 @@
     </div>
 </div>
 
-<header>
+<header class="no-print">
     <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v80 PRIV <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
-<div class="container">
+<div class="container no-print">
     <div id="page-vendas" class="page active">
         <div class="card">
             <h3>
@@ -404,7 +449,7 @@
     </div>
 </div>
 
-<nav>
+<nav class="no-print">
     <button class="nav-item active" onclick="nav('vendas', this)"><i class="fas fa-shopping-cart"></i>VENDAS</button>
     <button class="nav-item" onclick="nav('servicos', this)"><i class="fas fa-wrench"></i>OS</button>
     <button class="nav-item" onclick="nav('clientes', this)"><i class="fas fa-users"></i>CLIENTES</button>
@@ -588,6 +633,12 @@ window.finalizarVenda = async function() {
     if(isNaN(valorPago)) return;
     if(valorPago < 0) valorPago = 0;
     
+    // Calcula troco para exibição (apenas se pagou a mais)
+    let troco = 0;
+    if(valorPago > total) {
+        troco = valorPago - total;
+    }
+    
     for(let i of window.carrinho) {
         await addDoc(collection(db,"logs"), { tipo: i.tipo=='P'?'PRODUTO':'SERVICO', desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: cli, data: new Date().toISOString() });
     }
@@ -608,7 +659,17 @@ window.finalizarVenda = async function() {
         msgFiado = `\n\nATENÇÃO: DÉBITO DE R$ ${restante.toFixed(2)} REGISTRADO!`;
     }
 
-    window.shareData = { tipo:'VENDA', cliente:cli, itens:window.carrinho, subtotal: sub, desconto: desc, total: total };
+    window.shareData = { 
+        tipo:'VENDA', 
+        cliente:cli, 
+        itens:window.carrinho, 
+        subtotal: sub, 
+        desconto: desc, 
+        total: total,
+        valorPago: valorPago,
+        troco: troco
+    };
+
     window.carrinho=[]; document.getElementById('v-cli').value=''; document.getElementById('v-desc').value=''; renderCarrinho();
     alert("VENDA FINALIZADA!" + msgFiado);
     abrirModalShare();
@@ -1118,34 +1179,66 @@ window.abrirExtratoCliente = function(nome) {
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
+/* --- SISTEMA DE IMPRESSÃO / CUPOM --- */
 window.montarHtmlCupom = function(d) {
-    let html = `<div style="font-family:'Courier New', monospace; text-align:center; width:380px; margin:0 auto; background:white; color:black; padding:10px; border:1px solid #fff">
-        <div style="font-weight:bold; font-size:18px; margin-bottom:5px">${EMPRESA.nome}</div>
-        <div style="font-size:12px">${EMPRESA.end}</div>
-        <div style="font-size:12px">${EMPRESA.cid}</div>
-        <div style="font-size:12px">CNPJ: ${EMPRESA.cnpj}</div>
-        <div style="font-size:12px">Tel: ${EMPRESA.tel}</div>
-        <div style="border-bottom:1px dashed #000; margin:5px 0"></div>
-        <div style="font-size:12px; font-weight:bold">${d.tipo}</div>
-        <div style="font-size:12px">${new Date().toLocaleString()}</div>
-        <div style="font-size:12px">CLI: ${d.cliente || 'CONSUMIDOR'}</div>
-        <div style="border-bottom:1px dashed #000; margin:5px 0"></div>
-        <table style="width:100%; font-size:12px; text-align:left">
-            <thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">R$</th></tr></thead>
-            <tbody>
-                ${d.itens.map(i => `<tr><td style="vertical-align:top">${i.qtd||1}x</td><td>${i.nome}<br><small>GAR: ${i.garantia||'--'}</small></td><td style="text-align:right; vertical-align:top">${i.val.toFixed(2)}</td></tr>`).join('')}
-            </tbody>
-        </table>
-        <div style="border-bottom:1px dashed #000; margin:5px 0"></div>
-        <div style="display:flex; justify-content:space-between; font-size:14px"><span>SUBTOTAL:</span><span>R$ ${d.subtotal.toFixed(2)}</span></div>`;
-    if(d.desconto > 0) html += `<div style="display:flex; justify-content:space-between; font-size:14px"><span>DESCONTO:</span><span>- R$ ${d.desconto.toFixed(2)}</span></div>`;
-    html += `<div style="font-size:18px; font-weight:bold; margin-top:5px; text-align:right">TOTAL: R$ ${d.total.toFixed(2)}</div>`;
-    if(d.obs) html += `<div style="margin-top:5px; text-align:left; font-size:12px; border:1px solid #000; padding:2px"><b>OBS:</b> ${d.obs}</div>`;
-    html += `<div style="margin-top:40px; border-top:1px solid #000; width:80%; margin-left:auto; margin-right:auto"></div>
-             <div style="font-size:10px; text-align:center">ASSINATURA DO CLIENTE</div>
-             <div style="margin-top:10px; font-size:10px; text-align:center">OBRIGADO PELA PREFERÊNCIA!</div>
-    </div>`;
-    return html;
+    const agora = new Date();
+    const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
+
+    const itensHtml = d.itens.map(i => {
+        const totalItem = (i.val).toFixed(2);
+        return `
+            <tr>
+                <td style="width:10%"><strong>${i.qtd || 1}x</strong></td>
+                <td style="width:65%">
+                    <span class="c-item-name">${i.nome}</span>
+                    ${i.garantia ? `<span class="c-item-meta">GAR: ${i.garantia}</span>` : ''}
+                </td>
+                <td style="width:25%; text-align:right">${totalItem}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <div class="cupom-wrapper" id="cupom-imprimir">
+            <div class="c-header">
+                <div class="c-company">${EMPRESA.nome}</div>
+                <div class="c-sub">${EMPRESA.end}</div>
+                <div class="c-sub">${EMPRESA.cid}</div>
+                <div class="c-sub">CNPJ: ${EMPRESA.cnpj}</div>
+                <div class="c-sub">Tel: ${EMPRESA.tel}</div>
+            </div>
+
+            <div class="c-body">
+                <div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div>
+                <div class="c-row bold"><span>TIPO:</span> <span>${d.tipo}</span></div>
+                <div class="c-row"><span>CLIENTE:</span> <span>${d.cliente || 'CONSUMIDOR'}</span></div>
+                
+                <table class="c-table">
+                    <thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead>
+                    <tbody>${itensHtml}</tbody>
+                </table>
+
+                <div class="c-row border-top"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>
+                ${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}
+                <div class="c-row bold big"><span>TOTAL A PAGAR:</span> <span>R$ ${d.total.toFixed(2)}</span></div>
+                
+                ${d.valorPago ? `<div class="c-row" style="margin-top:5px"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}
+                ${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}
+                
+                ${d.obs ? `<div style="margin-top:10px; border:1px solid #000; padding:5px; font-weight:bold">OBS: ${d.obs}</div>` : ''}
+                ${d.senha ? `<div style="margin-top:5px; font-weight:bold; text-align:center; font-size:14px">SENHA: ${d.senha}</div>` : ''}
+            </div>
+
+            <div class="c-footer">
+                <div style="border-top:1px solid #000; width:80%; margin:20px auto 5px auto;"></div>
+                <div>ASSINATURA DO CLIENTE</div>
+                <br>
+                <div>NÃO É DOCUMENTO FISCAL</div>
+                <div><b>OBRIGADO PELA PREFERÊNCIA!</b></div>
+                <div style="font-size:9px; margin-top:5px">Sistema: Filhão.Cell v80</div>
+            </div>
+        </div>
+    `;
 }
 
 window.abrirModalShare = function() {
@@ -1153,13 +1246,26 @@ window.abrirModalShare = function() {
     const htmlCupom = montarHtmlCupom(d);
     
     document.getElementById('modal-content-default').innerHTML = `
-        <h3 style="justify-content:center">COMPROVANTE</h3>
-        <div id="cupom-preview" style="background:white; border:1px solid #ccc; margin-bottom:10px; max-height:300px; overflow-y:auto; overflow-x:hidden; display:flex; justify-content:center">
+        <h3 class="no-print" style="justify-content:center"><i class="fas fa-print"></i> PRÉ-VISUALIZAÇÃO</h3>
+        
+        <div style="background:#888; padding:10px; max-height:400px; overflow-y:auto; border-radius:4px; margin-bottom:10px;">
             ${htmlCupom}
         </div>
-        <button class="btn" style="background:#25d366; margin-top:5px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
-        <button class="btn" style="background:#0277bd; margin-top:5px" onclick="acaoShare('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH (RAWBT)</button>
-        <button class="btn" style="background:#666; margin-top:5px" onclick="fecharModal({target:{id:'modal-overlay'}})">FECHAR</button>
+
+        <div class="no-print" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px">
+            <button class="btn" style="background:#333; margin:0" onclick="acaoShare('pdf')">
+                <i class="fas fa-file-pdf"></i> PDF / IMPRIMIR
+            </button>
+            <button class="btn" style="background:#0277bd; margin:0" onclick="acaoShare('bluetooth')">
+                <i class="fab fa-bluetooth"></i> RAWBT (TERMICA)
+            </button>
+            <button class="btn" style="background:#25d366; margin:0" onclick="acaoShare('zap')">
+                <i class="fab fa-whatsapp"></i> WHATSAPP
+            </button>
+            <button class="btn" style="background:#d32f2f; margin:0" onclick="fecharModal({target:{id:'modal-overlay'}})">
+                <i class="fas fa-times"></i> FECHAR
+            </button>
+        </div>
     `; 
     document.getElementById('modal-overlay').style.display='flex'; 
 }
@@ -1167,33 +1273,45 @@ window.abrirModalShare = function() {
 window.acaoShare = function(tipo) {
     const d = window.shareData; 
     
-    // ZAP
-    if(tipo=='zap') { 
-        document.getElementById('modal-overlay').style.display='none';
-        let txt = `*${EMPRESA.nome}*\n*${d.tipo}*\nDATA: ${new Date().toLocaleString()}\nCLI: ${d.cliente||'Consumidor'}\n----------------\n` + d.itens.map(i=>`${i.qtd||1}x ${i.nome} ... R$ ${i.val.toFixed(2)} ${i.garantia?'('+i.garantia+')':''}`).join('\n') + `\n----------------\n`;
-        if(d.desconto > 0) txt += `SUBTOTAL: R$ ${d.subtotal.toFixed(2)}\nDESCONTO: -R$ ${d.desconto.toFixed(2)}\n`; txt += `*TOTAL FINAL: R$ ${d.total.toFixed(2)}*`; if(d.obs) txt += `\nOBS: ${d.obs}`;
-        const cliName = d.cliente || '';
-        const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === cliName.toUpperCase());
-        let phone = ''; if(cliObj && cliObj.tel) phone = cliObj.tel.replace(/\D/g, '');
-        let urlZap = `whatsapp://send?text=${encodeURIComponent(txt)}`; 
-        if(phone.length >= 10) urlZap = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(txt)}`; 
-        window.location.href = urlZap; 
+    // 1. PDF / IMPRESSÃO PC
+    if(tipo === 'pdf') {
+        window.print(); // O CSS @media print fará o resto
     }
-    // BLUETOOTH (RAWBT) - VIA IMAGEM
-    if(tipo=='bluetooth') {
-        // Usa o html2canvas para converter o DIV do cupom em uma imagem PNG base64
-        // Pega o primeiro filho do preview box que é o container principal do cupom
-        const element = document.getElementById('cupom-preview').firstElementChild;
+
+    // 2. BLUETOOTH (RAWBT - VIA IMAGEM)
+    else if(tipo === 'bluetooth') {
+        const element = document.getElementById('cupom-imprimir');
+        // Aumentamos a scale para 3 para melhor nitidez na térmica
+        html2canvas(element, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png'); 
+            const base64 = imgData.split(',')[1];
+            // Protocolo RawBT para Android
+            window.location.href = 'rawbt:base64,' + base64;
+        }).catch(err => alert("Erro ao gerar imagem: " + err));
+    }
+
+    // 3. WHATSAPP (TEXTO PURO)
+    else if(tipo === 'zap') {
+        let txt = `*${EMPRESA.nome}*\n--------------------------------\n`;
+        txt += `*${d.tipo}*\nCLI: ${d.cliente}\nDATA: ${new Date().toLocaleString()}\n`;
+        txt += `--------------------------------\n`;
         
-        html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png').split(',')[1]; 
-            // Envia para RawBT como imagem base64
-            const rawbtUrl = 'rawbt:base64,' + imgData;
-            window.location.href = rawbtUrl;
-            document.getElementById('modal-overlay').style.display='none';
-        }).catch(err => {
-            alert("Erro ao gerar imagem para impressão: " + err);
+        d.itens.forEach(i => {
+            txt += `${i.qtd || 1}x ${i.nome}\n   R$ ${i.val.toFixed(2)}\n`;
         });
+        
+        txt += `--------------------------------\n`;
+        txt += `*TOTAL: R$ ${d.total.toFixed(2)}*`;
+        if(d.desconto > 0) txt += `\n(Desc: R$ ${d.desconto.toFixed(2)})`;
+        if(d.obs) txt += `\nOBS: ${d.obs}`;
+
+        const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === (d.cliente||'').toUpperCase());
+        let phone = (cliObj && cliObj.tel) ? cliObj.tel.replace(/\D/g, '') : '';
+        
+        let urlZap = `whatsapp://send?text=${encodeURIComponent(txt)}`; 
+        if(phone.length >= 10) urlZap += `&phone=55${phone}`; 
+        
+        window.location.href = urlZap;
     }
 }
 
@@ -1216,7 +1334,6 @@ window.shareExtrato = function(tipo) {
         window.location.href = urlZap;
     } 
     else if(tipo === 'bluetooth') {
-        // Tenta imprimir o extrato como texto simples pois pode ser muito longo para imagem
         let btTxt = `${EMPRESA.nome}%0AEXTRATO DE CLIENTE%0ACLIENTE: ${d.cliente}%0A--------------------------------%0A`;
         for (const [data, itens] of Object.entries(d.dados)) {
             btTxt += `[${data}]%0A`;
