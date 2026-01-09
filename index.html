@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v75 PRIV</title>
+    <title>FILHÃO.CELL v76 PRIV</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -194,12 +194,23 @@
 
         .check-log { transform: scale(1.3); margin-right: 10px; accent-color: var(--primary); }
 
-        /* ESTILO PARA IMPRESSÃO - CORRIGE O PDF "FOTO DA TELA" */
+        /* ESTILO PARA IMPRESSÃO - CORREÇÃO MOBILE */
         @media print {
-            body * { visibility: hidden; }
-            #area-print, #area-print * { visibility: visible; }
-            #area-print { position: absolute; left: 0; top: 0; width: 100%; background: white; }
-            header, nav, .container, #modal-overlay, #modal-extrato { display: none !important; }
+            body { background-color: white !important; -webkit-print-color-adjust: exact; }
+            header, nav, .container, #modal-overlay, #modal-extrato, .version-btn { display: none !important; }
+            #area-print { 
+                display: block !important; 
+                position: absolute; 
+                top: 0; 
+                left: 0; 
+                width: 100%; 
+                margin: 0; 
+                padding: 0; 
+                background: white; 
+                color: black !important; 
+                z-index: 99999; 
+            }
+            #area-print * { visibility: visible !important; color: black !important; }
         }
     </style>
 </head>
@@ -219,7 +230,7 @@
         </div>
         <div id="ext-lista" style="padding:12px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
         <div id="ext-share-area" style="padding:12px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:6px">
-            <div id="ext-preview-box" style="border:1px solid #ccc; padding:10px; max-height:200px; overflow-y:auto; background:#fff; margin-bottom:10px; font-size:10px; display:none"></div>
+            <div id="ext-preview-box" style="border:1px solid #ccc; padding:10px; max-height:200px; overflow-y:auto; background:#fff; margin-bottom:10px; font-size:10px; display:none; color:black;"></div>
             
             <div style="font-size:9px; color:#999; text-align:center; font-weight:bold; margin-bottom:4px">COMPARTILHAR EXTRATO</div>
             <button class="btn" style="background:#25d366; margin:0; padding:8px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
@@ -232,7 +243,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v75 PRIV <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v76 PRIV <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -587,7 +598,12 @@ window.cadastrarNovoNaOS = function() { window.retornoOS=true; window.nav('clien
 
 window.finalizarVenda = async function() {
     if(!window.carrinho.length) return alert("VAZIO");
-    const cli = (document.getElementById('v-cli').value || "CONSUMIDOR").toUpperCase(); 
+    
+    // BLOQUEIO NOME VAZIO
+    const cliField = document.getElementById('v-cli').value.trim();
+    if(!cliField) return alert("ERRO: DIGITE O NOME DO CLIENTE!");
+    
+    const cli = cliField.toUpperCase();
     const desc = parseFloat(document.getElementById('v-desc').value) || 0;
     const sub = window.carrinho.reduce((a,b)=>a+b.val,0);
     const total = sub - desc;
@@ -670,6 +686,11 @@ window.delItemOS = function(i) { window.carrinhoOS.splice(i,1); renderItemsOS();
 
 window.salvarOS = async function() {
     const id = document.getElementById('os-id').value; 
+
+    // BLOQUEIO NOME VAZIO
+    const cliField = document.getElementById('s-cli').value.trim();
+    if(!cliField) return alert("ERRO: OBRIGATÓRIO NOME DO CLIENTE NA O.S.!");
+
     const sub = window.carrinhoOS.reduce((a,b)=>a+b.val,0); 
     const desc = parseFloat(document.getElementById('s-desc').value) || 0;
     let numOS = 0;
@@ -681,7 +702,7 @@ window.salvarOS = async function() {
         else { numOS = 1; await setDoc(configRef, { last: 1 }); }
     }
 
-    const os = { cliente: document.getElementById('s-cli').value.toUpperCase(), modelo: document.getElementById('s-mod').value.toUpperCase(), defeito: document.getElementById('s-def').value.toUpperCase(), senha: document.getElementById('s-senha').value.toUpperCase(), valor: sub - desc, desconto: desc, itens: window.carrinhoOS, fotos: window.osFotos, status: document.getElementById('os-status-orig').value || 'pecas', data: new Date().toISOString() };
+    const os = { cliente: cliField.toUpperCase(), modelo: document.getElementById('s-mod').value.toUpperCase(), defeito: document.getElementById('s-def').value.toUpperCase(), senha: document.getElementById('s-senha').value.toUpperCase(), valor: sub - desc, desconto: desc, itens: window.carrinhoOS, fotos: window.osFotos, status: document.getElementById('os-status-orig').value || 'pecas', data: new Date().toISOString() };
     if(!id) os.num = numOS;
     if(id) await updateDoc(doc(db,"os_ativa",id), os); else await addDoc(collection(db,"os_ativa"), os);
     limparOS(); alert("SALVO! OS Nº " + (id ? "ATUALIZADA" : numOS));
@@ -957,7 +978,7 @@ window.revelarCusto = function() { abrirModalSenha(() => { document.getElementBy
 window.togglePriv = function() {
     window.verValores = !window.verValores;
     const ico = document.getElementById('eye-rel');
-    if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); }
+    if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); ico.classList.add('fa-eye'); }
     else { ico.classList.remove('fa-eye-slash'); ico.classList.add('fa-eye'); }
     renderRelatorio();
 }
