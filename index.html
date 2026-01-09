@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v1.2 PRO</title>
+    <title>FILHÃO.CELL v1.5 PRO</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -64,12 +64,20 @@
         input:focus { border-color: var(--primary); background: #fff; }
 
         /* BUSCA E SUGESTÕES */
-        .search-box { position: relative; margin-top: 5px; }
-        .search-box input { padding-right: 45px; margin-top: 0; }
-        .search-btn { position: absolute; right: 5px; top: 5px; bottom: 5px; background: var(--primary); color: white; border: none; width: 40px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20; font-size: 14px; }
-        .clear-btn { position: absolute; right: 50px; top: 12px; color: #d32f2f; cursor: pointer; font-size: 16px; z-index: 21; display: none; }
-
-        .sugestoes { background: white; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; position: absolute; top: 100%; width: 100%; z-index: 999; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: none; border: 1px solid #eee; }
+        .search-box { position: relative; margin-top: 5px; display: flex; align-items: center; }
+        .search-box input { padding-right: 45px; margin-top: 0; width: 100%; }
+        
+        /* BOTÃO LUPA INTERNO */
+        .search-trigger {
+            position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+            background: var(--primary); color: white; border: none;
+            width: 35px; height: 35px; border-radius: 6px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .search-trigger:active { transform: translateY(-50%) scale(0.95); }
+        
+        .sugestoes { background: white; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; position: absolute; top: 100%; width: 100%; z-index: 999; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: none; border: 1px solid #eee; left: 0; }
         .sugestoes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
         .sugestoes div.item-sug { padding: 10px; border-bottom: 1px solid #f1f1f1; border-right: 1px solid #f1f1f1; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; flex-direction: column; }
         .sug-header { font-size: 10px; font-weight: 900; padding: 6px; text-align:center; border-bottom: 2px solid #ccc; letter-spacing: 1px; position:sticky; top:0; z-index:2; }
@@ -128,75 +136,32 @@
         /* --- ESTILO PROFISSIONAL DO CUPOM (HTML/PDF) --- */
         .cupom-wrapper {
             background: #fff; color: #000;
-            font-family: 'Consolas', 'Courier New', monospace; /* Fonte Monoespaçada */
-            padding: 20px 10px; 
-            width: 100%;
-            max-width: 320px; /* Largura padrão de bobina 80mm */
-            margin: 0 auto;
-            font-size: 11px; /* Fonte levemente ajustada */
-            text-transform: uppercase;
-            line-height: 1.3; 
-            text-align: left;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-family: 'Consolas', 'Courier New', monospace;
+            padding: 20px 10px; width: 100%; max-width: 320px; margin: 0 auto;
+            font-size: 11px; text-transform: uppercase; line-height: 1.3; 
+            text-align: left; border: 1px solid #e0e0e0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        
-        /* Cabeçalho do Cupom */
         .c-header { text-align: center; margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
         .c-company { font-size: 16px; font-weight: 900; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
         .c-sub { font-size: 10px; display: block; margin-bottom: 2px; color: #333; }
-
-        /* Títulos de Seção */
-        .c-section-title { 
-            font-weight: 900; border-top: 1px solid #000; border-bottom: 1px solid #000; 
-            margin: 10px 0; padding: 4px 0; font-size: 12px; text-align: center; background: #f9f9f9;
-        }
-
-        /* Linhas de Dados */
+        .c-section-title { font-weight: 900; border-top: 1px solid #000; border-bottom: 1px solid #000; margin: 10px 0; padding: 4px 0; font-size: 12px; text-align: center; background: #f9f9f9; }
         .c-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
         .c-row.bold { font-weight: 900; }
-        
-        /* Tabela de Itens */
         .c-table { width: 100%; text-align: left; margin: 10px 0; border-collapse: collapse; }
         .c-table th { border-bottom: 1px solid #000; font-size: 10px; padding-bottom: 4px; font-weight: 900; }
         .c-table td { padding: 4px 0; vertical-align: top; border-bottom: 1px dotted #ccc; font-size: 11px; }
         .c-item-name { font-weight: 800; display: block; }
         .c-item-meta { font-size: 9px; color: #555; margin-left: 0; display: block; font-style: italic; }
-
-        /* Área de Totais */
         .c-total-box { border: 2px solid #000; padding: 8px; margin-top: 15px; border-radius: 4px; }
         .c-big-total { font-size: 16px; font-weight: 900; text-align: right; margin-top: 5px; }
-        
         .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
-
-        /* REGRAS CRÍTICAS PARA IMPRESSÃO PDF/PC */
         #area-cupom-visual { display: none; margin-bottom: 50px; }
 
         @media print {
             @page { margin: 0; size: auto; }
-            
-            /* Oculta TUDO exceto o cupom */
             body > :not(#area-cupom-visual) { display: none !important; }
-            
-            /* Mostra e formata o cupom */
-            #area-cupom-visual { 
-                display: block !important; 
-                position: static !important;
-                width: 100% !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                background: white;
-            }
-            
-            .cupom-wrapper {
-                border: none;
-                box-shadow: none;
-                max-width: 100%;
-                width: 100%;
-                padding: 5mm; 
-            }
-
-            /* Garante cor preta pura */
+            #area-cupom-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: white; }
+            .cupom-wrapper { border: none; box-shadow: none; max-width: 100%; width: 100%; padding: 5mm; }
             * { color: #000 !important; text-shadow: none !important; }
             .c-section-title { background: none !important; border-color: #000 !important; }
         }
@@ -227,7 +192,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.2 PRO <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.5 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -241,7 +206,7 @@
             <label>CLIENTE</label>
             <div class="search-box">
                 <input type="text" id="v-cli" placeholder="BUSCAR CLIENTE..." onkeyup="buscar('clientes', this.value, 'sug-v-cli')">
-                <button type="button" class="search-btn" onclick="toggleSearch('cli', 'v-cli', 'sug-v-cli')"><i class="fas fa-search"></i></button>
+                <button type="button" class="search-trigger" onclick="toggleSearch('cli', 'v-cli', 'sug-v-cli')"><i class="fas fa-search"></i></button>
                 <div id="sug-v-cli" class="sugestoes"></div>
             </div>
             <button class="btn-novo" style="margin-top:12px" onclick="cadastrarNovoNaVenda()"><i class="fas fa-plus"></i> NOVO CLIENTE</button>
@@ -249,8 +214,8 @@
             <label style="margin-top:18px">ADICIONAR ITEM</label>
             <div class="search-box">
                 <input type="text" id="v-busca" placeholder="BIPAR OU DIGITAR..." onkeyup="buscarVenda(this.value)">
-                <i class="fas fa-times clear-btn" id="v-clear-btn" onclick="limparBuscaVenda()"></i>
-                <button type="button" class="search-btn" onclick="toggleSearch('venda', 'v-busca', 'sug-v-prod')"><i class="fas fa-search"></i></button>
+                <i class="fas fa-times clear-btn" id="v-clear-btn" style="right: 50px;" onclick="limparBuscaVenda()"></i>
+                <button type="button" class="search-trigger" onclick="toggleSearch('venda', 'v-busca', 'sug-v-prod')"><i class="fas fa-search"></i></button>
                 <div id="sug-v-prod" class="sugestoes"></div>
             </div>
 
@@ -275,7 +240,7 @@
             <div style="display:flex; gap:5px; align-items:flex-end">
                 <div class="search-box" style="flex:1">
                     <input type="text" id="s-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'sug-s-cli')">
-                    <button type="button" class="search-btn" onclick="toggleSearch('cli', 's-cli', 'sug-s-cli')"><i class="fas fa-search"></i></button>
+                    <button type="button" class="search-trigger" onclick="toggleSearch('cli', 's-cli', 'sug-s-cli')"><i class="fas fa-search"></i></button>
                     <div id="sug-s-cli" class="sugestoes"></div>
                 </div>
                 <button class="btn-add-mini" onclick="cadastrarNovoNaOS()"><i class="fas fa-plus"></i></button>
@@ -298,23 +263,34 @@
             <label>ADICIONAR PEÇA/SERVIÇO</label>
             <div class="search-box">
                 <input type="text" id="s-busca-item" placeholder="BUSCAR PEÇA..." onkeyup="buscarItemOS(this.value)">
-                <button type="button" class="search-btn" onclick="toggleSearch('os', 's-busca-item', 'sug-os-item')"><i class="fas fa-search"></i></button>
+                <button type="button" class="search-trigger" onclick="toggleSearch('os', 's-busca-item', 'sug-os-item')"><i class="fas fa-search"></i></button>
                 <div id="sug-os-item" class="sugestoes"></div>
             </div>
 
             <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:15px; margin-top:18px; border-radius:10px">
                 <div id="os-lista-itens"></div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:15px; padding-top:15px; border-top:1px solid #ddd">
-                    <label style="margin:0; font-size:11px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
-                    <input type="number" id="s-desc" placeholder="0.00" style="width:90px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
+                
+                <div style="border-top:1px solid #ddd; margin-top:15px; padding-top:15px">
+                    <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-bottom:5px">
+                        <label style="margin:0; font-size:11px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
+                        <input type="number" id="s-desc" placeholder="0.00" style="width:90px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-bottom:10px">
+                        <label style="margin:0; font-size:11px; color:#2e7d32; font-weight:bold">SINAL (R$):</label>
+                        <input type="number" id="s-sinal" placeholder="0.00" style="width:90px; margin:0; border-color:#2e7d32; color:#2e7d32; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
+                    </div>
+
+                    <div style="text-align:right; font-size:18px; font-weight:900; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
+                    <div style="text-align:right; font-size:14px; font-weight:900; color:#444; margin-top:5px" id="s-restante-display">RESTANTE: R$ 0,00</div>
                 </div>
-                <div style="text-align:right; font-size:18px; font-weight:900; margin-top:10px; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
             </div>
             <button class="btn btn-primary" onclick="salvarOS()">SALVAR ORDEM</button>
         </div>
 
         <div style="padding: 0 5px; margin-bottom: 10px; display:flex; gap:8px">
-            <div class="search-box" style="flex:1"><input type="text" id="busca-kanban" placeholder="🔍 LOCALIZAR OS..." onkeyup="renderKanban()" style="background:white; border:2px solid #ddd; font-weight:bold"></div>
+            <div class="search-box" style="flex:1">
+                <input type="text" id="busca-kanban" placeholder="🔍 LOCALIZAR OS..." onkeyup="renderKanban()" style="background:white; border:2px solid #ddd; font-weight:bold">
+            </div>
             <button class="btn-mini dark" onclick="verHistoricoOS()"><i class="fas fa-history"></i></button>
         </div>
         <div class="kanban-grid">
@@ -341,7 +317,7 @@
             </button>
             <div class="search-box">
                 <input type="text" id="cli-search-input" placeholder="FILTRAR LISTA..." onkeyup="buscar('clientes', this.value, 'lista-clientes', true)">
-                <button type="button" class="search-btn" onclick="toggleSearch('listacli', 'cli-search-input', 'lista-clientes')"><i class="fas fa-search"></i></button>
+                <button type="button" class="search-trigger" onclick="toggleSearch('listacli', 'cli-search-input', 'lista-clientes')"><i class="fas fa-search"></i></button>
             </div>
             <div id="lista-clientes" style="margin-top:18px"></div>
         </div>
@@ -368,9 +344,14 @@
             </div>
         </div>
         <div class="card">
+            <div class="search-box" style="margin-bottom:10px">
+                <input type="text" id="estoque-search" placeholder="🔍 FILTRAR ESTOQUE..." onkeyup="renderListaEstoque()">
+                <button type="button" class="search-trigger" onclick="toggleSearch('listaestoque', 'estoque-search', 'lista-estoque')"><i class="fas fa-search"></i></button>
+            </div>
+
             <div style="display:flex; gap:8px; margin-bottom:12px">
-                <button class="btn-mini dark" onclick="listarEstoque('prod')">PRODUTOS</button>
-                <button class="btn-mini dark" style="opacity:0.7" onclick="listarEstoque('serv')">SERVIÇOS</button>
+                <button id="btn-tab-prod" class="btn-mini dark" onclick="mudarTabEstoque('prod')">PRODUTOS</button>
+                <button id="btn-tab-serv" class="btn-mini dark" style="opacity:0.5" onclick="mudarTabEstoque('serv')">SERVIÇOS</button>
             </div>
             <div id="lista-estoque"></div>
         </div>
@@ -441,9 +422,12 @@ window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[], dividas:[],
 window.carrinho = []; window.carrinhoOS = []; window.shareData = null; window.tempImg = null; window.retornoVenda = false; window.retornoOS = false; window.osFotos = [null, null, null, null]; window.currentFotoIndex = 0; window.extratoAtual = null; window.editingDateId = null;
 window.callbackSenha = null; window.verValores = false;
 
+// ESTADO DA ABA DE ESTOQUE
+window.estoqueTab = 'prod'; 
+
 onSnapshot(collection(db, "clientes"), s => { window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('clientes')) listarCli(); });
-onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque')) listarEstoque('prod'); });
-onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque')) listarEstoque('serv'); });
+onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque') && window.estoqueTab=='prod') renderListaEstoque(); });
+onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque') && window.estoqueTab=='serv') renderListaEstoque(); });
 onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); renderKanban(); });
 onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { window.db.logs = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('relatorio')) renderRelatorio(); });
 onSnapshot(collection(db, "dividas"), s => { window.db.dividas = s.docs.map(d=>({id:d.id, ...d.data()})); });
@@ -500,19 +484,47 @@ window.nav = function(p, el) {
     document.getElementById('page-'+p).classList.add('active');
     if(el) el.classList.add('active');
     if(p==='clientes') listarCli();
-    if(p==='estoque') listarEstoque('prod');
+    if(p==='estoque') renderListaEstoque();
 }
 window.forcarAtualizacao = async function() { if(!confirm("Atualizar sistema?")) return; window.location.reload(true); }
 
+/* --- LÓGICA DE LUPA INTELIGENTE (TOGGLE) --- */
 window.toggleSearch = function(tipo, inpId, boxId) {
-    const box = document.getElementById(boxId); const val = document.getElementById(inpId).value;
-    if(tipo === 'listacli') { if(box.innerHTML.trim()!==''){box.innerHTML='';} else {buscar('clientes', val, boxId, true, true);} return; }
-    if(box.style.display === 'block') { box.style.display = 'none'; } else {
+    const box = document.getElementById(boxId); 
+    const val = document.getElementById(inpId).value;
+
+    // 1. Caso LISTA DE CLIENTES (Página Clientes)
+    if(tipo === 'listacli') { 
+         // Se tem conteudo e não é a mensagem de vazio, limpa (recolhe)
+         if(box.innerHTML.trim() !== '' && !box.innerHTML.includes('VAZIO')) {
+             box.innerHTML = '';
+         } else {
+             // Mostra (busca completa)
+             buscar('clientes', val, boxId, true, true);
+         }
+         return; 
+    }
+
+    // 2. Caso LISTA DE ESTOQUE (Página Estoque) - NOVO
+    if(tipo === 'listaestoque') {
+        if(box.innerHTML.trim() !== '' && !box.innerHTML.includes('NENHUM ITEM')) {
+            box.innerHTML = ''; // Recolhe
+        } else {
+            renderListaEstoque(); // Mostra
+        }
+        return;
+    }
+
+    // 3. Caso DROPDOWNS (Vendas e OS)
+    if(box.style.display === 'block') { 
+        box.style.display = 'none'; 
+    } else {
         if(tipo === 'cli') buscar('clientes', val, boxId, false, true);
         if(tipo === 'venda') buscarVenda(val, true);
         if(tipo === 'os') buscarItemOS(val, true);
     }
 }
+
 window.buscar = function(col, txt, divId, lista=false, force=false) {
     const box = document.getElementById(divId); if(!window.db[col]) return;
     if(!txt && !force && !lista) { box.style.display='none'; return; }
@@ -618,7 +630,6 @@ window.lerFoto = function(inp, viewId) {
                 const c = document.createElement('canvas'); 
                 const x = c.getContext('2d'); 
                 let w=i.width, h=i.height; 
-                // Redimensionar para economizar espaço no Firebase
                 const max = 300;
                 if(w>h){if(w>max){h*=max/w;w=max}}else{if(h>max){w*=max/h;h=max}}; 
                 c.width=w; c.height=h; 
@@ -652,14 +663,26 @@ window.addItemOS = function(id, tipo, nome, val) {
     renderItemsOS(); document.getElementById('s-busca-item').value = ''; document.getElementById('sug-os-item').style.display='none'; 
 }
 window.renderItemsOS = function() {
-    const l = document.getElementById('os-lista-itens'); if(!window.carrinhoOS.length) { l.innerHTML = 'VAZIO'; document.getElementById('s-total-display').innerText='TOTAL: R$ 0,00'; return; }
+    const l = document.getElementById('os-lista-itens'); 
     let subtotal = 0;
-    l.innerHTML = window.carrinhoOS.map((i,x) => {
-        subtotal += i.val;
-        return `<div style="padding:12px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:6px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:8px; margin-top:8px;"><label style="margin:0; font-size:10px">GAR:</label><select style="padding:4px; font-size:11px; width:auto;" onchange="setGarantiaOS(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemOS(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delItemOS(${x})"><i class="fas fa-trash"></i></button></div></div>`;
-    }).join('');
+    
+    if(window.carrinhoOS.length) {
+        l.innerHTML = window.carrinhoOS.map((i,x) => {
+            subtotal += i.val;
+            return `<div style="padding:12px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:6px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:8px; margin-top:8px;"><label style="margin:0; font-size:10px">GAR:</label><select style="padding:4px; font-size:11px; width:auto;" onchange="setGarantiaOS(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemOS(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delItemOS(${x})"><i class="fas fa-trash"></i></button></div></div>`;
+        }).join('');
+    } else {
+        l.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc">NENHUM ITEM</div>';
+    }
+
     const desc = parseFloat(document.getElementById('s-desc').value) || 0;
-    document.getElementById('s-total-display').innerText = 'TOTAL: R$ ' + (subtotal - desc).toFixed(2);
+    const sinal = parseFloat(document.getElementById('s-sinal').value) || 0;
+    
+    const total = subtotal - desc;
+    const restante = total - sinal;
+
+    document.getElementById('s-total-display').innerText = 'TOTAL: R$ ' + total.toFixed(2);
+    document.getElementById('s-restante-display').innerText = 'RESTANTE: R$ ' + restante.toFixed(2);
 }
 window.setGarantiaOS = function(idx, val) { window.carrinhoOS[idx].garantia = val; }
 window.editItemOS = function(index) { const i=window.carrinhoOS[index]; const n=prompt(`Valor TOTAL ${i.nome}:`, i.val); if(n!==null){const v=parseFloat(n); if(!isNaN(v)){window.carrinhoOS[index].val=v; renderItemsOS();}} }
@@ -668,21 +691,42 @@ window.delItemOS = function(i) { window.carrinhoOS.splice(i,1); renderItemsOS();
 window.salvarOS = async function() {
     const id = document.getElementById('os-id').value; const cliField = document.getElementById('s-cli').value.trim();
     if(!cliField) return alert("ERRO: OBRIGATÓRIO NOME DO CLIENTE NA O.S.!");
-    const sub = window.carrinhoOS.reduce((a,b)=>a+b.val,0); const desc = parseFloat(document.getElementById('s-desc').value) || 0;
+    
+    const sub = window.carrinhoOS.reduce((a,b)=>a+b.val,0); 
+    const desc = parseFloat(document.getElementById('s-desc').value) || 0;
+    const sinal = parseFloat(document.getElementById('s-sinal').value) || 0;
+    const total = sub - desc;
+
     let numOS = 0;
     if(!id) {
         const configRef = doc(db, "config", "contador"); const configSnap = await getDoc(configRef);
         if (configSnap.exists()) { numOS = configSnap.data().last + 1; await updateDoc(configRef, { last: numOS }); } 
         else { numOS = 1; await setDoc(configRef, { last: 1 }); }
     }
-    const os = { cliente: cliField.toUpperCase(), modelo: document.getElementById('s-mod').value.toUpperCase(), defeito: document.getElementById('s-def').value.toUpperCase(), senha: document.getElementById('s-senha').value.toUpperCase(), valor: sub - desc, desconto: desc, itens: window.carrinhoOS, fotos: window.osFotos, status: document.getElementById('os-status-orig').value || 'pecas', data: new Date().toISOString() };
+    
+    const os = { 
+        cliente: cliField.toUpperCase(), 
+        modelo: document.getElementById('s-mod').value.toUpperCase(), 
+        defeito: document.getElementById('s-def').value.toUpperCase(), 
+        senha: document.getElementById('s-senha').value.toUpperCase(), 
+        valor: total, 
+        desconto: desc,
+        sinal: sinal, // Salva o sinal
+        restante: total - sinal,
+        itens: window.carrinhoOS, 
+        fotos: window.osFotos, 
+        status: document.getElementById('os-status-orig').value || 'pecas', 
+        data: new Date().toISOString() 
+    };
+
     if(!id) os.num = numOS;
     if(id) await updateDoc(doc(db,"os_ativa",id), os); else await addDoc(collection(db,"os_ativa"), os);
     limparOS(); alert("SALVO! OS Nº " + (id ? "ATUALIZADA" : numOS));
 }
 
 window.limparOS = function() {
-    document.getElementById('os-id').value = ''; document.getElementById('s-cli').value = ''; document.getElementById('s-mod').value = ''; document.getElementById('s-senha').value = ''; document.getElementById('s-def').value = ''; document.getElementById('s-desc').value = '';
+    document.getElementById('os-id').value = ''; document.getElementById('s-cli').value = ''; document.getElementById('s-mod').value = ''; document.getElementById('s-senha').value = ''; document.getElementById('s-def').value = ''; 
+    document.getElementById('s-desc').value = ''; document.getElementById('s-sinal').value = ''; 
     window.carrinhoOS = []; window.osFotos = [null,null,null,null]; renderItemsOS(); const slots = document.querySelectorAll('.os-foto-slot'); slots.forEach(s => s.innerHTML = '<i class="fas fa-camera"></i>');
 }
 
@@ -695,8 +739,11 @@ window.renderKanban = function() {
         if(idx > 0) nav += `<button class="btn-mini dark" onclick="moveOS('${o.id}', -1)"><i class="fas fa-arrow-left"></i></button>`;
         if(idx < 2) nav += `<button class="btn-mini dark" onclick="moveOS('${o.id}', 1)"><i class="fas fa-arrow-right"></i></button>`;
         else nav += `<button class="btn-mini primary" style="background:var(--primary)" onclick="arqOS('${o.id}')"><i class="fas fa-archive"></i></button>`;
+        
         const numDisplay = o.num ? `<b>#${o.num}</b> - ` : '';
-        c[o.status] += `<div class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">R$ ${o.valor.toFixed(2)}</div><div class="actions-row">${nav}</div><div class="actions-row"><button class="btn-mini blue" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button><button class="btn-mini zap" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini red" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button></div></div>`;
+        const restanteVal = o.restante !== undefined ? o.restante : o.valor; // Compatibilidade antiga
+        
+        c[o.status] += `<div class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">FALTA: R$ ${restanteVal.toFixed(2)}</div><div class="actions-row">${nav}</div><div class="actions-row"><button class="btn-mini blue" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button><button class="btn-mini zap" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini red" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button></div></div>`;
     });
     document.getElementById('k-pecas').innerHTML = c.pecas; document.getElementById('k-pgto').innerHTML = c.pgto; document.getElementById('k-retirado').innerHTML = c.retirado;
 }
@@ -735,14 +782,22 @@ window.reabrirOS = async function(id) {
 }
 
 window.editOS = function(id) {
-    const o = window.db.os.find(i=>i.id===id); document.getElementById('os-id').value=id; document.getElementById('s-cli').value=o.cliente; document.getElementById('s-mod').value=o.modelo; document.getElementById('os-status-orig').value = o.status; document.getElementById('s-def').value=o.defeito; document.getElementById('s-senha').value=o.senha; document.getElementById('s-desc').value = o.desconto || '';
+    const o = window.db.os.find(i=>i.id===id); 
+    document.getElementById('os-id').value=id; document.getElementById('s-cli').value=o.cliente; document.getElementById('s-mod').value=o.modelo; document.getElementById('os-status-orig').value = o.status; document.getElementById('s-def').value=o.defeito; document.getElementById('s-senha').value=o.senha; 
+    
+    document.getElementById('s-desc').value = o.desconto || '';
+    document.getElementById('s-sinal').value = o.sinal || '';
+
     window.carrinhoOS = (o.itens && Array.isArray(o.itens)) ? o.itens : (o.valor>0?[{nome: 'Serviço Antigo', val: o.valor, qtd: 1, garantia: '90 DIAS', tipo:'S'}]:[]);
-    renderItemsOS(); window.osFotos = o.fotos || [null, null, null, null]; const slots = document.querySelectorAll('.os-foto-slot'); window.osFotos.forEach((f, i) => { if(f) slots[i].innerHTML = `<img src="${f}">`; else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; }); document.getElementById('page-servicos').scrollIntoView();
+    renderItemsOS(); 
+    
+    window.osFotos = o.fotos || [null, null, null, null]; const slots = document.querySelectorAll('.os-foto-slot'); window.osFotos.forEach((f, i) => { if(f) slots[i].innerHTML = `<img src="${f}">`; else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; }); document.getElementById('page-servicos').scrollIntoView();
 }
 window.shareOS = function(id) {
     const o = window.db.os.find(i=>i.id===id); const it = (o.itens && o.itens.length) ? o.itens : [{nome:o.modelo, val:o.valor, qtd:1, garantia:'90 DIAS'}];
     const sub = it.reduce((a,b)=>a+b.val,0); const desc = o.desconto || 0; const numDisplay = o.num ? `Nº ${o.num}` : 'S/N';
-    window.shareData={ tipo:'OS '+numDisplay, cliente:o.cliente, itens: it, subtotal: sub, desconto: desc, total: o.valor, obs: o.defeito, senha: o.senha, fotos: o.fotos || [] };
+    // Adiciona sinal ao objeto de compartilhamento
+    window.shareData={ tipo:'OS '+numDisplay, cliente:o.cliente, itens: it, subtotal: sub, desconto: desc, sinal: o.sinal || 0, total: o.valor, obs: o.defeito, senha: o.senha, fotos: o.fotos || [] };
     abrirModalShare();
 }
 window.maskTel = function(o) { let v = o.value.replace(/\D/g,""); if(v.length > 11) v = v.substring(0,11); if(v.length >= 2) v = "(" + v.substring(0,2) + ") " + v.substring(2); if(v.length >= 7) v = v.substring(0,10) + "-" + v.substring(10); o.value = v; }
@@ -805,10 +860,31 @@ window.salvarProduto = async function(t) {
     if(id) await updateDoc(doc(db,col,id), d); else await addDoc(collection(db,col), d); limparEstoque();
 }
 window.limparEstoque = function() { document.getElementById('p-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-venda').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('p-custo').value = ''; window.tempImg = null; document.getElementById('p-foto-view').src = ''; document.getElementById('p-foto-view').classList.remove('has-img'); }
-window.listarEstoque = function(t) {
-    const l = t==='prod'?window.db.produtos:window.db.servicos; const col=t==='prod'?'produtos':'servicos_cad';
-    document.getElementById('lista-estoque').innerHTML = l.map(i => `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex;gap:10px;align-items:center">${i.foto?`<img src="${i.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-box"></i></div>`}<div><b>${i.nome}</b><br>R$ ${i.precoVenda}</div></div><div class="actions-row" style="width:auto; gap:5px"><button class="btn-mini blue" onclick="edtProd('${col}','${i.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" onclick="del('${col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
+
+// NOVA LÓGICA DE ESTOQUE (v1.5 - Toggle e Busca)
+window.mudarTabEstoque = function(tab) {
+    window.estoqueTab = tab;
+    document.getElementById('btn-tab-prod').style.opacity = tab==='prod' ? '1' : '0.5';
+    document.getElementById('btn-tab-serv').style.opacity = tab==='serv' ? '1' : '0.5';
+    renderListaEstoque();
 }
+
+window.renderListaEstoque = function() {
+    const term = document.getElementById('estoque-search').value.toUpperCase();
+    const l = window.estoqueTab === 'prod' ? window.db.produtos : window.db.servicos;
+    const col = window.estoqueTab === 'prod' ? 'produtos' : 'servicos_cad';
+    
+    // Filtragem
+    const filtered = l.filter(i => i.nome.includes(term));
+    
+    if (filtered.length === 0) {
+        document.getElementById('lista-estoque').innerHTML = '<div style="text-align:center; padding:20px; color:#ccc">NENHUM ITEM</div>';
+        return;
+    }
+
+    document.getElementById('lista-estoque').innerHTML = filtered.map(i => `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex;gap:10px;align-items:center">${i.foto?`<img src="${i.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-box"></i></div>`}<div><b>${i.nome}</b><br>R$ ${i.precoVenda}</div></div><div class="actions-row" style="width:auto; gap:5px"><button class="btn-mini blue" onclick="edtProd('${col}','${i.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" onclick="del('${col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
+}
+
 window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id); document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||''; document.getElementById('p-custo').type='password'; document.getElementById('btn-ver-custo').style.display='block'; window.tempImg=i.foto; const view=document.getElementById('p-foto-view'); view.src=i.foto||''; if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('page-estoque').querySelector('.card').scrollIntoView(); }
 window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('modal-overlay').style.display='none'; document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
 
@@ -856,7 +932,7 @@ window.abrirExtratoCliente = function(nome) {
 }
 
 /* ==========================================================================
-   LÓGICA DE IMPRESSÃO PROFISSIONAL v1.2 (BLUETOOTH CORRIGIDO)
+   LÓGICA DE IMPRESSÃO PROFISSIONAL v1.5
    ========================================================================== */
 
 window.montarHtmlCupom = function(d) {
@@ -877,7 +953,19 @@ window.montarHtmlCupom = function(d) {
             </tr>`;
     }).join('');
 
-    // --- MONTAGEM DO HTML DO CUPOM ---
+    // SINAL E RESTANTE
+    let htmlFinanceiroExtra = '';
+    if (d.sinal && d.sinal > 0) {
+        const restante = d.total - d.sinal;
+        htmlFinanceiroExtra = `
+            <div class="c-row"><span>SINAL (PAGO):</span> <span>- R$ ${parseFloat(d.sinal).toFixed(2)}</span></div>
+            <div class="c-total-box" style="border-style:dashed; margin-top:5px">
+                 <div style="font-size:10px; font-weight:bold;">RESTANTE A PAGAR:</div>
+                 <div class="c-big-total">R$ ${restante.toFixed(2)}</div>
+            </div>
+        `;
+    }
+
     return `
         <div class="cupom-wrapper">
             <div class="c-header">
@@ -904,9 +992,11 @@ window.montarHtmlCupom = function(d) {
                 ${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}
                 
                 <div class="c-total-box">
-                    <div style="font-size:10px; font-weight:bold;">TOTAL A PAGAR:</div>
+                    <div style="font-size:10px; font-weight:bold;">TOTAL GERAL:</div>
                     <div class="c-big-total">R$ ${d.total.toFixed(2)}</div>
                 </div>
+                
+                ${htmlFinanceiroExtra}
                 
                 <div style="margin-top:10px">
                     ${d.valorPago ? `<div class="c-row"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}
@@ -922,7 +1012,7 @@ window.montarHtmlCupom = function(d) {
                 <div>ASSINATURA DO CLIENTE</div>
                 <br>
                 <div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div>
-                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.2 PRO</div>
+                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.5 PRO</div>
             </div>
         </div>
     `;
@@ -946,6 +1036,23 @@ window.abrirModalShare = function() {
 }
 
 // 2. AÇÃO DE COMPARTILHAMENTO / IMPRESSÃO
+// FUNÇÕES AUXILIARES PARA FORMATAÇÃO DE TEXTO PURO (SEM TAGS)
+function txtCenter(text, width=32) {
+    if(text.length >= width) return text.substring(0, width);
+    const padding = Math.floor((width - text.length) / 2);
+    return ' '.repeat(padding) + text;
+}
+
+function txtPair(left, right, width=32) {
+    const space = width - left.length - right.length;
+    if(space < 1) return left.substring(0, width-right.length-1) + ' ' + right;
+    return left + ' '.repeat(space) + right;
+}
+
+function txtLine(width=32) {
+    return '-'.repeat(width);
+}
+
 window.acaoShare = function(tipo) {
     const d = window.shareData; 
     
@@ -953,60 +1060,68 @@ window.acaoShare = function(tipo) {
         window.print(); 
     }
     else if(tipo === 'bluetooth') {
+        // GERAÇÃO DE TEXTO PURO FORMATADO MANUALMENTE (SEM CÓDIGOS [C][L])
+        // Assumindo 32 colunas para compatibilidade universal
+        const W = 32; 
         let T = '';
-        // CABEÇALHO CENTRALIZADO
-        T += '[C]<b>' + EMPRESA.nome + '</b>\n';
-        T += '[C]' + EMPRESA.end + '\n';
-        T += '[C]' + EMPRESA.cid + '\n';
-        T += '[C]CNPJ: ' + EMPRESA.cnpj + '\n';
-        T += '[C]Tel: ' + EMPRESA.tel + '\n';
-        T += '[C]--------------------------------\n'; 
         
-        // DADOS DA OPERAÇÃO
-        T += '[L]DATA: ' + new Date().toLocaleString() + '\n';
-        T += '[L]<b>TIPO: ' + d.tipo + '</b>\n';
-        T += '[L]CLIENTE: ' + d.cliente + '\n';
-        T += '[C]--------------------------------\n';
+        // CABEÇALHO
+        T += txtCenter(EMPRESA.nome, W) + '\n';
+        T += txtCenter('ASSISTENCIA TECNICA', W) + '\n'; // Simplificado para caber
+        T += txtCenter(EMPRESA.tel, W) + '\n';
+        T += txtLine(W) + '\n';
         
-        // LISTA DE ITENS
-        T += '[L]QTD  ITEM                   TOTAL\n';
+        // DADOS
+        T += 'DATA: ' + new Date().toLocaleString() + '\n';
+        T += 'TIPO: ' + d.tipo + '\n';
+        T += 'CLIENTE: ' + d.cliente + '\n';
+        T += txtLine(W) + '\n';
+        
+        // ITENS
+        T += txtPair('QTD ITEM', 'TOTAL', W) + '\n';
         d.itens.forEach(i => {
             let nomeItem = i.nome;
-            // Corta nomes muito longos para não quebrar layout
-            if(nomeItem.length > 22) nomeItem = nomeItem.substring(0,22);
-            T += '[L]' + (i.qtd||1) + 'x    ' + nomeItem + '\n';
-            T += '[R]R$ ' + i.val.toFixed(2) + '\n';
-            if(i.garantia) T += '[L]     (GAR: ' + i.garantia + ')\n';
-            T += '[L]- - - - - - - - - - - - - - - -\n';
+            if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20);
+            T += (i.qtd||1) + 'x ' + nomeItem + '\n';
+            T += txtPair('', 'R$ ' + i.val.toFixed(2), W) + '\n';
+            if(i.garantia) T += '   (GAR: ' + i.garantia + ')\n';
         });
-        
-        T += '\n'; // Espaço
+        T += '\n';
 
         // TOTAIS
-        T += '[L]SUBTOTAL:' + '[R]R$ ' + d.subtotal.toFixed(2) + '\n';
+        T += txtPair('SUBTOTAL:', 'R$ ' + d.subtotal.toFixed(2), W) + '\n';
         if(d.desconto > 0) {
-            T += '[L]DESCONTO:' + '[R]- R$ ' + d.desconto.toFixed(2) + '\n';
+            T += txtPair('DESCONTO:', '- R$ ' + d.desconto.toFixed(2), W) + '\n';
         }
         
-        // TOTAL GRANDE E CENTRALIZADO
-        T += '[C]--------------------------------\n';
-        T += '[C][w]TOTAL: R$ ' + d.total.toFixed(2) + '[/w]\n';
-        T += '[C]--------------------------------\n';
+        T += txtLine(W) + '\n';
+        T += txtCenter('TOTAL: R$ ' + d.total.toFixed(2), W) + '\n';
+        T += txtLine(W) + '\n';
 
-        if(d.valorPago) T += '[L]VALOR PAGO:' + '[R]R$ ' + d.valorPago.toFixed(2) + '\n';
-        if(d.troco) T += '[L]TROCO:' + '[R]R$ ' + d.troco.toFixed(2) + '\n';
+        // SINAL E RESTANTE
+        if(d.sinal && d.sinal > 0) {
+             const restante = d.total - d.sinal;
+             T += txtPair('SINAL PAGO:', 'R$ ' + parseFloat(d.sinal).toFixed(2), W) + '\n';
+             T += '\n';
+             T += txtCenter('*** RESTANTE ***', W) + '\n';
+             T += txtCenter('R$ ' + restante.toFixed(2), W) + '\n';
+             T += '\n';
+        }
+
+        if(d.valorPago) T += txtPair('VALOR PAGO:', 'R$ ' + d.valorPago.toFixed(2), W) + '\n';
+        if(d.troco) T += txtPair('TROCO:', 'R$ ' + d.troco.toFixed(2), W) + '\n';
         
         if(d.obs) {
-            T += '\n[L]OBSERVACOES:\n[L]' + d.obs + '\n';
+            T += '\nOBSERVACOES:\n' + d.obs + '\n';
         }
 
         if(d.senha) {
-            T += '\n\n[C][w][h]SENHA: ' + d.senha + '[/h][/w]\n';
+            T += '\n\n' + txtCenter('SENHA: ' + d.senha, W) + '\n';
         }
         
-        // RODAPÉ CENTRALIZADO
-        T += '\n\n[C]OBRIGADO PELA PREFERENCIA!\n';
-        T += '[C]Filhao.Cell v1.2 PRO\n\n\n';
+        // RODAPÉ
+        T += '\n\n' + txtCenter('OBRIGADO PELA PREFERENCIA!', W) + '\n';
+        T += txtCenter('Filhao.Cell v1.5', W) + '\n\n\n';
 
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
@@ -1015,6 +1130,13 @@ window.acaoShare = function(tipo) {
         d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome}\n   R$ ${i.val.toFixed(2)}\n`; });
         txt += `----------------\n*TOTAL: R$ ${d.total.toFixed(2)}*`;
         if(d.desconto > 0) txt += `\n(Desc: R$ ${d.desconto.toFixed(2)})`;
+        
+        if(d.sinal > 0) {
+            const rest = d.total - d.sinal;
+            txt += `\nSINAL: R$ ${parseFloat(d.sinal).toFixed(2)}`;
+            txt += `\n*RESTANTE: R$ ${rest.toFixed(2)}*`;
+        }
+
         if(d.obs) txt += `\nOBS: ${d.obs}`;
         const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === (d.cliente||'').toUpperCase());
         let phone = (cliObj && cliObj.tel) ? cliObj.tel.replace(/\D/g, '') : '';
@@ -1049,22 +1171,23 @@ window.shareExtrato = function(tipo) {
         window.location.href = urlZap;
     } 
     else if(tipo === 'bluetooth') {
+        const W = 32;
         let T = '';
-        T += '[C]<b>' + EMPRESA.nome + '</b>\n';
-        T += '[C]EXTRATO DE CONTA\n';
-        T += '[L]CLIENTE: ' + d.cliente + '\n';
-        T += '[C]--------------------------------\n\n';
+        T += txtCenter(EMPRESA.nome, W) + '\n';
+        T += txtCenter('EXTRATO DE CONTA', W) + '\n';
+        T += 'CLIENTE: ' + d.cliente + '\n';
+        T += txtLine(W) + '\n';
         for (const [data, itens] of Object.entries(d.dados)) { 
-            T += '[L][' + data + ']\n'; 
+            T += '[' + data + ']\n'; 
             itens.forEach(i => { 
                 const qtd = (i.qtd > 1 && i.tipo !== 'DESCONTO') ? i.qtd + 'x ' : ''; 
-                T += '[L]' + qtd + i.desc + '\n';
-                T += '[R]R$ ' + i.valor.toFixed(2) + '\n';
+                T += qtd + i.desc + '\n';
+                T += txtPair('', 'R$ ' + i.valor.toFixed(2), W) + '\n';
             }); 
             T += '\n'; 
         }
-        T += '[C]--------------------------------\n';
-        T += '[C][w]TOTAL: R$ ' + d.total.toFixed(2) + '[/w]\n\n\n';
+        T += txtLine(W) + '\n';
+        T += txtCenter('TOTAL: R$ ' + d.total.toFixed(2), W) + '\n\n\n';
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
 }
