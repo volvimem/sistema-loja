@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v1.1 PRO</title>
+    <title>FILHÃO.CELL v1.2 PRO</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -125,7 +125,7 @@
 
         .check-log { transform: scale(1.4); margin-right: 12px; accent-color: var(--primary); }
 
-        /* --- ESTILO PROFISSIONAL DO CUPOM v1.1 (CORREÇÃO PDF) --- */
+        /* --- ESTILO PROFISSIONAL DO CUPOM (HTML/PDF) --- */
         .cupom-wrapper {
             background: #fff; color: #000;
             font-family: 'Consolas', 'Courier New', monospace; /* Fonte Monoespaçada */
@@ -181,7 +181,7 @@
             /* Mostra e formata o cupom */
             #area-cupom-visual { 
                 display: block !important; 
-                position: static !important; /* Importante: Static para fluir na página */
+                position: static !important;
                 width: 100% !important; 
                 margin: 0 !important; 
                 padding: 0 !important; 
@@ -193,7 +193,7 @@
                 box-shadow: none;
                 max-width: 100%;
                 width: 100%;
-                padding: 5mm; /* Margem segura para impressora */
+                padding: 5mm; 
             }
 
             /* Garante cor preta pura */
@@ -227,7 +227,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.1 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.2 PRO <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -856,7 +856,7 @@ window.abrirExtratoCliente = function(nome) {
 }
 
 /* ==========================================================================
-   LÓGICA DE IMPRESSÃO PROFISSIONAL v1.1
+   LÓGICA DE IMPRESSÃO PROFISSIONAL v1.2 (BLUETOOTH CORRIGIDO)
    ========================================================================== */
 
 window.montarHtmlCupom = function(d) {
@@ -922,7 +922,7 @@ window.montarHtmlCupom = function(d) {
                 <div>ASSINATURA DO CLIENTE</div>
                 <br>
                 <div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div>
-                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.1 PRO</div>
+                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.2 PRO</div>
             </div>
         </div>
     `;
@@ -954,42 +954,60 @@ window.acaoShare = function(tipo) {
     }
     else if(tipo === 'bluetooth') {
         let T = '';
+        // CABEÇALHO CENTRALIZADO
         T += '[C]<b>' + EMPRESA.nome + '</b>\n';
         T += '[C]' + EMPRESA.end + '\n';
         T += '[C]' + EMPRESA.cid + '\n';
         T += '[C]CNPJ: ' + EMPRESA.cnpj + '\n';
         T += '[C]Tel: ' + EMPRESA.tel + '\n';
-        T += '[C]--------------------------------\n\n'; 
+        T += '[C]--------------------------------\n'; 
+        
+        // DADOS DA OPERAÇÃO
         T += '[L]DATA: ' + new Date().toLocaleString() + '\n';
         T += '[L]<b>TIPO: ' + d.tipo + '</b>\n';
         T += '[L]CLIENTE: ' + d.cliente + '\n';
         T += '[C]--------------------------------\n';
+        
+        // LISTA DE ITENS
         T += '[L]QTD  ITEM                   TOTAL\n';
         d.itens.forEach(i => {
             let nomeItem = i.nome;
-            if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20) + '..';
+            // Corta nomes muito longos para não quebrar layout
+            if(nomeItem.length > 22) nomeItem = nomeItem.substring(0,22);
             T += '[L]' + (i.qtd||1) + 'x    ' + nomeItem + '\n';
             T += '[R]R$ ' + i.val.toFixed(2) + '\n';
             if(i.garantia) T += '[L]     (GAR: ' + i.garantia + ')\n';
             T += '[L]- - - - - - - - - - - - - - - -\n';
         });
-        T += '\n'; 
+        
+        T += '\n'; // Espaço
+
+        // TOTAIS
         T += '[L]SUBTOTAL:' + '[R]R$ ' + d.subtotal.toFixed(2) + '\n';
         if(d.desconto > 0) {
             T += '[L]DESCONTO:' + '[R]- R$ ' + d.desconto.toFixed(2) + '\n';
         }
-        T += '[R]<b>TOTAL: R$ ' + d.total.toFixed(2) + '</b>\n';
+        
+        // TOTAL GRANDE E CENTRALIZADO
         T += '[C]--------------------------------\n';
+        T += '[C][w]TOTAL: R$ ' + d.total.toFixed(2) + '[/w]\n';
+        T += '[C]--------------------------------\n';
+
         if(d.valorPago) T += '[L]VALOR PAGO:' + '[R]R$ ' + d.valorPago.toFixed(2) + '\n';
         if(d.troco) T += '[L]TROCO:' + '[R]R$ ' + d.troco.toFixed(2) + '\n';
+        
         if(d.obs) {
             T += '\n[L]OBSERVACOES:\n[L]' + d.obs + '\n';
         }
+
         if(d.senha) {
-            T += '\n\n[C]<font size="big">SENHA: ' + d.senha + '</font>\n';
+            T += '\n\n[C][w][h]SENHA: ' + d.senha + '[/h][/w]\n';
         }
-        T += '\n\n\n[C]OBRIGADO PELA PREFERENCIA!\n';
-        T += '[C]Filhao.Cell v1.1 PRO\n\n\n';
+        
+        // RODAPÉ CENTRALIZADO
+        T += '\n\n[C]OBRIGADO PELA PREFERENCIA!\n';
+        T += '[C]Filhao.Cell v1.2 PRO\n\n\n';
+
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
     else if(tipo === 'zap') {
@@ -1046,7 +1064,7 @@ window.shareExtrato = function(tipo) {
             T += '\n'; 
         }
         T += '[C]--------------------------------\n';
-        T += '[R]<b>TOTAL GERAL: R$ ' + d.total.toFixed(2) + '</b>\n\n\n';
+        T += '[C][w]TOTAL: R$ ' + d.total.toFixed(2) + '[/w]\n\n\n';
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
 }
