@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v1.7 PRO</title>
+    <title>FILHÃO.CELL v1.8 PRO</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -163,12 +163,33 @@
 
         @media print {
             @page { margin: 0; size: auto; }
-            body > :not(#area-cupom-visual):not(#area-relatorio-visual) { display: none !important; }
-            body.printing-cupom #area-cupom-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-            body.printing-relatorio #area-relatorio-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 10mm !important; }
-            .cupom-wrapper { border: none; box-shadow: none; max-width: 100%; width: 100%; padding: 5mm; }
-            * { color: #000 !important; text-shadow: none !important; }
-            .c-section-title { background: none !important; border-color: #000 !important; }
+            body { background: white; visibility: hidden; }
+            body * { visibility: hidden; }
+            
+            /* EXIBIR APENAS O QUE IMPORTA */
+            body.printing-cupom #area-cupom-visual,
+            body.printing-cupom #area-cupom-visual * {
+                visibility: visible !important;
+                display: block !important;
+            }
+
+            body.printing-relatorio #area-relatorio-visual,
+            body.printing-relatorio #area-relatorio-visual * {
+                visibility: visible !important;
+                display: block !important;
+            }
+
+            #area-cupom-visual, #area-relatorio-visual {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 10px;
+                background: white;
+            }
+
+            .cupom-wrapper { border: none; box-shadow: none; max-width: 100%; width: 100%; padding: 0; }
             .no-print { display: none !important; }
         }
     </style>
@@ -201,7 +222,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.7 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.8 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -924,33 +945,30 @@ window.abrirExtratoCliente = function(nome) {
 }
 
 /* ==========================================================================
-   LÓGICA DE IMPRESSÃO (PDF E CUPOM) V1.6
+   LÓGICA DE IMPRESSÃO (PDF E CUPOM) V1.8
    ========================================================================== */
 
-/* --- FUNÇÃO PARA GERAR O PDF DO RELATÓRIO --- */
+/* --- FUNÇÃO PARA GERAR O PDF DO RELATÓRIO GERAL --- */
 window.acaoImprimirRelatorio = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display='none';
         
-        // 1. Coleta os dados filtrados (reusa a lógica do renderRelatorio)
         const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
         const logsFiltrados = window.db.logs.filter(l => {
             const d = new Date(l.data); let matchDate = false;
             if(f=='dia') matchDate = d.toDateString()===now.toDateString(); else if(f=='semana') matchDate = (now-d) < 604800000; else if(f=='mes') matchDate = d.getMonth()===now.getMonth(); else matchDate = d.getFullYear()===now.getFullYear();
             let matchText = true; if(searchTxt) { matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt)); } return matchDate && matchText;
-        }).sort((a,b) => new Date(b.data) - new Date(a.data)); // Ordena por data (recente primeiro)
+        }).sort((a,b) => new Date(b.data) - new Date(a.data));
 
         let totalGeral = 0;
         let lucroGeral = 0;
         
-        // Gera linhas da tabela
         const linhasTabela = logsFiltrados.map(l => {
             totalGeral += l.valor;
             let custoItem = 0; 
             if(l.tipo === 'PRODUTO' || l.tipo === 'P') { const prod = window.db.produtos.find(p => p.nome === l.desc); if(prod && prod.custo) custoItem = parseFloat(prod.custo) * (l.qtd || 1); } 
             lucroGeral += (l.valor - custoItem);
             
-            const tipoLbl = (l.tipo==='DESCONTO') ? 'DESC' : (l.tipo.substring(0,4));
             const color = (l.valor < 0) ? 'red' : 'black';
             return `
                 <tr style="font-size:11px; border-bottom:1px solid #ccc;">
@@ -962,7 +980,6 @@ window.acaoImprimirRelatorio = function() {
             `;
         }).join('');
 
-        // Monta o HTML do Relatório A4
         const htmlRelatorio = `
             <div style="font-family: Arial, sans-serif; padding:20px; color:#000;">
                 <h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2>
@@ -992,32 +1009,34 @@ window.acaoImprimirRelatorio = function() {
                         ${linhasTabela}
                     </tbody>
                 </table>
-                <div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.7</div>
+                <div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.8</div>
             </div>
         `;
 
-        // Insere no DOM
         document.getElementById('area-relatorio-visual').innerHTML = htmlRelatorio;
         
-        // Define classe para impressão correta
-        document.body.classList.remove('printing-cupom');
+        // FORÇA VISUALIZAÇÃO E CLASSE ANTES DE IMPRIMIR
+        document.getElementById('area-relatorio-visual').style.display = 'block';
         document.body.classList.add('printing-relatorio');
         
-        // Chama a impressão nativa (Browser gera o PDF)
-        window.print();
-
-        // Limpa classe após impressão (timeout para garantir)
-        setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
+        // DELAY PARA RENDERIZAR
+        setTimeout(() => {
+            window.print();
+            // LIMPEZA PÓS IMPRESSÃO
+            setTimeout(() => { 
+                document.body.classList.remove('printing-relatorio'); 
+                document.getElementById('area-relatorio-visual').style.display = 'none';
+            }, 500);
+        }, 250);
     });
 }
 
 
-/* --- CUPOM COM DESTAQUES ATUALIZADO --- */
+/* --- CUPOM COM DESTAQUES --- */
 window.montarHtmlCupom = function(d) {
     const agora = new Date(); 
     const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
     
-    // Constrói linhas da tabela
     const itensHtml = d.itens.map(i => {
         const totalItem = (i.val).toFixed(2);
         return `
@@ -1031,7 +1050,6 @@ window.montarHtmlCupom = function(d) {
             </tr>`;
     }).join('');
 
-    // SINAL E RESTANTE
     let htmlFinanceiroExtra = '';
     if (d.sinal && d.sinal > 0) {
         const restante = d.total - d.sinal;
@@ -1056,7 +1074,6 @@ window.montarHtmlCupom = function(d) {
 
             <div class="c-body">
                 <div class="c-destaque-os">${d.tipo}</div>
-                
                 <div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div>
                 
                 <div style="margin:5px 0; border-bottom:1px solid #ccc; padding-bottom:5px;">
@@ -1094,7 +1111,7 @@ window.montarHtmlCupom = function(d) {
                 <div>ASSINATURA DO CLIENTE</div>
                 <br>
                 <div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div>
-                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.7 PRO</div>
+                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.8 PRO</div>
             </div>
         </div>
     `;
@@ -1118,96 +1135,65 @@ window.abrirModalShare = function() {
 }
 
 // 2. AÇÃO DE COMPARTILHAMENTO / IMPRESSÃO
-// FUNÇÕES AUXILIARES PARA FORMATAÇÃO DE TEXTO PURO (SEM TAGS)
 function txtCenter(text, width=32) {
     if(text.length >= width) return text.substring(0, width);
     const padding = Math.floor((width - text.length) / 2);
     return ' '.repeat(padding) + text;
 }
-
 function txtPair(left, right, width=32) {
     const space = width - left.length - right.length;
     if(space < 1) return left.substring(0, width-right.length-1) + ' ' + right;
     return left + ' '.repeat(space) + right;
 }
-
-function txtLine(width=32) {
-    return '-'.repeat(width);
-}
+function txtLine(width=32) { return '-'.repeat(width); }
 
 window.acaoShare = function(tipo) {
     const d = window.shareData; 
     
     if(tipo === 'pdf') {
+        // FORÇA VISUALIZAÇÃO DO CUPOM
+        document.getElementById('area-cupom-visual').style.display = 'block';
         document.body.classList.remove('printing-relatorio');
         document.body.classList.add('printing-cupom');
-        window.print(); 
-        setTimeout(() => { document.body.classList.remove('printing-cupom'); }, 1000);
+        
+        setTimeout(() => {
+            window.print(); 
+            setTimeout(() => { 
+                document.body.classList.remove('printing-cupom');
+                document.getElementById('area-cupom-visual').style.display = 'none';
+            }, 500);
+        }, 250);
     }
     else if(tipo === 'bluetooth') {
-        // GERAÇÃO DE TEXTO PURO FORMATADO MANUALMENTE (SEM CÓDIGOS [C][L])
-        // Assumindo 32 colunas para compatibilidade universal
-        const W = 32; 
-        let T = '';
-        
-        // CABEÇALHO
+        const W = 32; let T = '';
         T += txtCenter(EMPRESA.nome, W) + '\n';
-        T += txtCenter('ASSISTENCIA TECNICA', W) + '\n'; // Simplificado para caber
+        T += txtCenter('ASSISTENCIA TECNICA', W) + '\n'; 
         T += txtCenter(EMPRESA.tel, W) + '\n';
         T += txtLine(W) + '\n';
-        
-        // DADOS
         T += 'DATA: ' + new Date().toLocaleString() + '\n';
         T += 'TIPO: ' + d.tipo + '\n';
         T += 'CLIENTE: ' + d.cliente + '\n';
         T += txtLine(W) + '\n';
-        
-        // ITENS
         T += txtPair('QTD ITEM', 'TOTAL', W) + '\n';
         d.itens.forEach(i => {
-            let nomeItem = i.nome;
-            if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20);
+            let nomeItem = i.nome; if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20);
             T += (i.qtd||1) + 'x ' + nomeItem + '\n';
             T += txtPair('', 'R$ ' + i.val.toFixed(2), W) + '\n';
             if(i.garantia) T += '   (GAR: ' + i.garantia + ')\n';
         });
         T += '\n';
-
-        // TOTAIS
         T += txtPair('SUBTOTAL:', 'R$ ' + d.subtotal.toFixed(2), W) + '\n';
-        if(d.desconto > 0) {
-            T += txtPair('DESCONTO:', '- R$ ' + d.desconto.toFixed(2), W) + '\n';
-        }
-        
+        if(d.desconto > 0) { T += txtPair('DESCONTO:', '- R$ ' + d.desconto.toFixed(2), W) + '\n'; }
         T += txtLine(W) + '\n';
         T += txtCenter('TOTAL: R$ ' + d.total.toFixed(2), W) + '\n';
         T += txtLine(W) + '\n';
-
-        // SINAL E RESTANTE
-        if(d.sinal && d.sinal > 0) {
-             const restante = d.total - d.sinal;
-             T += txtPair('SINAL PAGO:', 'R$ ' + parseFloat(d.sinal).toFixed(2), W) + '\n';
-             T += '\n';
-             T += txtCenter('*** RESTANTE ***', W) + '\n';
-             T += txtCenter('R$ ' + restante.toFixed(2), W) + '\n';
-             T += '\n';
-        }
-
+        if(d.sinal && d.sinal > 0) { const restante = d.total - d.sinal; T += txtPair('SINAL PAGO:', 'R$ ' + parseFloat(d.sinal).toFixed(2), W) + '\n\n'; T += txtCenter('*** RESTANTE ***', W) + '\n'; T += txtCenter('R$ ' + restante.toFixed(2), W) + '\n\n'; }
         if(d.valorPago) T += txtPair('VALOR PAGO:', 'R$ ' + d.valorPago.toFixed(2), W) + '\n';
         if(d.troco) T += txtPair('TROCO:', 'R$ ' + d.troco.toFixed(2), W) + '\n';
-        
-        if(d.obs) {
-            T += '\nOBSERVACOES:\n' + d.obs + '\n';
-        }
-
-        if(d.senha) {
-            T += '\n\n' + txtCenter('SENHA: ' + d.senha, W) + '\n';
-        }
-        
-        // RODAPÉ
+        if(d.obs) { T += '\nOBSERVACOES:\n' + d.obs + '\n'; }
+        if(d.senha) { T += '\n\n' + txtCenter('SENHA: ' + d.senha, W) + '\n'; }
         T += '\n\n' + txtCenter('OBRIGADO PELA PREFERENCIA!', W) + '\n';
-        T += txtCenter('Filhao.Cell v1.7', W) + '\n\n\n';
-
+        T += txtCenter('Filhao.Cell v1.8', W) + '\n\n\n';
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
     else if(tipo === 'zap') {
@@ -1215,13 +1201,7 @@ window.acaoShare = function(tipo) {
         d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome}\n   R$ ${i.val.toFixed(2)}\n`; });
         txt += `----------------\n*TOTAL: R$ ${d.total.toFixed(2)}*`;
         if(d.desconto > 0) txt += `\n(Desc: R$ ${d.desconto.toFixed(2)})`;
-        
-        if(d.sinal > 0) {
-            const rest = d.total - d.sinal;
-            txt += `\nSINAL: R$ ${parseFloat(d.sinal).toFixed(2)}`;
-            txt += `\n*RESTANTE: R$ ${rest.toFixed(2)}*`;
-        }
-
+        if(d.sinal > 0) { const rest = d.total - d.sinal; txt += `\nSINAL: R$ ${parseFloat(d.sinal).toFixed(2)}`; txt += `\n*RESTANTE: R$ ${rest.toFixed(2)}*`; }
         if(d.obs) txt += `\nOBS: ${d.obs}`;
         const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === (d.cliente||'').toUpperCase());
         let phone = (cliObj && cliObj.tel) ? cliObj.tel.replace(/\D/g, '') : '';
@@ -1249,7 +1229,6 @@ window.shareExtrato = function(tipo) {
     // --- LÓGICA NOVA PARA PDF DO EXTRATO DO CLIENTE ---
     if(tipo === 'pdf') {
         let linhasTabela = '';
-        // Itera sobre as datas ordenadas (dados já vem agrupados e ordenados na lógica da tela)
         for (const [data, itens] of Object.entries(d.dados)) { 
             itens.forEach(i => {
                 const color = i.valor < 0 ? 'color:red' : 'color:black';
@@ -1291,15 +1270,25 @@ window.shareExtrato = function(tipo) {
                     TOTAL GERAL: R$ ${d.total.toFixed(2)}
                 </div>
 
-                <div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.7</div>
+                <div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.8</div>
             </div>
         `;
 
         document.getElementById('area-relatorio-visual').innerHTML = htmlRelatorio;
+        
+        // FORÇA VISIBILIDADE
+        document.getElementById('area-relatorio-visual').style.display = 'block';
         document.body.classList.remove('printing-cupom');
         document.body.classList.add('printing-relatorio');
-        window.print();
-        setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
+        
+        // DELAY
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => { 
+                document.body.classList.remove('printing-relatorio'); 
+                document.getElementById('area-relatorio-visual').style.display = 'none';
+            }, 500);
+        }, 250);
         return;
     }
 
