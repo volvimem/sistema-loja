@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v83 PRO</title>
+    <title>FILHÃO.CELL v1.1 PRO</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -17,9 +17,9 @@
         :root { 
             --primary: #d50000;            
             --primary-dark: #b71c1c; 
-            --accent: #000000;            
-            --text: #212121;                
-            --bg: #f5f5f5;               
+            --accent: #000000;             
+            --text: #212121;                 
+            --bg: #f5f5f5;                
             --card-bg: #ffffff;            
             --success: #2e7d32;            
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -125,51 +125,80 @@
 
         .check-log { transform: scale(1.4); margin-right: 12px; accent-color: var(--primary); }
 
-        /* --- ESTILO PROFISSIONAL DO CUPOM (HTML/PDF) --- */
+        /* --- ESTILO PROFISSIONAL DO CUPOM v1.1 (CORREÇÃO PDF) --- */
         .cupom-wrapper {
             background: #fff; color: #000;
             font-family: 'Consolas', 'Courier New', monospace; /* Fonte Monoespaçada */
-            padding: 20px; width: 100%;
-            font-size: 13px; text-transform: uppercase;
-            line-height: 1.4; text-align: left;
-            border: 1px solid #ddd;
+            padding: 20px 10px; 
+            width: 100%;
+            max-width: 320px; /* Largura padrão de bobina 80mm */
+            margin: 0 auto;
+            font-size: 11px; /* Fonte levemente ajustada */
+            text-transform: uppercase;
+            line-height: 1.3; 
+            text-align: left;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
-        .c-header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
-        .c-company { font-size: 18px; font-weight: 900; margin-bottom: 8px; display: block; }
-        .c-sub { font-size: 12px; display: block; margin-bottom: 2px; }
+        /* Cabeçalho do Cupom */
+        .c-header { text-align: center; margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
+        .c-company { font-size: 16px; font-weight: 900; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
+        .c-sub { font-size: 10px; display: block; margin-bottom: 2px; color: #333; }
 
+        /* Títulos de Seção */
         .c-section-title { 
-            font-weight: 900; border-bottom: 1px solid #000; 
-            margin: 15px 0 5px 0; padding-bottom: 2px; font-size: 14px; 
+            font-weight: 900; border-top: 1px solid #000; border-bottom: 1px solid #000; 
+            margin: 10px 0; padding: 4px 0; font-size: 12px; text-align: center; background: #f9f9f9;
         }
 
-        .c-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        /* Linhas de Dados */
+        .c-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
         .c-row.bold { font-weight: 900; }
-        .c-row.big { font-size: 18px; margin-top: 15px; padding-top: 10px; border-top: 2px dashed #000; }
         
-        .c-table { width: 100%; text-align: left; margin: 15px 0; border-collapse: collapse; }
-        .c-table th { border-bottom: 1px solid #000; font-size: 12px; padding-bottom: 5px; font-weight: 900; }
-        .c-table td { padding: 6px 0; vertical-align: top; border-bottom: 1px dotted #ccc; }
-        .c-item-name { font-weight: bold; display: block; font-size: 13px; }
-        .c-item-meta { font-size: 11px; color: #444; margin-left: 10px; display: block; font-style: italic; }
+        /* Tabela de Itens */
+        .c-table { width: 100%; text-align: left; margin: 10px 0; border-collapse: collapse; }
+        .c-table th { border-bottom: 1px solid #000; font-size: 10px; padding-bottom: 4px; font-weight: 900; }
+        .c-table td { padding: 4px 0; vertical-align: top; border-bottom: 1px dotted #ccc; font-size: 11px; }
+        .c-item-name { font-weight: 800; display: block; }
+        .c-item-meta { font-size: 9px; color: #555; margin-left: 0; display: block; font-style: italic; }
 
-        .c-footer { text-align: center; margin-top: 30px; font-size: 11px; border-top: 2px dashed #000; padding-top: 15px; }
+        /* Área de Totais */
+        .c-total-box { border: 2px solid #000; padding: 8px; margin-top: 15px; border-radius: 4px; }
+        .c-big-total { font-size: 16px; font-weight: 900; text-align: right; margin-top: 5px; }
+        
+        .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
 
-        /* ÁREA VISUAL ONDE O CUPOM É MONTADO PARA PDF */
-        #area-cupom-visual { display: none; } 
+        /* REGRAS CRÍTICAS PARA IMPRESSÃO PDF/PC */
+        #area-cupom-visual { display: none; margin-bottom: 50px; }
 
-        /* REGRAS PARA IMPRESSÃO PDF/PC (Ctrl+P) */
         @media print {
-            @page { margin: 10mm; size: auto; }
-            body * { visibility: hidden; height: 0; overflow: hidden; }
-            #area-cupom-visual { display: block !important; }
-            #area-cupom-visual, #area-cupom-visual * {
-                visibility: visible; height: auto; overflow: visible;
-                position: absolute; left: 0; top: 0; width: 100%; background: white;
+            @page { margin: 0; size: auto; }
+            
+            /* Oculta TUDO exceto o cupom */
+            body > :not(#area-cupom-visual) { display: none !important; }
+            
+            /* Mostra e formata o cupom */
+            #area-cupom-visual { 
+                display: block !important; 
+                position: static !important; /* Importante: Static para fluir na página */
+                width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                background: white;
             }
-            .cupom-wrapper { border: none; padding: 0; width: 100%; }
-            #modal-overlay, nav, header { display: none !important; }
+            
+            .cupom-wrapper {
+                border: none;
+                box-shadow: none;
+                max-width: 100%;
+                width: 100%;
+                padding: 5mm; /* Margem segura para impressora */
+            }
+
+            /* Garante cor preta pura */
+            * { color: #000 !important; text-shadow: none !important; }
+            .c-section-title { background: none !important; border-color: #000 !important; }
         }
     </style>
 </head>
@@ -198,7 +227,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v83 PRO <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.1 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -579,6 +608,31 @@ window.processFotoOS = function(inp) {
     if(inp.files && inp.files[0]) { const r = new FileReader(); r.onload = e => { const i = new Image(); i.src = e.target.result; i.onload = () => { const c = document.createElement('canvas'); const x = c.getContext('2d'); let w=i.width, h=i.height; if(w>h){if(w>400){h*=400/w;w=400}}else{if(h>400){w*=400/h;h=400}}; c.width=w; c.height=h; x.drawImage(i,0,0,w,h); window.osFotos[window.currentFotoIndex] = c.toDataURL('image/jpeg', 0.6); const slots = document.querySelectorAll('.os-foto-slot'); window.osFotos.forEach((f, i) => { if(f) slots[i].innerHTML = `<img src="${f}">`; else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; }); } }; r.readAsDataURL(inp.files[0]); }
 }
 
+window.lerFoto = function(inp, viewId) {
+    if(inp.files && inp.files[0]) { 
+        const r = new FileReader(); 
+        r.onload = e => { 
+            const i = new Image(); 
+            i.src = e.target.result; 
+            i.onload = () => { 
+                const c = document.createElement('canvas'); 
+                const x = c.getContext('2d'); 
+                let w=i.width, h=i.height; 
+                // Redimensionar para economizar espaço no Firebase
+                const max = 300;
+                if(w>h){if(w>max){h*=max/w;w=max}}else{if(h>max){w*=max/h;h=max}}; 
+                c.width=w; c.height=h; 
+                x.drawImage(i,0,0,w,h); 
+                window.tempImg = c.toDataURL('image/jpeg', 0.7); 
+                const view=document.getElementById(viewId); 
+                view.src=window.tempImg; 
+                view.classList.add('has-img'); 
+            } 
+        }; 
+        r.readAsDataURL(inp.files[0]); 
+    }
+}
+
 window.buscarItemOS = function(txt, force=false) {
     const box = document.getElementById('sug-os-item'); if(!txt && !force) { box.style.display='none'; return; }
     const term = (txt||'').toUpperCase();
@@ -802,10 +856,9 @@ window.abrirExtratoCliente = function(nome) {
 }
 
 /* ==========================================================================
-   LÓGICA DE IMPRESSÃO PROFISSIONAL v83
+   LÓGICA DE IMPRESSÃO PROFISSIONAL v1.1
    ========================================================================== */
 
-// 1. GERA HTML PARA PDF E TELA (Layout Completo)
 window.montarHtmlCupom = function(d) {
     const agora = new Date(); 
     const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
@@ -824,6 +877,7 @@ window.montarHtmlCupom = function(d) {
             </tr>`;
     }).join('');
 
+    // --- MONTAGEM DO HTML DO CUPOM ---
     return `
         <div class="cupom-wrapper">
             <div class="c-header">
@@ -845,16 +899,21 @@ window.montarHtmlCupom = function(d) {
                     <tbody>${itensHtml}</tbody>
                 </table>
 
-                <div class="c-section-title">TOTAIS</div>
+                <div class="c-section-title">RESUMO FINANCEIRO</div>
                 <div class="c-row"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>
                 ${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}
                 
-                <div class="c-row bold big"><span>TOTAL A PAGAR:</span> <span>R$ ${d.total.toFixed(2)}</span></div>
+                <div class="c-total-box">
+                    <div style="font-size:10px; font-weight:bold;">TOTAL A PAGAR:</div>
+                    <div class="c-big-total">R$ ${d.total.toFixed(2)}</div>
+                </div>
                 
-                ${d.valorPago ? `<div class="c-row" style="margin-top:10px"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}
-                ${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}
+                <div style="margin-top:10px">
+                    ${d.valorPago ? `<div class="c-row"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}
+                    ${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}
+                </div>
                 
-                ${d.obs ? `<div style="margin-top:15px; border:1px solid #000; padding:8px; font-weight:bold">OBS: ${d.obs}</div>` : ''}
+                ${d.obs ? `<div style="margin-top:15px; border:1px solid #000; padding:8px; font-weight:bold; background:#eee;">OBS: ${d.obs}</div>` : ''}
                 ${d.senha ? `<div style="margin-top:10px; font-weight:bold; text-align:center; font-size:18px; border:2px solid #000; padding:5px;">SENHA: ${d.senha}</div>` : ''}
             </div>
 
@@ -863,7 +922,7 @@ window.montarHtmlCupom = function(d) {
                 <div>ASSINATURA DO CLIENTE</div>
                 <br>
                 <div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div>
-                <div style="font-size:10px; margin-top:5px">Sistema: Filhão.Cell v83</div>
+                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.1 PRO</div>
             </div>
         </div>
     `;
@@ -874,10 +933,10 @@ window.abrirModalShare = function() {
     document.getElementById('area-cupom-visual').innerHTML = htmlCupom;
 
     document.getElementById('modal-content-default').innerHTML = `
-        <h3 class="no-print" style="justify-content:center"><i class="fas fa-check-circle"></i> SALVO!</h3>
+        <h3 class="no-print" style="justify-content:center"><i class="fas fa-check-circle"></i> SUCESSO!</h3>
         <div class="no-print" style="display:flex; flex-direction:column; gap:10px; margin-top:15px">
-            <button class="btn" style="background:#007bff; margin:0; padding:12px" onclick="acaoShare('bluetooth')"><i class="fas fa-print"></i> IMPRIMIR BLUETOOTH (RÁPIDO)</button>
-            <button class="btn" style="background:#333; margin:0; padding:12px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / IMPRIMIR PC</button>
+            <button class="btn" style="background:#007bff; margin:0; padding:12px" onclick="acaoShare('bluetooth')"><i class="fas fa-print"></i> IMPRIMIR BLUETOOTH</button>
+            <button class="btn" style="background:#333; margin:0; padding:12px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / PC (CTRL+P)</button>
             <button class="btn" style="background:#28a745; margin:0; padding:12px" onclick="verComprovanteTela()"><i class="fas fa-eye"></i> VER NA TELA</button>
              <button class="btn" style="background:#25d366; margin:0; padding:12px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
             <button class="btn" style="background:#d32f2f; margin:0; padding:12px" onclick="fecharModal({target:{id:'modal-overlay'}})"> <i class="fas fa-times"></i> FECHAR</button>
@@ -894,62 +953,43 @@ window.acaoShare = function(tipo) {
         window.print(); 
     }
     else if(tipo === 'bluetooth') {
-        // [MODO PROFISSIONAL] Comandos de Texto Puro para RawBT
-        // [C] = Center, [L] = Left, [R] = Right, [B] = Bold, \n = Quebra de linha
         let T = '';
-        
-        // CABEÇALHO
         T += '[C]<b>' + EMPRESA.nome + '</b>\n';
         T += '[C]' + EMPRESA.end + '\n';
         T += '[C]' + EMPRESA.cid + '\n';
         T += '[C]CNPJ: ' + EMPRESA.cnpj + '\n';
         T += '[C]Tel: ' + EMPRESA.tel + '\n';
-        T += '[C]--------------------------------\n\n'; // Espaço extra
-
-        // DADOS
+        T += '[C]--------------------------------\n\n'; 
         T += '[L]DATA: ' + new Date().toLocaleString() + '\n';
         T += '[L]<b>TIPO: ' + d.tipo + '</b>\n';
         T += '[L]CLIENTE: ' + d.cliente + '\n';
         T += '[C]--------------------------------\n';
-        
-        // ITENS
         T += '[L]QTD  ITEM                   TOTAL\n';
         d.itens.forEach(i => {
             let nomeItem = i.nome;
             if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20) + '..';
-            T += '[L]' + (i.qtd||1) + 'x   ' + nomeItem + '\n';
-            // Alinhamento forçado do preço à direita na linha de baixo para não quebrar
+            T += '[L]' + (i.qtd||1) + 'x    ' + nomeItem + '\n';
             T += '[R]R$ ' + i.val.toFixed(2) + '\n';
             if(i.garantia) T += '[L]     (GAR: ' + i.garantia + ')\n';
             T += '[L]- - - - - - - - - - - - - - - -\n';
         });
-        
-        T += '\n'; // Espaço antes dos totais
-
-        // TOTAIS
+        T += '\n'; 
         T += '[L]SUBTOTAL:' + '[R]R$ ' + d.subtotal.toFixed(2) + '\n';
         if(d.desconto > 0) {
             T += '[L]DESCONTO:' + '[R]- R$ ' + d.desconto.toFixed(2) + '\n';
         }
-        
         T += '[R]<b>TOTAL: R$ ' + d.total.toFixed(2) + '</b>\n';
         T += '[C]--------------------------------\n';
-
         if(d.valorPago) T += '[L]VALOR PAGO:' + '[R]R$ ' + d.valorPago.toFixed(2) + '\n';
         if(d.troco) T += '[L]TROCO:' + '[R]R$ ' + d.troco.toFixed(2) + '\n';
-        
         if(d.obs) {
             T += '\n[L]OBSERVACOES:\n[L]' + d.obs + '\n';
         }
-
         if(d.senha) {
             T += '\n\n[C]<font size="big">SENHA: ' + d.senha + '</font>\n';
         }
-        
         T += '\n\n\n[C]OBRIGADO PELA PREFERENCIA!\n';
-        T += '[C]Filhao.Cell v83\n\n\n';
-
-        // Envia para o App RawBT
+        T += '[C]Filhao.Cell v1.1 PRO\n\n\n';
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
     else if(tipo === 'zap') {
