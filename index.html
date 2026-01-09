@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v81 PRINT-FIX</title>
+    <title>FILHÃO.CELL v82 FAST-PRINT</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -12,7 +12,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root { 
@@ -30,7 +29,7 @@
         
         body { background: var(--bg); color: var(--text); padding-bottom: 85px; user-select: none; }
 
-        /* --- ESTILOS GERAIS DA INTERFACE (APP) --- */
+        /* HEADER */
         header { 
             background: linear-gradient(135deg, var(--accent) 30%, var(--primary) 100%); 
             color: white; padding: 12px 15px; 
@@ -127,26 +126,16 @@
 
         .check-log { transform: scale(1.3); margin-right: 10px; accent-color: var(--primary); }
 
-        /* ==========================================================================
-           ÁREA CRÍTICA DE IMPRESSÃO (O SEGREDO DO SUCESSO)
-           ========================================================================== */
-        
-        /* 1. ESTILO DO CUPOM (Válido para Visualização e Impressão) */
+        /* --- ESTILO DO CUPOM PARA TELA E PDF APENAS --- */
+        /* Isso não afeta o Bluetooth, pois o Bluetooth agora usa Texto Puro */
         .cupom-wrapper {
-            background: #fff;
-            color: #000;
-            font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada estilo impressora */
-            padding: 10px;
-            width: 100%;
-            font-size: 12px;
-            text-transform: uppercase;
-            line-height: 1.2;
-            text-align: left;
-            border: 1px dashed #ccc; /* Borda visual na tela */
+            background: #fff; color: #000;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 10px; width: 100%;
+            font-size: 12px; text-transform: uppercase;
+            line-height: 1.2; text-align: left;
+            border: 1px dashed #ccc;
         }
-        /* Remove borda na hora de imprimir */
-        @media print { .cupom-wrapper { border: none; padding: 0; } }
-
         .c-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
         .c-company { font-size: 16px; font-weight: 900; margin-bottom: 5px; }
         .c-sub { font-size: 11px; }
@@ -160,45 +149,26 @@
         .c-table td { padding: 4px 0; vertical-align: top; }
         .c-footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
 
-        /* 2. ÁREA ESPELHO (Invisível na tela, usada para gerar o print BT) */
-        #area-print-oculta {
-            position: fixed;
-            top: 0;
-            left: -9999px; /* Joga para fora da tela */
-            width: 380px;  /* Largura fixa ideal para impressoras térmicas 58mm/80mm */
-            background: white; /* Fundo branco OBRIGATÓRIO para html2canvas */
-            z-index: 9999;
-            padding: 5px;
-        }
+        /* ÁREA VISUAL ONDE O CUPOM É MONTADO PARA PDF */
+        #area-cupom-visual { display: none; } 
 
-        /* 3. REGRAS PARA IMPRESSÃO NATIVA (PDF/PC - Ctrl+P) */
+        /* REGRAS PARA IMPRESSÃO PDF/PC (Ctrl+P) */
         @media print {
-            @page { margin: 0; size: auto; } /* Remove margens do navegador */
-            
-            /* Oculta TUDO do app */
+            @page { margin: 0; size: auto; }
             body * { visibility: hidden; height: 0; overflow: hidden; }
-            
-            /* Torna visível APENAS a área oculta */
-            #area-print-oculta, #area-print-oculta * {
-                visibility: visible;
-                display: block !important;
-                height: auto;
-                overflow: visible;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%; /* Ocupa largura do papel */
-                background: white;
+            #area-cupom-visual { display: block !important; }
+            #area-cupom-visual, #area-cupom-visual * {
+                visibility: visible; height: auto; overflow: visible;
+                position: absolute; left: 0; top: 0; width: 100%; background: white;
             }
-            
-            /* Garante que modais e menu não apareçam */
+            .cupom-wrapper { border: none; padding: 0; }
             #modal-overlay, nav, header { display: none !important; }
         }
     </style>
 </head>
 <body>
 
-<div id="area-print-oculta"></div>
+<div id="area-cupom-visual"></div>
 
 <div id="modal-overlay" onclick="fecharModal(event)">
     <div class="modal-content" id="modal-content-default"></div>
@@ -212,7 +182,8 @@
         </div>
         <div id="ext-lista" style="padding:12px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
         <div id="ext-share-area" style="padding:12px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:6px">
-            <div id="ext-preview-box" style="display:none"></div> <div style="font-size:9px; color:#999; text-align:center; font-weight:bold; margin-bottom:4px">COMPARTILHAR</div>
+            <div id="ext-preview-box" style="display:none"></div>
+            <div style="font-size:9px; color:#999; text-align:center; font-weight:bold; margin-bottom:4px">COMPARTILHAR</div>
             <button class="btn" style="background:#25d366; margin:0; padding:8px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
             <button class="btn" style="background:#0277bd; margin:0; padding:8px" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH (RAWBT)</button>
         </div>
@@ -220,7 +191,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v81 PRINT <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v82 FAST <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -824,55 +795,27 @@ window.abrirExtratoCliente = function(nome) {
 }
 
 /* ==========================================================================
-   LÓGICA DE IMPRESSÃO CENTRALIZADA (PDF & BLUETOOTH)
+   LÓGICA DE IMPRESSÃO PROFISSIONAL (TEXTO PURO NO BLUETOOTH)
    ========================================================================== */
 
-// 1. GERA O HTML DO CUPOM E INJETA NA ÁREA OCULTA
+// 1. GERA HTML PARA PDF E TELA
 window.montarHtmlCupom = function(d) {
-    const agora = new Date();
-    const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
-
-    const itensHtml = d.itens.map(i => {
-        const totalItem = (i.val).toFixed(2);
-        return `<tr><td style="width:10%"><strong>${i.qtd || 1}x</strong></td><td style="width:65%"><span class="c-item-name">${i.nome}</span>${i.garantia ? `<span class="c-item-meta">GAR: ${i.garantia}</span>` : ''}</td><td style="width:25%; text-align:right">${totalItem}</td></tr>`;
-    }).join('');
-
-    return `
-        <div class="cupom-wrapper">
-            <div class="c-header"><div class="c-company">${EMPRESA.nome}</div><div class="c-sub">${EMPRESA.end}</div><div class="c-sub">${EMPRESA.cid}</div><div class="c-sub">CNPJ: ${EMPRESA.cnpj}</div><div class="c-sub">Tel: ${EMPRESA.tel}</div></div>
-            <div class="c-body">
-                <div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div>
-                <div class="c-row bold"><span>TIPO:</span> <span>${d.tipo}</span></div>
-                <div class="c-row"><span>CLIENTE:</span> <span>${d.cliente || 'CONSUMIDOR'}</span></div>
-                <table class="c-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead><tbody>${itensHtml}</tbody></table>
-                <div class="c-row border-top"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>
-                ${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}
-                <div class="c-row bold big"><span>TOTAL A PAGAR:</span> <span>R$ ${d.total.toFixed(2)}</span></div>
-                ${d.valorPago ? `<div class="c-row" style="margin-top:5px"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}
-                ${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}
-                ${d.obs ? `<div style="margin-top:10px; border:1px solid #000; padding:5px; font-weight:bold">OBS: ${d.obs}</div>` : ''}
-                ${d.senha ? `<div style="margin-top:5px; font-weight:bold; text-align:center; font-size:14px">SENHA: ${d.senha}</div>` : ''}
-            </div>
-            <div class="c-footer"><div style="border-top:1px solid #000; width:80%; margin:20px auto 5px auto;"></div><div>ASSINATURA DO CLIENTE</div><br><div>NÃO É DOCUMENTO FISCAL</div><div><b>OBRIGADO PELA PREFERÊNCIA!</b></div><div style="font-size:9px; margin-top:5px">Sistema: Filhão.Cell v81</div></div>
-        </div>
-    `;
+    const agora = new Date(); const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
+    const itensHtml = d.itens.map(i => { const totalItem = (i.val).toFixed(2); return `<tr><td style="width:10%"><strong>${i.qtd || 1}x</strong></td><td style="width:65%"><span class="c-item-name">${i.nome}</span>${i.garantia ? `<span class="c-item-meta">GAR: ${i.garantia}</span>` : ''}</td><td style="width:25%; text-align:right">${totalItem}</td></tr>`; }).join('');
+    return `<div class="cupom-wrapper"><div class="c-header"><div class="c-company">${EMPRESA.nome}</div><div class="c-sub">${EMPRESA.end}</div><div class="c-sub">${EMPRESA.cid}</div><div class="c-sub">CNPJ: ${EMPRESA.cnpj}</div><div class="c-sub">Tel: ${EMPRESA.tel}</div></div><div class="c-body"><div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div><div class="c-row bold"><span>TIPO:</span> <span>${d.tipo}</span></div><div class="c-row"><span>CLIENTE:</span> <span>${d.cliente || 'CONSUMIDOR'}</span></div><table class="c-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead><tbody>${itensHtml}</tbody></table><div class="c-row border-top"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}<div class="c-row bold big"><span>TOTAL A PAGAR:</span> <span>R$ ${d.total.toFixed(2)}</span></div>${d.valorPago ? `<div class="c-row" style="margin-top:5px"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}${d.obs ? `<div style="margin-top:10px; border:1px solid #000; padding:5px; font-weight:bold">OBS: ${d.obs}</div>` : ''}${d.senha ? `<div style="margin-top:5px; font-weight:bold; text-align:center; font-size:14px">SENHA: ${d.senha}</div>` : ''}</div><div class="c-footer"><div style="border-top:1px solid #000; width:80%; margin:20px auto 5px auto;"></div><div>ASSINATURA DO CLIENTE</div><br><div>NÃO É DOCUMENTO FISCAL</div><div><b>OBRIGADO PELA PREFERÊNCIA!</b></div><div style="font-size:9px; margin-top:5px">Sistema: Filhão.Cell v82</div></div></div>`;
 }
 
-// 2. ABRE MODAL DE DECISÃO
 window.abrirModalShare = function() {
-    const d = window.shareData;
-    const htmlCupom = montarHtmlCupom(d);
-    
-    // Injeta na área oculta (para Bluetooth ler) e também prepara para PDF
-    document.getElementById('area-print-oculta').innerHTML = htmlCupom;
+    // Apenas monta o HTML visual para caso a pessoa queira ver na tela ou imprimir PDF
+    const htmlCupom = montarHtmlCupom(window.shareData);
+    document.getElementById('area-cupom-visual').innerHTML = htmlCupom;
 
     document.getElementById('modal-content-default').innerHTML = `
         <h3 class="no-print" style="justify-content:center"><i class="fas fa-check-circle"></i> SALVO!</h3>
-        <div class="no-print" style="text-align:center; font-size:12px; margin-bottom:15px">O que deseja fazer?</div>
-        <div class="no-print" style="display:flex; flex-direction:column; gap:8px">
-            <button class="btn" style="background:#007bff; margin:0" onclick="acaoShare('bluetooth')"><i class="fas fa-print"></i> IMPRIMIR BLUETOOTH</button>
-            <button class="btn" style="background:#28a745; margin:0" onclick="verComprovanteTela()"><i class="fas fa-eye"></i> VER COMPROVANTE</button>
-            <button class="btn" style="background:#333; margin:0" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> SALVAR PDF / IMPRIMIR PC</button>
+        <div class="no-print" style="display:flex; flex-direction:column; gap:8px; margin-top:15px">
+            <button class="btn" style="background:#007bff; margin:0" onclick="acaoShare('bluetooth')"><i class="fas fa-print"></i> IMPRIMIR BLUETOOTH (RÁPIDO)</button>
+            <button class="btn" style="background:#333; margin:0" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / IMPRIMIR PC</button>
+            <button class="btn" style="background:#28a745; margin:0" onclick="verComprovanteTela()"><i class="fas fa-eye"></i> VER NA TELA</button>
              <button class="btn" style="background:#25d366; margin:0" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
             <button class="btn" style="background:#d32f2f; margin:0" onclick="fecharModal({target:{id:'modal-overlay'}})"> <i class="fas fa-times"></i> FECHAR</button>
         </div>
@@ -880,23 +823,46 @@ window.abrirModalShare = function() {
     document.getElementById('modal-overlay').style.display='flex'; 
 }
 
-// 3. EXECUTA A AÇÃO ESCOLHIDA
+// 2. AÇÃO DE COMPARTILHAMENTO / IMPRESSÃO
 window.acaoShare = function(tipo) {
     const d = window.shareData; 
     
     if(tipo === 'pdf') {
-        // Usa o CSS @media print para esconder tudo e mostrar só a div oculta
         window.print(); 
     }
     else if(tipo === 'bluetooth') {
-        const element = document.getElementById('area-print-oculta');
-        // Captura a div oculta como imagem (Canvas)
-        html2canvas(element, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png'); 
-            const base64 = imgData.split(',')[1];
-            // Envia para o RawBT
-            window.location.href = 'rawbt:base64,' + base64;
-        }).catch(err => alert("Erro ao gerar imagem BT: " + err));
+        // [CORREÇÃO] Gera TEXTO PURO para o RawBT. Isso evita o buffer overflow (loop infinito).
+        let T = '';
+        T += '[C]<b>' + EMPRESA.nome + '</b>\n';
+        T += '[C]' + EMPRESA.end + '\n';
+        T += '[C]' + EMPRESA.cid + '\n';
+        T += '[C]Tel: ' + EMPRESA.tel + '\n';
+        T += '[L]--------------------------------\n';
+        T += '[L]DATA: ' + new Date().toLocaleString() + '\n';
+        T += '[L]TIPO: ' + d.tipo + '\n';
+        T += '[L]CLIENTE: ' + d.cliente + '\n';
+        T += '[L]--------------------------------\n';
+        
+        d.itens.forEach(i => {
+            T += '[L]' + (i.qtd||1) + 'x ' + i.nome + '\n';
+            T += '[R]R$ ' + i.val.toFixed(2) + '\n';
+            if(i.garantia) T += '[L](GAR: ' + i.garantia + ')\n';
+        });
+
+        T += '[L]--------------------------------\n';
+        T += '[R]<b>TOTAL: R$ ' + d.total.toFixed(2) + '</b>\n';
+        if(d.desconto > 0) T += '[R](Desc: R$ ' + d.desconto.toFixed(2) + ')\n';
+        if(d.valorPago) T += '[R]PAGO: R$ ' + d.valorPago.toFixed(2) + '\n';
+        if(d.troco) T += '[R]TROCO: R$ ' + d.troco.toFixed(2) + '\n';
+        
+        if(d.obs) T += '\n[L]OBS: ' + d.obs + '\n';
+        if(d.senha) T += '\n[C]<font size="big">SENHA: ' + d.senha + '</font>\n';
+        
+        T += '\n\n[C]OBRIGADO PELA PREFERENCIA!\n';
+        T += '[C]Filhao.Cell v82\n\n\n';
+
+        // Envia para o App RawBT usando esquema de URI seguro
+        window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
     else if(tipo === 'zap') {
         let txt = `*${EMPRESA.nome}*\n----------------\n*${d.tipo}*\nCLI: ${d.cliente}\nDATA: ${new Date().toLocaleString()}\n----------------\n`;
@@ -913,8 +879,7 @@ window.acaoShare = function(tipo) {
 }
 
 window.verComprovanteTela = function() {
-    const d = window.shareData;
-    const htmlCupom = montarHtmlCupom(d);
+    const htmlCupom = montarHtmlCupom(window.shareData);
     document.getElementById('modal-content-default').innerHTML = `
         <h3 class="no-print" style="justify-content:center">VISUALIZAÇÃO</h3>
         <div style="background:#eee; padding:5px; max-height:400px; overflow-y:auto; border-radius:4px; margin-bottom:10px;">${htmlCupom}</div>
@@ -938,10 +903,24 @@ window.shareExtrato = function(tipo) {
         window.location.href = urlZap;
     } 
     else if(tipo === 'bluetooth') {
-        let btTxt = `${EMPRESA.nome}%0AEXTRATO DE CLIENTE%0ACLIENTE: ${d.cliente}%0A--------------------------------%0A`;
-        for (const [data, itens] of Object.entries(d.dados)) { btTxt += `[${data}]%0A`; itens.forEach(i => { const qtd = (i.qtd > 1 && i.tipo !== 'DESCONTO') ? `${i.qtd}x ` : ''; btTxt += `${qtd}${i.desc}: R$ ${i.valor.toFixed(2)}%0A`; }); btTxt += `%0A`; }
-        btTxt += `--------------------------------%0ATOTAL GERAL: R$ ${d.total.toFixed(2)}%0A--------------------------------%0A%0A%0A`;
-        window.location.href = 'rawbt:' + btTxt;
+        // [CORREÇÃO] Gera TEXTO PURO também para o Extrato
+        let T = '';
+        T += '[C]<b>' + EMPRESA.nome + '</b>\n';
+        T += '[C]EXTRATO DE CONTA\n';
+        T += '[L]CLIENTE: ' + d.cliente + '\n';
+        T += '[L]--------------------------------\n';
+        for (const [data, itens] of Object.entries(d.dados)) { 
+            T += '[L][' + data + ']\n'; 
+            itens.forEach(i => { 
+                const qtd = (i.qtd > 1 && i.tipo !== 'DESCONTO') ? i.qtd + 'x ' : ''; 
+                T += '[L]' + qtd + i.desc + '\n';
+                T += '[R]R$ ' + i.valor.toFixed(2) + '\n';
+            }); 
+            T += '\n'; 
+        }
+        T += '[L]--------------------------------\n';
+        T += '[R]<b>TOTAL GERAL: R$ ' + d.total.toFixed(2) + '</b>\n\n\n';
+        window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
 }
 
