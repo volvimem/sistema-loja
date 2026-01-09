@@ -198,16 +198,17 @@
         /* --- ESTILO DO CUPOM FISCAL (VISUAL E IMPRESSÃO) --- */
         .cupom-wrapper {
             width: 100%;
-            /* Remover max-width fixo aqui para impressão */
+            /* Remover max-width fixo para preencher o papel térmico */
             background: #fff;
             color: #000;
             font-family: 'Courier New', Courier, monospace;
-            padding: 5px;
-            margin: 0 auto;
+            padding: 10px 5px; /* Padding reduzido para impressora */
+            margin: 0;
             font-size: 12px;
             text-transform: uppercase;
             line-height: 1.2;
             text-align: left;
+            border: none;
         }
 
         .c-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
@@ -228,17 +229,18 @@
 
         .c-footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
 
-        /* --- ÁREA OCULTA PARA IMPRESSÃO LIMPA (Fix do Problema) --- */
+        /* --- ÁREA SECRETA PARA LIMPEZA DE IMPRESSÃO (O CORRETOR DE ERROS) --- */
         #area-print-oculta {
             position: fixed;
             top: -9999px;
             left: -9999px;
-            width: 380px; /* Largura fixa para html2canvas capturar direito para térmica */
-            background: white;
+            width: 380px; /* Largura perfeita para impressora térmica */
+            background: white; /* Fundo BRANCO OBRIGATÓRIO para não sair preto */
             z-index: 5000;
+            pointer-events: none;
         }
 
-        /* --- IMPRESSÃO NATIVA (PDF) RIGOROSA --- */
+        /* --- IMPRESSÃO NATIVA (PDF/CABO) RIGOROSA --- */
         @media print {
             @page { margin: 0; size: auto; }
             body * { 
@@ -257,6 +259,7 @@
                 left: 0;
                 top: 0;
                 width: 100%;
+                background: white;
             }
 
             #modal-overlay { display: none !important; } 
@@ -1335,10 +1338,11 @@ window.acaoShare = function(tipo) {
 
     // 2. BLUETOOTH (RAWBT - LÊ A DIV OCULTA)
     else if(tipo === 'bluetooth') {
-        // Pega a DIV oculta que só tem o cupom
+        // Pega a DIV oculta que só tem o cupom (sem botões)
         const element = document.getElementById('area-print-oculta');
         
         // Aumentamos a scale para 3 para melhor nitidez na térmica
+        // OBRIGATÓRIO: Fundo branco, senão sai preto
         html2canvas(element, { scale: 3, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
             const imgData = canvas.toDataURL('image/png'); 
             const base64 = imgData.split(',')[1];
