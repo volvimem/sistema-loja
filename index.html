@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v1.5 PRO</title>
+    <title>FILHÃO.CELL v1.7 PRO</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -67,7 +67,6 @@
         .search-box { position: relative; margin-top: 5px; display: flex; align-items: center; }
         .search-box input { padding-right: 45px; margin-top: 0; width: 100%; }
         
-        /* BOTÃO LUPA INTERNO */
         .search-trigger {
             position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
             background: var(--primary); color: white; border: none;
@@ -153,23 +152,31 @@
         .c-item-name { font-weight: 800; display: block; }
         .c-item-meta { font-size: 9px; color: #555; margin-left: 0; display: block; font-style: italic; }
         .c-total-box { border: 2px solid #000; padding: 8px; margin-top: 15px; border-radius: 4px; }
-        .c-big-total { font-size: 16px; font-weight: 900; text-align: right; margin-top: 5px; }
+        
+        .c-destaque-os { font-size: 14px; font-weight: 900; border: 2px solid #000; background: #eee; padding: 5px; display: block; text-align: center; margin: 5px 0; }
+        .c-destaque-nome { font-size: 15px; font-weight: 900; text-decoration: underline; margin-left: 5px; }
+        .c-big-total { font-size: 24px; font-weight: 900; text-align: right; margin-top: 5px; border: 3px solid #000; padding: 5px; display: inline-block; width: 100%; background: #fff; }
+        
         .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
-        #area-cupom-visual { display: none; margin-bottom: 50px; }
+        
+        #area-cupom-visual, #area-relatorio-visual { display: none; margin-bottom: 50px; }
 
         @media print {
             @page { margin: 0; size: auto; }
-            body > :not(#area-cupom-visual) { display: none !important; }
-            #area-cupom-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: white; }
+            body > :not(#area-cupom-visual):not(#area-relatorio-visual) { display: none !important; }
+            body.printing-cupom #area-cupom-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            body.printing-relatorio #area-relatorio-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 10mm !important; }
             .cupom-wrapper { border: none; box-shadow: none; max-width: 100%; width: 100%; padding: 5mm; }
             * { color: #000 !important; text-shadow: none !important; }
             .c-section-title { background: none !important; border-color: #000 !important; }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body>
 
 <div id="area-cupom-visual"></div>
+<div id="area-relatorio-visual"></div>
 
 <div id="modal-overlay" onclick="fecharModal(event)">
     <div class="modal-content" id="modal-content-default"></div>
@@ -184,15 +191,17 @@
         <div id="ext-lista" style="padding:15px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
         <div id="ext-share-area" style="padding:15px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:8px">
             <div id="ext-preview-box" style="display:none"></div>
-            <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:5px">COMPARTILHAR</div>
+            <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:5px">COMPARTILHAR EXTRATO</div>
+            
             <button class="btn" style="background:#25d366; margin:0; padding:10px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
             <button class="btn" style="background:#0277bd; margin:0; padding:10px" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH (RAWBT)</button>
+            <button class="btn" style="background:#333; margin:0; padding:10px" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> PDF / IMPRIMIR</button>
         </div>
     </div>
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.5 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v1.7 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -375,6 +384,8 @@
                 <div id="r-lucro" style="font-size:18px; font-weight:900; color:#b2fab4">****</div>
             </div>
 
+            <button class="btn btn-dark" style="margin-top:15px" onclick="acaoImprimirRelatorio()"><i class="fas fa-file-pdf"></i> GERAR PDF DO RELATÓRIO</button>
+
             <h3 style="margin-top:25px; font-size:12px; color:#666">CLIENTES ATENDIDOS</h3>
             <div class="search-box" style="margin-bottom:10px">
                 <input type="text" id="r-search" placeholder="🔍 BUSCAR CLIENTE..." onkeyup="renderRelatorio()" style="background:white; border:2px solid #ddd">
@@ -493,32 +504,13 @@ window.toggleSearch = function(tipo, inpId, boxId) {
     const box = document.getElementById(boxId); 
     const val = document.getElementById(inpId).value;
 
-    // 1. Caso LISTA DE CLIENTES (Página Clientes)
     if(tipo === 'listacli') { 
-         // Se tem conteudo e não é a mensagem de vazio, limpa (recolhe)
-         if(box.innerHTML.trim() !== '' && !box.innerHTML.includes('VAZIO')) {
-             box.innerHTML = '';
-         } else {
-             // Mostra (busca completa)
-             buscar('clientes', val, boxId, true, true);
-         }
-         return; 
+         if(box.innerHTML.trim() !== '' && !box.innerHTML.includes('VAZIO')) { box.innerHTML = ''; } else { buscar('clientes', val, boxId, true, true); } return; 
     }
-
-    // 2. Caso LISTA DE ESTOQUE (Página Estoque) - NOVO
     if(tipo === 'listaestoque') {
-        if(box.innerHTML.trim() !== '' && !box.innerHTML.includes('NENHUM ITEM')) {
-            box.innerHTML = ''; // Recolhe
-        } else {
-            renderListaEstoque(); // Mostra
-        }
-        return;
+        if(box.innerHTML.trim() !== '' && !box.innerHTML.includes('NENHUM ITEM')) { box.innerHTML = ''; } else { renderListaEstoque(); } return;
     }
-
-    // 3. Caso DROPDOWNS (Vendas e OS)
-    if(box.style.display === 'block') { 
-        box.style.display = 'none'; 
-    } else {
+    if(box.style.display === 'block') { box.style.display = 'none'; } else {
         if(tipo === 'cli') buscar('clientes', val, boxId, false, true);
         if(tipo === 'venda') buscarVenda(val, true);
         if(tipo === 'os') buscarItemOS(val, true);
@@ -861,7 +853,7 @@ window.salvarProduto = async function(t) {
 }
 window.limparEstoque = function() { document.getElementById('p-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-venda').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('p-custo').value = ''; window.tempImg = null; document.getElementById('p-foto-view').src = ''; document.getElementById('p-foto-view').classList.remove('has-img'); }
 
-// NOVA LÓGICA DE ESTOQUE (v1.5 - Toggle e Busca)
+// NOVA LÓGICA DE ESTOQUE
 window.mudarTabEstoque = function(tab) {
     window.estoqueTab = tab;
     document.getElementById('btn-tab-prod').style.opacity = tab==='prod' ? '1' : '0.5';
@@ -932,9 +924,95 @@ window.abrirExtratoCliente = function(nome) {
 }
 
 /* ==========================================================================
-   LÓGICA DE IMPRESSÃO PROFISSIONAL v1.5
+   LÓGICA DE IMPRESSÃO (PDF E CUPOM) V1.6
    ========================================================================== */
 
+/* --- FUNÇÃO PARA GERAR O PDF DO RELATÓRIO --- */
+window.acaoImprimirRelatorio = function() {
+    abrirModalSenha(() => {
+        document.getElementById('modal-overlay').style.display='none';
+        
+        // 1. Coleta os dados filtrados (reusa a lógica do renderRelatorio)
+        const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
+        const logsFiltrados = window.db.logs.filter(l => {
+            const d = new Date(l.data); let matchDate = false;
+            if(f=='dia') matchDate = d.toDateString()===now.toDateString(); else if(f=='semana') matchDate = (now-d) < 604800000; else if(f=='mes') matchDate = d.getMonth()===now.getMonth(); else matchDate = d.getFullYear()===now.getFullYear();
+            let matchText = true; if(searchTxt) { matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt)); } return matchDate && matchText;
+        }).sort((a,b) => new Date(b.data) - new Date(a.data)); // Ordena por data (recente primeiro)
+
+        let totalGeral = 0;
+        let lucroGeral = 0;
+        
+        // Gera linhas da tabela
+        const linhasTabela = logsFiltrados.map(l => {
+            totalGeral += l.valor;
+            let custoItem = 0; 
+            if(l.tipo === 'PRODUTO' || l.tipo === 'P') { const prod = window.db.produtos.find(p => p.nome === l.desc); if(prod && prod.custo) custoItem = parseFloat(prod.custo) * (l.qtd || 1); } 
+            lucroGeral += (l.valor - custoItem);
+            
+            const tipoLbl = (l.tipo==='DESCONTO') ? 'DESC' : (l.tipo.substring(0,4));
+            const color = (l.valor < 0) ? 'red' : 'black';
+            return `
+                <tr style="font-size:11px; border-bottom:1px solid #ccc;">
+                    <td style="padding:4px;">${new Date(l.data).toLocaleDateString()}</td>
+                    <td style="padding:4px;">${l.cliente}</td>
+                    <td style="padding:4px;">${l.desc}</td>
+                    <td style="padding:4px; text-align:right; color:${color}">${l.valor.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        // Monta o HTML do Relatório A4
+        const htmlRelatorio = `
+            <div style="font-family: Arial, sans-serif; padding:20px; color:#000;">
+                <h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2>
+                <div style="text-align:center; font-size:12px; margin-bottom:20px;">RELATÓRIO FINANCEIRO - ${f.toUpperCase()}</div>
+                
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px; border:1px solid #000; padding:10px;">
+                    <div>
+                        <b>EMISSÃO:</b> ${new Date().toLocaleString()}<br>
+                        <b>ITENS:</b> ${logsFiltrados.length}
+                    </div>
+                    <div style="text-align:right">
+                        <b>FATURAMENTO:</b> R$ ${totalGeral.toFixed(2)}<br>
+                        <b>LUCRO EST.:</b> R$ ${lucroGeral.toFixed(2)}
+                    </div>
+                </div>
+
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#eee; font-weight:bold; font-size:12px;">
+                            <th style="text-align:left; padding:5px;">DATA</th>
+                            <th style="text-align:left; padding:5px;">CLIENTE</th>
+                            <th style="text-align:left; padding:5px;">DESCRIÇÃO</th>
+                            <th style="text-align:right; padding:5px;">VALOR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasTabela}
+                    </tbody>
+                </table>
+                <div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.7</div>
+            </div>
+        `;
+
+        // Insere no DOM
+        document.getElementById('area-relatorio-visual').innerHTML = htmlRelatorio;
+        
+        // Define classe para impressão correta
+        document.body.classList.remove('printing-cupom');
+        document.body.classList.add('printing-relatorio');
+        
+        // Chama a impressão nativa (Browser gera o PDF)
+        window.print();
+
+        // Limpa classe após impressão (timeout para garantir)
+        setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
+    });
+}
+
+
+/* --- CUPOM COM DESTAQUES ATUALIZADO --- */
 window.montarHtmlCupom = function(d) {
     const agora = new Date(); 
     const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
@@ -961,7 +1039,7 @@ window.montarHtmlCupom = function(d) {
             <div class="c-row"><span>SINAL (PAGO):</span> <span>- R$ ${parseFloat(d.sinal).toFixed(2)}</span></div>
             <div class="c-total-box" style="border-style:dashed; margin-top:5px">
                  <div style="font-size:10px; font-weight:bold;">RESTANTE A PAGAR:</div>
-                 <div class="c-big-total">R$ ${restante.toFixed(2)}</div>
+                 <div class="c-big-total" style="font-size:18px">R$ ${restante.toFixed(2)}</div>
             </div>
         `;
     }
@@ -977,10 +1055,14 @@ window.montarHtmlCupom = function(d) {
             </div>
 
             <div class="c-body">
-                <div class="c-section-title">DETALHES DA OPERAÇÃO</div>
+                <div class="c-destaque-os">${d.tipo}</div>
+                
                 <div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div>
-                <div class="c-row bold"><span>TIPO:</span> <span>${d.tipo}</span></div>
-                <div class="c-row"><span>CLIENTE:</span> <span>${d.cliente || 'CONSUMIDOR'}</span></div>
+                
+                <div style="margin:5px 0; border-bottom:1px solid #ccc; padding-bottom:5px;">
+                    <span style="font-size:10px;">CLIENTE:</span><br>
+                    <span class="c-destaque-nome">${d.cliente || 'CONSUMIDOR'}</span>
+                </div>
                 
                 <table class="c-table">
                     <thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead>
@@ -991,7 +1073,7 @@ window.montarHtmlCupom = function(d) {
                 <div class="c-row"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>
                 ${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}
                 
-                <div class="c-total-box">
+                <div style="margin-top:10px; text-align:right;">
                     <div style="font-size:10px; font-weight:bold;">TOTAL GERAL:</div>
                     <div class="c-big-total">R$ ${d.total.toFixed(2)}</div>
                 </div>
@@ -1012,7 +1094,7 @@ window.montarHtmlCupom = function(d) {
                 <div>ASSINATURA DO CLIENTE</div>
                 <br>
                 <div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div>
-                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.5 PRO</div>
+                <div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.7 PRO</div>
             </div>
         </div>
     `;
@@ -1057,7 +1139,10 @@ window.acaoShare = function(tipo) {
     const d = window.shareData; 
     
     if(tipo === 'pdf') {
+        document.body.classList.remove('printing-relatorio');
+        document.body.classList.add('printing-cupom');
         window.print(); 
+        setTimeout(() => { document.body.classList.remove('printing-cupom'); }, 1000);
     }
     else if(tipo === 'bluetooth') {
         // GERAÇÃO DE TEXTO PURO FORMATADO MANUALMENTE (SEM CÓDIGOS [C][L])
@@ -1121,7 +1206,7 @@ window.acaoShare = function(tipo) {
         
         // RODAPÉ
         T += '\n\n' + txtCenter('OBRIGADO PELA PREFERENCIA!', W) + '\n';
-        T += txtCenter('Filhao.Cell v1.5', W) + '\n\n\n';
+        T += txtCenter('Filhao.Cell v1.7', W) + '\n\n\n';
 
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
@@ -1160,6 +1245,64 @@ window.verComprovanteTela = function() {
 
 window.shareExtrato = function(tipo) {
     if(!window.extratoAtual) return; const d = window.extratoAtual;
+    
+    // --- LÓGICA NOVA PARA PDF DO EXTRATO DO CLIENTE ---
+    if(tipo === 'pdf') {
+        let linhasTabela = '';
+        // Itera sobre as datas ordenadas (dados já vem agrupados e ordenados na lógica da tela)
+        for (const [data, itens] of Object.entries(d.dados)) { 
+            itens.forEach(i => {
+                const color = i.valor < 0 ? 'color:red' : 'color:black';
+                const qtdTxt = (i.qtd > 1) ? `(${i.qtd}x)` : '';
+                linhasTabela += `
+                    <tr style="font-size:11px; border-bottom:1px solid #ccc;">
+                        <td style="padding:5px;">${data}</td>
+                        <td style="padding:5px;">${i.desc} ${qtdTxt}</td>
+                        <td style="padding:5px; text-align:right; ${color}">R$ ${i.valor.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        const htmlRelatorio = `
+            <div style="font-family: Arial, sans-serif; padding:20px; color:#000;">
+                <h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2>
+                <div style="text-align:center; font-size:12px; margin-bottom:20px;">EXTRATO DO CLIENTE</div>
+                
+                <div style="margin-bottom:20px; border:1px solid #000; padding:10px; background:#f9f9f9;">
+                    <b style="font-size:14px">${d.cliente}</b><br>
+                    <span style="font-size:12px">EMISSÃO: ${new Date().toLocaleString()}</span>
+                </div>
+
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#eee; font-weight:bold; font-size:12px;">
+                            <th style="text-align:left; padding:5px; width:25%">DATA</th>
+                            <th style="text-align:left; padding:5px; width:50%">DESCRIÇÃO</th>
+                            <th style="text-align:right; padding:5px; width:25%">VALOR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasTabela}
+                    </tbody>
+                </table>
+                
+                <div style="text-align:right; margin-top:20px; font-size:16px; font-weight:bold; border-top:2px solid #000; padding-top:10px;">
+                    TOTAL GERAL: R$ ${d.total.toFixed(2)}
+                </div>
+
+                <div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.7</div>
+            </div>
+        `;
+
+        document.getElementById('area-relatorio-visual').innerHTML = htmlRelatorio;
+        document.body.classList.remove('printing-cupom');
+        document.body.classList.add('printing-relatorio');
+        window.print();
+        setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
+        return;
+    }
+
     if(tipo === 'zap') {
         let txt = `*EXTRATO - ${EMPRESA.nome}*\nCLI: ${d.cliente}\n\n`;
         for (const [data, itens] of Object.entries(d.dados)) { txt += `*${data}*\n`; itens.forEach(i => { const qtd = (i.qtd > 1 && i.tipo !== 'DESCONTO') ? `${i.qtd}x ` : ''; txt += `- ${qtd}${i.desc}: R$ ${i.valor.toFixed(2)}\n`; }); txt += `\n`; }
