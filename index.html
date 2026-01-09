@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v77 PRIV</title>
+    <title>FILHÃO.CELL v78 PRIV</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -195,51 +195,33 @@
         .check-log { transform: scale(1.3); margin-right: 10px; accent-color: var(--primary); }
 
         /* ========================================= */
-        /* CORREÇÃO CRÍTICA DE IMPRESSÃO MOBILE PDF  */
+        /* CSS IMPRESSÃO (MODO SEGURO)               */
         /* ========================================= */
+        #area-print { display: none; } /* Escondido por padrão */
+
         @media print {
-            /* 1. Resetar propriedades do HTML/BODY para garantir fundo branco e sem margens estranhas */
-            html, body {
-                background-color: #ffffff !important;
-                background: #ffffff !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                height: 100% !important;
-                width: 100% !important;
-                overflow: visible !important;
-                color: #000000 !important;
-            }
+            /* Esconde toda a aplicação principal */
+            #main-app { display: none !important; }
 
-            /* 2. Ocultar TUDO que for filho direto do body, EXCETO a área de impressão */
-            body > *:not(#area-print) {
-                display: none !important;
-            }
-
-            /* 3. Estilizar a área de impressão para ser a única coisa visível */
-            #area-print {
-                display: block !important;
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                margin: 0 !important;
+            /* Mostra apenas a área de impressão */
+            #area-print { 
+                display: block !important; 
+                position: absolute !important; 
+                top: 0 !important; 
+                left: 0 !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
                 padding: 10px !important;
-                background-color: #ffffff !important;
-                z-index: 999999 !important;
-                color: #000000 !important;
-                visibility: visible !important;
+                background-color: white !important; 
+                color: black !important;
+                z-index: 9999;
             }
 
-            /* 4. Garantir que filhos da área de impressão estejam visíveis e pretos */
-            #area-print * {
-                visibility: visible !important;
-                color: #000000 !important;
-            }
-            
-            /* Remove sombras e bordas extras na impressão */
-            .p-header, .p-table, .p-total {
-                box-shadow: none !important;
-                border: none !important;
+            /* Reseta estilos globais que podem atrapalhar */
+            body, html { 
+                background: white !important; 
+                height: auto !important; 
+                overflow: visible !important; 
             }
         }
     </style>
@@ -248,222 +230,224 @@
 
 <div id="area-print"></div>
 
-<div id="modal-overlay" onclick="fecharModal(event)">
-    <div class="modal-content" id="modal-content-default"></div>
-</div>
-
-<div id="modal-extrato" onclick="fecharExtrato(event)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2001; align-items:center; justify-content:center; backdrop-filter:blur(5px)">
-    <div class="modal-content" style="width:90%; max-width:400px; max-height:80vh; display:flex; flex-direction:column; padding:0; overflow:hidden">
-        <div style="background:var(--primary); color:white; padding:12px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; font-size:12px">
-            <span id="ext-nome">CLIENTE</span>
-            <i class="fas fa-times" onclick="document.getElementById('modal-extrato').style.display='none'" style="cursor:pointer"></i>
-        </div>
-        <div id="ext-lista" style="padding:12px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
-        <div id="ext-share-area" style="padding:12px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:6px">
-            <div id="ext-preview-box" style="border:1px solid #ccc; padding:10px; max-height:200px; overflow-y:auto; background:#fff; margin-bottom:10px; font-size:10px; display:none; color:black;"></div>
-            
-            <div style="font-size:9px; color:#999; text-align:center; font-weight:bold; margin-bottom:4px">COMPARTILHAR EXTRATO</div>
-            <button class="btn" style="background:#25d366; margin:0; padding:8px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
-            <div style="display:flex; gap:6px">
-                <button class="btn" style="background:#0277bd; margin:0; padding:8px; flex:1" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH</button>
-                <button class="btn" style="background:#d32f2f; margin:0; padding:8px; flex:1" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v77 PRIV <i class="fas fa-sync-alt"></i></div></h2>
-    <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
-</header>
-
-<div class="container">
-    <div id="page-vendas" class="page active">
-        <div class="card">
-            <h3>
-                <i class="fas fa-cash-register"></i> CAIXA
-                <button class="btn-novo" onclick="limparVendas()"><i class="fas fa-eraser"></i> LIMPAR</button>
-            </h3>
-            <label>CLIENTE</label>
-            <div class="search-box">
-                <input type="text" id="v-cli" placeholder="BUSCAR CLIENTE..." onkeyup="buscar('clientes', this.value, 'sug-v-cli')">
-                <button type="button" class="search-btn" onclick="toggleSearch('cli', 'v-cli', 'sug-v-cli')"><i class="fas fa-search"></i></button>
-                <div id="sug-v-cli" class="sugestoes"></div>
-            </div>
-            <button class="btn-novo" style="margin-top:10px" onclick="cadastrarNovoNaVenda()"><i class="fas fa-plus"></i> NOVO CLIENTE</button>
-
-            <label style="margin-top:15px">ADICIONAR ITEM</label>
-            <div class="search-box">
-                <input type="text" id="v-busca" placeholder="BIPAR OU DIGITAR..." onkeyup="buscarVenda(this.value)">
-                <i class="fas fa-times clear-btn" id="v-clear-btn" onclick="limparBuscaVenda()"></i>
-                <button type="button" class="search-btn" onclick="toggleSearch('venda', 'v-busca', 'sug-v-prod')"><i class="fas fa-search"></i></button>
-                <div id="sug-v-prod" class="sugestoes"></div>
-            </div>
-
-            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
-                <div style="font-size:9px; color:#999; text-align:center; margin-bottom:5px">ITENS DO CARRINHO</div>
-                <div id="carrinho-lista" style="font-size:11px; color:#888; text-align:center; padding:10px">VAZIO</div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
-                    <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
-                    <input type="number" id="v-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderCarrinho()">
-                </div>
-                <div style="text-align:right; font-size:16px; font-weight:900; margin-top:8px; color:var(--primary);" id="v-total">TOTAL: R$ 0,00</div>
-            </div>
-            <button class="btn btn-primary" style="margin-top:15px; width:100%" onclick="finalizarVenda()">FINALIZAR VENDA</button>
-        </div>
+<div id="main-app">
+    <div id="modal-overlay" onclick="fecharModal(event)">
+        <div class="modal-content" id="modal-content-default"></div>
     </div>
 
-    <div id="page-servicos" class="page">
-        <div class="card">
-            <h3>NOVA O.S. <button class="btn-novo" onclick="limparOS()"><i class="fas fa-eraser"></i> LIMPAR</button></h3>
-            <input type="hidden" id="os-id"><input type="hidden" id="os-status-orig">
-            <label>CLIENTE</label>
-            <div style="display:flex; gap:5px; align-items:flex-end">
-                <div class="search-box" style="flex:1">
-                    <input type="text" id="s-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'sug-s-cli')">
-                    <button type="button" class="search-btn" onclick="toggleSearch('cli', 's-cli', 'sug-s-cli')"><i class="fas fa-search"></i></button>
-                    <div id="sug-s-cli" class="sugestoes"></div>
-                </div>
-                <button class="btn-add-mini" onclick="cadastrarNovoNaOS()"><i class="fas fa-plus"></i></button>
+    <div id="modal-extrato" onclick="fecharExtrato(event)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2001; align-items:center; justify-content:center; backdrop-filter:blur(5px)">
+        <div class="modal-content" style="width:90%; max-width:400px; max-height:80vh; display:flex; flex-direction:column; padding:0; overflow:hidden">
+            <div style="background:var(--primary); color:white; padding:12px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; font-size:12px">
+                <span id="ext-nome">CLIENTE</span>
+                <i class="fas fa-times" onclick="document.getElementById('modal-extrato').style.display='none'" style="cursor:pointer"></i>
             </div>
-            <div style="display:flex; gap:10px">
-                <div style="flex:1"><label>MODELO</label><input id="s-mod"></div>
-                <div style="flex:1"><label>SENHA</label><input id="s-senha"></div>
-            </div>
-            <label>DEFEITO / OBS</label><input id="s-def">
-            
-            <label>FOTOS DO APARELHO</label>
-            <div class="os-foto-grid">
-                <div class="os-foto-slot" onclick="addFotoOS(0)"><i class="fas fa-camera"></i></div>
-                <div class="os-foto-slot" onclick="addFotoOS(1)"><i class="fas fa-camera"></i></div>
-                <div class="os-foto-slot" onclick="addFotoOS(2)"><i class="fas fa-camera"></i></div>
-                <div class="os-foto-slot" onclick="addFotoOS(3)"><i class="fas fa-camera"></i></div>
-            </div>
-            <input type="file" id="os-foto-input" hidden onchange="processFotoOS(this)">
-
-            <label>ADICIONAR PEÇA/SERVIÇO</label>
-            <div class="search-box">
-                <input type="text" id="s-busca-item" placeholder="BUSCAR PEÇA..." onkeyup="buscarItemOS(this.value)">
-                <button type="button" class="search-btn" onclick="toggleSearch('os', 's-busca-item', 'sug-os-item')"><i class="fas fa-search"></i></button>
-                <div id="sug-os-item" class="sugestoes"></div>
-            </div>
-
-            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
-                <div id="os-lista-itens"></div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
-                    <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
-                    <input type="number" id="s-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
-                </div>
-                <div style="text-align:right; font-size:15px; font-weight:900; margin-top:8px; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
-            </div>
-            <button class="btn btn-primary" onclick="salvarOS()">SALVAR ORDEM</button>
-        </div>
-
-        <div style="padding: 0 5px; margin-bottom: 8px; display:flex; gap:5px">
-            <div class="search-box" style="flex:1"><input type="text" id="busca-kanban" placeholder="🔍 LOCALIZAR OS..." onkeyup="renderKanban()" style="background:white; border:2px solid #ddd; font-weight:bold"></div>
-            <button class="btn-mini dark" onclick="verHistoricoOS()"><i class="fas fa-history"></i></button>
-        </div>
-        <div class="kanban-grid">
-            <div class="k-col"><div class="k-head" style="color:#555">ANÁLISE</div><div id="k-pecas"></div></div>
-            <div class="k-col"><div class="k-head" style="color:#ff9800; font-size:8px">AGUARDANDO PAGAMENTO</div><div id="k-pgto"></div></div>
-            <div class="k-col"><div class="k-head" style="color:green">PRONTO</div><div id="k-retirado"></div></div>
-        </div>
-    </div>
-
-    <div id="page-clientes" class="page">
-        <div class="card" id="form-cli">
-            <h3>CLIENTES <button class="btn-novo" onclick="limparCli()"><i class="fas fa-user-plus"></i> NOVO</button></h3>
-            <input type="hidden" id="c-id">
-            <img id="c-foto-view" src="" class="foto-preview" onclick="document.getElementById('c-foto').click()">
-            <input type="file" id="c-foto" hidden onchange="lerFoto(this, 'c-foto-view')">
-            <input type="text" id="c-nome" placeholder="NOME COMPLETO *">
-            <input type="tel" id="c-tel" placeholder="WHATSAPP (81) 9..." oninput="maskTel(this)">
-            <div style="display:flex; gap:10px"><input type="text" id="c-bairro" placeholder="BAIRRO"><input type="text" id="c-cidade" placeholder="CIDADE"></div>
-            <button class="btn btn-primary" onclick="salvarCliente()">SALVAR CLIENTE</button>
-        </div>
-        <div class="card">
-            <button class="btn-debt" onclick="abrirCarteiraDevedores()">
-                <i class="fas fa-book" style="font-size:16px"></i> CARTEIRA DE DEVEDORES
-            </button>
-            <div class="search-box">
-                <input type="text" id="cli-search-input" placeholder="FILTRAR LISTA..." onkeyup="buscar('clientes', this.value, 'lista-clientes', true)">
-                <button type="button" class="search-btn" onclick="toggleSearch('listacli', 'cli-search-input', 'lista-clientes')"><i class="fas fa-search"></i></button>
-            </div>
-            <div id="lista-clientes" style="margin-top:15px"></div>
-        </div>
-    </div>
-
-    <div id="page-estoque" class="page">
-        <div class="card">
-            <h3>ITEM DE ESTOQUE <button class="btn-novo" onclick="limparEstoque()"><i class="fas fa-eraser"></i> LIMPAR</button></h3>
-            <input type="hidden" id="p-id">
-            <img id="p-foto-view" src="" class="foto-preview" onclick="document.getElementById('p-foto').click()">
-            <input type="file" id="p-foto" hidden onchange="lerFoto(this, 'p-foto-view')">
-            <input type="text" id="p-nome" placeholder="DESCRIÇÃO (OBRIGATÓRIO) *">
-            <div style="display:flex; gap:10px"><input type="number" id="p-venda" placeholder="R$ VENDA *"><input type="number" id="p-qtd" placeholder="QTD"></div>
-            <div style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px">
-                <label style="margin-top:0; color:#c62828"><i class="fas fa-lock"></i> PREÇO DE CUSTO</label>
-                <div style="display:flex; gap:5px">
-                    <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
-                    <button id="btn-ver-custo" class="btn-mini dark" style="flex:0; width:40px" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
-                </div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:10px">
-                <button class="btn btn-primary" onclick="salvarProduto('prod')">SALVAR PRODUTO</button>
-                <button class="btn btn-dark" onclick="salvarProduto('serv')">SALVAR SERVIÇO</button>
-            </div>
-        </div>
-        <div class="card">
-            <div style="display:flex; gap:5px; margin-bottom:10px">
-                <button class="btn-mini dark" onclick="listarEstoque('prod')">PRODUTOS</button>
-                <button class="btn-mini dark" style="opacity:0.7" onclick="listarEstoque('serv')">SERVIÇOS</button>
-            </div>
-            <div id="lista-estoque"></div>
-        </div>
-    </div>
-
-    <div id="page-relatorio" class="page">
-        <div class="card" style="position:relative">
-            <i class="fas fa-eye" id="eye-rel" onclick="togglePriv()" style="position:absolute; top:12px; right:12px; color:var(--primary); font-size:16px; cursor:pointer; padding:5px; z-index:10"></i>
-            <h3>RELATÓRIOS FINANCEIROS</h3>
-            <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:12px">
-                <option value="dia">HOJE</option>
-                <option value="semana">ÚLTIMOS 7 DIAS</option>
-                <option value="mes">MÊS ATUAL</option>
-                <option value="ano">ESTE ANO</option>
-            </select>
-            <div style="background:var(--accent); color:white; padding:15px; border-radius:10px; text-align:center">
-                <div style="font-size:10px; opacity:0.8">FATURAMENTO TOTAL</div>
-                <div id="r-total" style="font-size:20px; font-weight:900; margin-top:4px">****</div>
+            <div id="ext-lista" style="padding:12px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
+            <div id="ext-share-area" style="padding:12px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:6px">
+                <div id="ext-preview-box" style="border:1px solid #ccc; padding:10px; max-height:200px; overflow-y:auto; background:#fff; margin-bottom:10px; font-size:10px; display:none; color:black;"></div>
                 
-                <div style="font-size:10px; opacity:0.8; margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:4px">LUCRO ESTIMADO</div>
-                <div id="r-lucro" style="font-size:16px; font-weight:900; color:#b2fab4">****</div>
-            </div>
-
-            <h3 style="margin-top:20px; font-size:11px; color:#666">CLIENTES ATENDIDOS</h3>
-            <div class="search-box" style="margin-bottom:8px">
-                <input type="text" id="r-search" placeholder="🔍 BUSCAR CLIENTE..." onkeyup="renderRelatorio()" style="background:white; border:2px solid #ddd">
-                <div id="sug-r-cli" class="sugestoes"></div>
-            </div>
-            <div id="r-hist" style="max-height:300px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:5px"></div>
-
-            <h3 style="margin-top:15px; font-size:11px; color:#666">RANKINGS</h3>
-            <div class="rank-grid">
-                <div class="rank-box"><div class="rank-title">CLIENTES</div><div id="rank-cli"></div></div>
-                <div class="rank-box"><div class="rank-title">PRODUTOS</div><div id="rank-prod"></div></div>
-                <div class="rank-box"><div class="rank-title">SERVIÇOS</div><div id="rank-serv"></div></div>
+                <div style="font-size:9px; color:#999; text-align:center; font-weight:bold; margin-bottom:4px">COMPARTILHAR EXTRATO</div>
+                <button class="btn" style="background:#25d366; margin:0; padding:8px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
+                <div style="display:flex; gap:6px">
+                    <button class="btn" style="background:#0277bd; margin:0; padding:8px; flex:1" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH</button>
+                    <button class="btn" style="background:#d32f2f; margin:0; padding:8px; flex:1" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<nav>
-    <button class="nav-item active" onclick="nav('vendas', this)"><i class="fas fa-shopping-cart"></i>VENDAS</button>
-    <button class="nav-item" onclick="nav('servicos', this)"><i class="fas fa-wrench"></i>OS</button>
-    <button class="nav-item" onclick="nav('clientes', this)"><i class="fas fa-users"></i>CLIENTES</button>
-    <button class="nav-item" onclick="nav('estoque', this)"><i class="fas fa-box"></i>ESTOQUE</button>
-    <button class="nav-item" onclick="nav('relatorio', this)"><i class="fas fa-chart-line"></i>RELATÓRIOS</button>
-</nav>
+    <header>
+        <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v78 PRIV <i class="fas fa-sync-alt"></i></div></h2>
+        <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
+    </header>
+
+    <div class="container">
+        <div id="page-vendas" class="page active">
+            <div class="card">
+                <h3>
+                    <i class="fas fa-cash-register"></i> CAIXA
+                    <button class="btn-novo" onclick="limparVendas()"><i class="fas fa-eraser"></i> LIMPAR</button>
+                </h3>
+                <label>CLIENTE</label>
+                <div class="search-box">
+                    <input type="text" id="v-cli" placeholder="BUSCAR CLIENTE..." onkeyup="buscar('clientes', this.value, 'sug-v-cli')">
+                    <button type="button" class="search-btn" onclick="toggleSearch('cli', 'v-cli', 'sug-v-cli')"><i class="fas fa-search"></i></button>
+                    <div id="sug-v-cli" class="sugestoes"></div>
+                </div>
+                <button class="btn-novo" style="margin-top:10px" onclick="cadastrarNovoNaVenda()"><i class="fas fa-plus"></i> NOVO CLIENTE</button>
+
+                <label style="margin-top:15px">ADICIONAR ITEM</label>
+                <div class="search-box">
+                    <input type="text" id="v-busca" placeholder="BIPAR OU DIGITAR..." onkeyup="buscarVenda(this.value)">
+                    <i class="fas fa-times clear-btn" id="v-clear-btn" onclick="limparBuscaVenda()"></i>
+                    <button type="button" class="search-btn" onclick="toggleSearch('venda', 'v-busca', 'sug-v-prod')"><i class="fas fa-search"></i></button>
+                    <div id="sug-v-prod" class="sugestoes"></div>
+                </div>
+
+                <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
+                    <div style="font-size:9px; color:#999; text-align:center; margin-bottom:5px">ITENS DO CARRINHO</div>
+                    <div id="carrinho-lista" style="font-size:11px; color:#888; text-align:center; padding:10px">VAZIO</div>
+                    <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
+                        <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
+                        <input type="number" id="v-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderCarrinho()">
+                    </div>
+                    <div style="text-align:right; font-size:16px; font-weight:900; margin-top:8px; color:var(--primary);" id="v-total">TOTAL: R$ 0,00</div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:15px; width:100%" onclick="finalizarVenda()">FINALIZAR VENDA</button>
+            </div>
+        </div>
+
+        <div id="page-servicos" class="page">
+            <div class="card">
+                <h3>NOVA O.S. <button class="btn-novo" onclick="limparOS()"><i class="fas fa-eraser"></i> LIMPAR</button></h3>
+                <input type="hidden" id="os-id"><input type="hidden" id="os-status-orig">
+                <label>CLIENTE</label>
+                <div style="display:flex; gap:5px; align-items:flex-end">
+                    <div class="search-box" style="flex:1">
+                        <input type="text" id="s-cli" placeholder="BUSCAR..." onkeyup="buscar('clientes', this.value, 'sug-s-cli')">
+                        <button type="button" class="search-btn" onclick="toggleSearch('cli', 's-cli', 'sug-s-cli')"><i class="fas fa-search"></i></button>
+                        <div id="sug-s-cli" class="sugestoes"></div>
+                    </div>
+                    <button class="btn-add-mini" onclick="cadastrarNovoNaOS()"><i class="fas fa-plus"></i></button>
+                </div>
+                <div style="display:flex; gap:10px">
+                    <div style="flex:1"><label>MODELO</label><input id="s-mod"></div>
+                    <div style="flex:1"><label>SENHA</label><input id="s-senha"></div>
+                </div>
+                <label>DEFEITO / OBS</label><input id="s-def">
+                
+                <label>FOTOS DO APARELHO</label>
+                <div class="os-foto-grid">
+                    <div class="os-foto-slot" onclick="addFotoOS(0)"><i class="fas fa-camera"></i></div>
+                    <div class="os-foto-slot" onclick="addFotoOS(1)"><i class="fas fa-camera"></i></div>
+                    <div class="os-foto-slot" onclick="addFotoOS(2)"><i class="fas fa-camera"></i></div>
+                    <div class="os-foto-slot" onclick="addFotoOS(3)"><i class="fas fa-camera"></i></div>
+                </div>
+                <input type="file" id="os-foto-input" hidden onchange="processFotoOS(this)">
+
+                <label>ADICIONAR PEÇA/SERVIÇO</label>
+                <div class="search-box">
+                    <input type="text" id="s-busca-item" placeholder="BUSCAR PEÇA..." onkeyup="buscarItemOS(this.value)">
+                    <button type="button" class="search-btn" onclick="toggleSearch('os', 's-busca-item', 'sug-os-item')"><i class="fas fa-search"></i></button>
+                    <div id="sug-os-item" class="sugestoes"></div>
+                </div>
+
+                <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
+                    <div id="os-lista-itens"></div>
+                    <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
+                        <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
+                        <input type="number" id="s-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
+                    </div>
+                    <div style="text-align:right; font-size:15px; font-weight:900; margin-top:8px; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
+                </div>
+                <button class="btn btn-primary" onclick="salvarOS()">SALVAR ORDEM</button>
+            </div>
+
+            <div style="padding: 0 5px; margin-bottom: 8px; display:flex; gap:5px">
+                <div class="search-box" style="flex:1"><input type="text" id="busca-kanban" placeholder="🔍 LOCALIZAR OS..." onkeyup="renderKanban()" style="background:white; border:2px solid #ddd; font-weight:bold"></div>
+                <button class="btn-mini dark" onclick="verHistoricoOS()"><i class="fas fa-history"></i></button>
+            </div>
+            <div class="kanban-grid">
+                <div class="k-col"><div class="k-head" style="color:#555">ANÁLISE</div><div id="k-pecas"></div></div>
+                <div class="k-col"><div class="k-head" style="color:#ff9800; font-size:8px">AGUARDANDO PAGAMENTO</div><div id="k-pgto"></div></div>
+                <div class="k-col"><div class="k-head" style="color:green">PRONTO</div><div id="k-retirado"></div></div>
+            </div>
+        </div>
+
+        <div id="page-clientes" class="page">
+            <div class="card" id="form-cli">
+                <h3>CLIENTES <button class="btn-novo" onclick="limparCli()"><i class="fas fa-user-plus"></i> NOVO</button></h3>
+                <input type="hidden" id="c-id">
+                <img id="c-foto-view" src="" class="foto-preview" onclick="document.getElementById('c-foto').click()">
+                <input type="file" id="c-foto" hidden onchange="lerFoto(this, 'c-foto-view')">
+                <input type="text" id="c-nome" placeholder="NOME COMPLETO *">
+                <input type="tel" id="c-tel" placeholder="WHATSAPP (81) 9..." oninput="maskTel(this)">
+                <div style="display:flex; gap:10px"><input type="text" id="c-bairro" placeholder="BAIRRO"><input type="text" id="c-cidade" placeholder="CIDADE"></div>
+                <button class="btn btn-primary" onclick="salvarCliente()">SALVAR CLIENTE</button>
+            </div>
+            <div class="card">
+                <button class="btn-debt" onclick="abrirCarteiraDevedores()">
+                    <i class="fas fa-book" style="font-size:16px"></i> CARTEIRA DE DEVEDORES
+                </button>
+                <div class="search-box">
+                    <input type="text" id="cli-search-input" placeholder="FILTRAR LISTA..." onkeyup="buscar('clientes', this.value, 'lista-clientes', true)">
+                    <button type="button" class="search-btn" onclick="toggleSearch('listacli', 'cli-search-input', 'lista-clientes')"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="lista-clientes" style="margin-top:15px"></div>
+            </div>
+        </div>
+
+        <div id="page-estoque" class="page">
+            <div class="card">
+                <h3>ITEM DE ESTOQUE <button class="btn-novo" onclick="limparEstoque()"><i class="fas fa-eraser"></i> LIMPAR</button></h3>
+                <input type="hidden" id="p-id">
+                <img id="p-foto-view" src="" class="foto-preview" onclick="document.getElementById('p-foto').click()">
+                <input type="file" id="p-foto" hidden onchange="lerFoto(this, 'p-foto-view')">
+                <input type="text" id="p-nome" placeholder="DESCRIÇÃO (OBRIGATÓRIO) *">
+                <div style="display:flex; gap:10px"><input type="number" id="p-venda" placeholder="R$ VENDA *"><input type="number" id="p-qtd" placeholder="QTD"></div>
+                <div style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px">
+                    <label style="margin-top:0; color:#c62828"><i class="fas fa-lock"></i> PREÇO DE CUSTO</label>
+                    <div style="display:flex; gap:5px">
+                        <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
+                        <button id="btn-ver-custo" class="btn-mini dark" style="flex:0; width:40px" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px">
+                    <button class="btn btn-primary" onclick="salvarProduto('prod')">SALVAR PRODUTO</button>
+                    <button class="btn btn-dark" onclick="salvarProduto('serv')">SALVAR SERVIÇO</button>
+                </div>
+            </div>
+            <div class="card">
+                <div style="display:flex; gap:5px; margin-bottom:10px">
+                    <button class="btn-mini dark" onclick="listarEstoque('prod')">PRODUTOS</button>
+                    <button class="btn-mini dark" style="opacity:0.7" onclick="listarEstoque('serv')">SERVIÇOS</button>
+                </div>
+                <div id="lista-estoque"></div>
+            </div>
+        </div>
+
+        <div id="page-relatorio" class="page">
+            <div class="card" style="position:relative">
+                <i class="fas fa-eye" id="eye-rel" onclick="togglePriv()" style="position:absolute; top:12px; right:12px; color:var(--primary); font-size:16px; cursor:pointer; padding:5px; z-index:10"></i>
+                <h3>RELATÓRIOS FINANCEIROS</h3>
+                <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:12px">
+                    <option value="dia">HOJE</option>
+                    <option value="semana">ÚLTIMOS 7 DIAS</option>
+                    <option value="mes">MÊS ATUAL</option>
+                    <option value="ano">ESTE ANO</option>
+                </select>
+                <div style="background:var(--accent); color:white; padding:15px; border-radius:10px; text-align:center">
+                    <div style="font-size:10px; opacity:0.8">FATURAMENTO TOTAL</div>
+                    <div id="r-total" style="font-size:20px; font-weight:900; margin-top:4px">****</div>
+                    
+                    <div style="font-size:10px; opacity:0.8; margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:4px">LUCRO ESTIMADO</div>
+                    <div id="r-lucro" style="font-size:16px; font-weight:900; color:#b2fab4">****</div>
+                </div>
+
+                <h3 style="margin-top:20px; font-size:11px; color:#666">CLIENTES ATENDIDOS</h3>
+                <div class="search-box" style="margin-bottom:8px">
+                    <input type="text" id="r-search" placeholder="🔍 BUSCAR CLIENTE..." onkeyup="renderRelatorio()" style="background:white; border:2px solid #ddd">
+                    <div id="sug-r-cli" class="sugestoes"></div>
+                </div>
+                <div id="r-hist" style="max-height:300px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:5px"></div>
+
+                <h3 style="margin-top:15px; font-size:11px; color:#666">RANKINGS</h3>
+                <div class="rank-grid">
+                    <div class="rank-box"><div class="rank-title">CLIENTES</div><div id="rank-cli"></div></div>
+                    <div class="rank-box"><div class="rank-title">PRODUTOS</div><div id="rank-prod"></div></div>
+                    <div class="rank-box"><div class="rank-title">SERVIÇOS</div><div id="rank-serv"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <button class="nav-item active" onclick="nav('vendas', this)"><i class="fas fa-shopping-cart"></i>VENDAS</button>
+        <button class="nav-item" onclick="nav('servicos', this)"><i class="fas fa-wrench"></i>OS</button>
+        <button class="nav-item" onclick="nav('clientes', this)"><i class="fas fa-users"></i>CLIENTES</button>
+        <button class="nav-item" onclick="nav('estoque', this)"><i class="fas fa-box"></i>ESTOQUE</button>
+        <button class="nav-item" onclick="nav('relatorio', this)"><i class="fas fa-chart-line"></i>RELATÓRIOS</button>
+    </nav>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
@@ -1242,12 +1226,12 @@ window.acaoShare = function(tipo) {
         const area = document.getElementById('area-print'); 
         area.innerHTML = htmlPrint; 
         
-        // Aumentei o timeout para 500ms para garantir que o celular renderize o HTML antes de chamar o print
+        // Timeout pequeno para o render acontecer, mas não travar o print
         setTimeout(() => { 
             window.print(); 
             // Limpa a área de impressão depois para não atrapalhar
             setTimeout(() => { area.innerHTML = ''; }, 1000); 
-        }, 500);
+        }, 100);
     }
     // BLUETOOTH (RAWBT)
     if(tipo=='bluetooth') {
@@ -1283,7 +1267,7 @@ window.shareExtrato = function(tipo) {
         const htmlContent = document.getElementById('ext-preview-box').innerHTML;
         const area = document.getElementById('area-print'); 
         area.innerHTML = `<div style="font-family:monospace; color:black; padding:20px">${htmlContent}</div>`;
-        setTimeout(() => { window.print(); setTimeout(() => { area.innerHTML = ''; }, 500); }, 500);
+        setTimeout(() => { window.print(); setTimeout(() => { area.innerHTML = ''; }, 500); }, 100);
     }
     else if(tipo === 'bluetooth') {
         let btTxt = `${EMPRESA.nome}%0AEXTRATO DE CLIENTE%0ACLIENTE: ${d.cliente}%0A--------------------------------%0A`;
