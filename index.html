@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v76 PRIV</title>
+    <title>FILHÃO.CELL v77 PRIV</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -62,7 +62,7 @@
             display:flex; justify-content:space-between; align-items:center; font-weight: 800; 
         }
 
-        /* BOTÕES PEQUENOS (NOVO PADRÃO) */
+        /* BOTÕES PEQUENOS */
         .btn-novo {
             background: var(--accent); color: white; border: none; 
             padding: 5px 12px; border-radius: 6px; font-size: 9px; font-weight: bold; 
@@ -129,7 +129,7 @@
         .os-card.pgto { border-top-color: #ff9800; } 
         .os-card.retirado { border-top-color: var(--success); }
 
-        /* BOTÕES MINI (PADRÃO REDUZIDO) */
+        /* BOTÕES MINI */
         .btn-mini { 
             border: none; border-radius: 6px; padding: 6px 0; color: white; cursor: pointer; 
             font-size: 11px; flex: 1; transition: 0.2s; display: flex; justify-content: center; align-items: center; 
@@ -144,7 +144,7 @@
         .btn-mini.zap { background: #25D366; }
         .actions-row { display: flex; gap: 6px; margin-top: 5px; width: 100%; }
 
-        /* BOTÕES GERAIS (PADRÃO REDUZIDO) */
+        /* BOTÕES GERAIS */
         .btn { 
             width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 800; 
             cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; 
@@ -194,23 +194,53 @@
 
         .check-log { transform: scale(1.3); margin-right: 10px; accent-color: var(--primary); }
 
-        /* ESTILO PARA IMPRESSÃO - CORREÇÃO MOBILE */
+        /* ========================================= */
+        /* CORREÇÃO CRÍTICA DE IMPRESSÃO MOBILE PDF  */
+        /* ========================================= */
         @media print {
-            body { background-color: white !important; -webkit-print-color-adjust: exact; }
-            header, nav, .container, #modal-overlay, #modal-extrato, .version-btn { display: none !important; }
-            #area-print { 
-                display: block !important; 
-                position: absolute; 
-                top: 0; 
-                left: 0; 
-                width: 100%; 
-                margin: 0; 
-                padding: 0; 
-                background: white; 
-                color: black !important; 
-                z-index: 99999; 
+            /* 1. Resetar propriedades do HTML/BODY para garantir fundo branco e sem margens estranhas */
+            html, body {
+                background-color: #ffffff !important;
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                height: 100% !important;
+                width: 100% !important;
+                overflow: visible !important;
+                color: #000000 !important;
             }
-            #area-print * { visibility: visible !important; color: black !important; }
+
+            /* 2. Ocultar TUDO que for filho direto do body, EXCETO a área de impressão */
+            body > *:not(#area-print) {
+                display: none !important;
+            }
+
+            /* 3. Estilizar a área de impressão para ser a única coisa visível */
+            #area-print {
+                display: block !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 10px !important;
+                background-color: #ffffff !important;
+                z-index: 999999 !important;
+                color: #000000 !important;
+                visibility: visible !important;
+            }
+
+            /* 4. Garantir que filhos da área de impressão estejam visíveis e pretos */
+            #area-print * {
+                visibility: visible !important;
+                color: #000000 !important;
+            }
+            
+            /* Remove sombras e bordas extras na impressão */
+            .p-header, .p-table, .p-total {
+                box-shadow: none !important;
+                border: none !important;
+            }
         }
     </style>
 </head>
@@ -243,7 +273,7 @@
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v76 PRIV <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v77 PRIV <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -1211,11 +1241,13 @@ window.acaoShare = function(tipo) {
         const htmlPrint = montarHtmlCupom(d);
         const area = document.getElementById('area-print'); 
         area.innerHTML = htmlPrint; 
+        
+        // Aumentei o timeout para 500ms para garantir que o celular renderize o HTML antes de chamar o print
         setTimeout(() => { 
             window.print(); 
             // Limpa a área de impressão depois para não atrapalhar
             setTimeout(() => { area.innerHTML = ''; }, 1000); 
-        }, 300);
+        }, 500);
     }
     // BLUETOOTH (RAWBT)
     if(tipo=='bluetooth') {
@@ -1251,7 +1283,7 @@ window.shareExtrato = function(tipo) {
         const htmlContent = document.getElementById('ext-preview-box').innerHTML;
         const area = document.getElementById('area-print'); 
         area.innerHTML = `<div style="font-family:monospace; color:black; padding:20px">${htmlContent}</div>`;
-        setTimeout(() => { window.print(); setTimeout(() => { area.innerHTML = ''; }, 500); }, 300);
+        setTimeout(() => { window.print(); setTimeout(() => { area.innerHTML = ''; }, 500); }, 500);
     }
     else if(tipo === 'bluetooth') {
         let btTxt = `${EMPRESA.nome}%0AEXTRATO DE CLIENTE%0ACLIENTE: ${d.cliente}%0A--------------------------------%0A`;
