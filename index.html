@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v66 BT</title>
+    <title>FILHÃO.CELL v70 PRIV</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -15,13 +15,13 @@
 
     <style>
         :root { 
-            --primary: #d50000;          
+            --primary: #d50000;           
             --primary-dark: #b71c1c; 
-            --accent: #000000;          
-            --text: #212121;            
+            --accent: #000000;           
+            --text: #212121;             
             --bg: #f5f5f5;              
-            --card-bg: #ffffff;         
-            --success: #2e7d32;         
+            --card-bg: #ffffff;          
+            --success: #2e7d32;          
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
@@ -32,70 +32,71 @@
         /* HEADER */
         header { 
             background: linear-gradient(135deg, var(--accent) 30%, var(--primary) 100%); 
-            color: white; padding: 15px; 
+            color: white; padding: 12px 15px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
             position: sticky; top: 0; z-index: 100; 
             display:flex; justify-content:space-between; align-items:center; 
             border-bottom: 3px solid var(--primary);
         }
-        header h2 { font-size: 16px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; font-style: italic; }
+        header h2 { font-size: 15px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; font-style: italic; }
 
         .version-btn { 
-            font-size: 10px; font-weight: bold; background: rgba(255,255,255,0.2); 
-            padding: 4px 8px; border-radius: 12px; margin-left: 5px; font-style: normal; 
+            font-size: 9px; font-weight: bold; background: rgba(255,255,255,0.2); 
+            padding: 3px 8px; border-radius: 12px; margin-left: 5px; font-style: normal; 
             cursor: pointer; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 5px;
             transition: 0.3s;
         }
 
-        .container { padding: 12px; max-width: 800px; margin: auto; }
+        .container { padding: 10px; max-width: 800px; margin: auto; }
         .page { display: none; animation: slideUp 0.3s ease-out; }
         .page.active { display: block; }
         @keyframes slideUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
 
         /* CARDS */
-        .card { background: var(--card-bg); padding: 18px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 15px; position: relative; border-left: 5px solid transparent; }
+        .card { background: var(--card-bg); padding: 15px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 12px; position: relative; border-left: 4px solid transparent; }
         .card:hover { border-left-color: var(--primary); transition: 0.3s; }
 
         h3 { 
-            color: var(--accent); font-size: 14px; margin-bottom: 15px; 
-            border-bottom: 2px solid #eee; padding-bottom: 8px; 
+            color: var(--accent); font-size: 13px; margin-bottom: 12px; 
+            border-bottom: 2px solid #eee; padding-bottom: 6px; 
             display:flex; justify-content:space-between; align-items:center; font-weight: 800; 
         }
 
+        /* BOTÕES PEQUENOS (NOVO PADRÃO) */
         .btn-novo {
             background: var(--accent); color: white; border: none; 
-            padding: 6px 16px; border-radius: 20px; font-size: 10px; font-weight: bold; 
+            padding: 5px 12px; border-radius: 6px; font-size: 9px; font-weight: bold; 
             cursor: pointer; display: flex; align-items: center; gap: 5px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s;
         }
 
-        label { font-size: 10px; font-weight: 800; color: #666; margin-top: 10px; display: block; letter-spacing: 0.5px; }
+        label { font-size: 9px; font-weight: 800; color: #666; margin-top: 8px; display: block; letter-spacing: 0.5px; }
         
         input, textarea, select { 
-            width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; 
-            background: #fafafa; margin-top: 5px; font-size: 14px; outline: none; transition: 0.2s; font-weight: 600; color: #333;
+            width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; 
+            background: #fafafa; margin-top: 4px; font-size: 13px; outline: none; transition: 0.2s; font-weight: 600; color: #333;
             text-transform: uppercase;
         }
-        input::placeholder { text-transform: uppercase; }
+        input::placeholder { text-transform: uppercase; font-size: 11px; }
         input:focus { border-color: var(--primary); background: #fff; }
 
         .fa-lock { color: #f1c40f; margin-right: 3px; font-size: 11px; }
 
         /* BUSCA */
         .search-box { position: relative; margin-top: 5px; }
-        .search-box input { padding-right: 45px; margin-top: 0; }
+        .search-box input { padding-right: 40px; margin-top: 0; }
         .search-btn { 
-            position: absolute; right: 5px; top: 2px; bottom: 2px;
-            background: var(--primary); color: white; border: none; width: 40px; 
-            border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            z-index: 20;
+            position: absolute; right: 4px; top: 4px; bottom: 4px;
+            background: var(--primary); color: white; border: none; width: 35px; 
+            border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            z-index: 20; font-size: 12px;
         }
         .clear-btn {
-            position: absolute; right: 50px; top: 8px; color: #d32f2f; cursor: pointer; 
-            font-size: 16px; z-index: 21; display: none;
+            position: absolute; right: 45px; top: 8px; color: #d32f2f; cursor: pointer; 
+            font-size: 14px; z-index: 21; display: none;
         }
 
-        /* SUGESTÕES (GRID) */
+        /* SUGESTÕES */
         .sugestoes { 
             background: white; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; 
             position: absolute; top: 100%; width: 100%; z-index: 999; 
@@ -103,7 +104,7 @@
         }
         .sugestoes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
         .sugestoes div.item-sug { 
-            padding: 10px; border-bottom: 1px solid #f1f1f1; border-right: 1px solid #f1f1f1;
+            padding: 8px; border-bottom: 1px solid #f1f1f1; border-right: 1px solid #f1f1f1;
             cursor: pointer; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; 
         }
         .sug-header { font-size: 9px; font-weight: 900; padding: 5px; text-align:center; border-bottom: 2px solid #ccc; letter-spacing: 1px; position:sticky; top:0; z-index:2; }
@@ -111,124 +112,87 @@
         /* FOTOS OS */
         .os-foto-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 5px; }
         .os-foto-slot {
-            aspect-ratio: 1; background: #eee; border-radius: 8px; border: 2px dashed #ccc;
+            aspect-ratio: 1; background: #eee; border-radius: 6px; border: 2px dashed #ccc;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
             overflow: hidden; position: relative;
         }
         .os-foto-slot img { width: 100%; height: 100%; object-fit: cover; }
-        .os-foto-slot i { color: #999; font-size: 20px; }
+        .os-foto-slot i { color: #999; font-size: 18px; }
 
         /* KANBAN */
         .kanban-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; align-items: start; }
-        .k-col { background: #f0f0f0; padding: 5px; border-radius: 10px; min-height: 100px; }
-        .k-head { font-size: 9px; font-weight: 900; text-align: center; margin-bottom: 8px; color: var(--accent); background: white; padding: 4px; border-radius: 6px; border: 1px solid #ddd; }
+        .k-col { background: #f0f0f0; padding: 4px; border-radius: 8px; min-height: 100px; }
+        .k-head { font-size: 8px; font-weight: 900; text-align: center; margin-bottom: 6px; color: var(--accent); background: white; padding: 4px; border-radius: 4px; border: 1px solid #ddd; }
 
-        .os-card { background: white; padding: 8px; border-radius: 8px; margin-bottom: 6px; border-top: 4px solid #ccc; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .os-card { background: white; padding: 6px; border-radius: 6px; margin-bottom: 6px; border-top: 3px solid #ccc; font-size: 9px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .os-card.pecas { border-top-color: var(--primary); } 
         .os-card.pgto { border-top-color: #ff9800; } 
         .os-card.retirado { border-top-color: var(--success); }
 
-        /* --- BOTÕES DE AÇÃO PADRONIZADOS (MINI) --- */
+        /* BOTÕES MINI (PADRÃO REDUZIDO) */
         .btn-mini { 
-            border: none; 
-            border-radius: 8px; 
-            padding: 10px 0; 
-            color: white; 
-            cursor: pointer; 
-            font-size: 14px; 
-            flex: 1; 
-            transition: 0.2s; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
-            min-width: 35px; /* Garante tamanho mínimo */
-            text-decoration: none; /* Para links */
+            border: none; border-radius: 6px; padding: 6px 0; color: white; cursor: pointer; 
+            font-size: 11px; flex: 1; transition: 0.2s; display: flex; justify-content: center; align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15); min-width: 28px; text-decoration: none; 
         }
         .btn-mini:active { transform: scale(0.95); }
-        
-        /* Cores Padronizadas */
         .btn-mini.blue { background: #0288d1; }
         .btn-mini.red { background: #d32f2f; }
         .btn-mini.green { background: #2e7d32; }
         .btn-mini.dark { background: var(--accent); }
         .btn-mini.orange { background: #f57c00; }
         .btn-mini.zap { background: #25D366; }
+        .actions-row { display: flex; gap: 6px; margin-top: 5px; width: 100%; }
 
-        /* Container para alinhar botões mini */
-        .actions-row { display: flex; gap: 8px; margin-top: 5px; width: 100%; }
-
-        /* BOTÕES GERAIS */
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; font-size: 13px; color: white; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        /* BOTÕES GERAIS (PADRÃO REDUZIDO) */
+        .btn { 
+            width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: 800; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; 
+            margin-top: 12px; font-size: 12px; color: white; text-transform: uppercase; letter-spacing: 0.5px; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15); 
+        }
         .btn-primary { background: var(--primary); } 
         .btn-dark { background: var(--accent); } 
         .btn-info { background: #0288d1; }
         .btn-success { background: var(--success); }
-        .btn-zap { background: #25D366; }
-        .btn-add-mini { background: #2e7d32; color:white; border:none; border-radius:8px; width:44px; font-size:18px; cursor:pointer; margin-top:5px; }
+        .btn-add-mini { background: #2e7d32; color:white; border:none; border-radius:6px; width:40px; font-size:16px; cursor:pointer; margin-top:4px; }
 
         /* FOTOS E MODAL */
         .foto-preview { 
-            width: 80px; height: 80px; border-radius: 50%; background-color: #eee; 
+            width: 70px; height: 70px; border-radius: 50%; background-color: #eee; 
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23999'%3E%3Cpath d='M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z'/%3E%3C/svg%3E");
             background-size: 40%; background-position: center; background-repeat: no-repeat;
-            object-fit: cover; border: 3px solid var(--primary); margin: 10px auto; display: block; cursor: pointer; 
+            object-fit: cover; border: 3px solid var(--primary); margin: 8px auto; display: block; cursor: pointer; 
         }
         .foto-preview.has-img { background-image: none; }
 
         #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 2000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; border: 2px solid var(--primary); }
+        .modal-content { background: white; padding: 20px; border-radius: 16px; width: 85%; max-width: 300px; text-align: center; border: 2px solid var(--primary); }
 
-        /* ESTILO ESPECÍFICO PARA INPUT DE SENHA */
         .password-container { position: relative; width: 100%; }
         .password-container input { padding-right: 40px; }
-        .password-container i { 
-            position: absolute; right: 10px; top: 50%; transform: translateY(-30%); 
-            color: #777; cursor: pointer; padding: 5px; font-size: 16px; 
-        }
+        .password-container i { position: absolute; right: 10px; top: 50%; transform: translateY(-30%); color: #777; cursor: pointer; padding: 5px; font-size: 16px; }
 
-        /* RANKING */
+        /* RANKING & FINANCEIRO */
         .rank-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
         .rank-box { background: #fafafa; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
-        .rank-title { font-size: 10px; font-weight: 900; text-align: center; color: var(--primary); margin-bottom: 8px; border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
-        .rank-item { font-size: 9px; margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
+        .rank-title { font-size: 9px; font-weight: 900; text-align: center; color: var(--primary); margin-bottom: 6px; border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
+        .rank-item { font-size: 8px; margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
 
+        .fin-item { background: #fff3e0; padding: 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid #ff9800; text-align: left; }
+        .fin-val { font-weight: 900; color: #d32f2f; font-size: 11px; }
+        .fin-date { font-size: 8px; color: #666; display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+
+        .btn-debt { background: #d32f2f; color: white; width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 6px rgba(211,47,47,0.3); font-size: 11px; }
+        
         /* NAV */
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 2px solid var(--primary); padding: 10px 0 25px 0; z-index: 900; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
-        .nav-item { flex: 1; border: none; background: none; color: #999; font-size: 9px; font-weight: bold; text-align: center; transition: 0.3s; }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; border-top: 2px solid var(--primary); padding: 8px 0 20px 0; z-index: 900; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+        .nav-item { flex: 1; border: none; background: none; color: #999; font-size: 8px; font-weight: bold; text-align: center; transition: 0.3s; }
         .nav-item.active { color: var(--primary); transform: translateY(-3px); }
-        .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; color: var(--accent); }
         .nav-item.active i { color: var(--primary); }
 
-        /* ÁREA DE IMPRESSÃO (PDF/PC) */
-        #area-print { display: none; } 
-        @media print { 
-            @page { margin: 0; size: auto; }
-            body > *:not(#area-print) { display: none !important; }
-            body, html { margin: 0; padding: 0; height: auto; background: white; }
-            #area-print { 
-                display: block !important; 
-                position: absolute; left: 0; top: 0; width: 100%; 
-                font-family: 'Courier New', monospace; font-size: 11px; color: black; background: white;
-                padding: 5px 10px; box-sizing: border-box;
-            }
-            #area-print * { visibility: visible; display: block; }
-            #area-print table { display: table; width: 100%; }
-            #area-print tr { display: table-row; }
-            #area-print td, #area-print th { display: table-cell; }
-
-            .p-header { text-align: center; margin-bottom: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
-            .p-title { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
-            .p-info { font-size: 9px; margin-bottom: 1px; }
-            .p-line { border-bottom: 1px dashed #000; margin: 5px 0; }
-            .p-table { width: 100%; text-align: left; font-size: 10px; border-collapse: collapse; }
-            .p-table th { border-bottom: 1px solid #000; padding: 2px 0; }
-            .p-table td { padding: 2px 0; }
-            .p-total { text-align: right; font-size: 14px; font-weight: bold; margin-top: 5px; }
-            .p-sign { margin-top: 30px; text-align: center; border-top: 1px solid #000; padding-top: 3px; font-size: 9px; width: 80%; margin-left: auto; margin-right: auto; }
-        }
-
-        .check-log { transform: scale(1.5); margin-right: 10px; accent-color: var(--primary); }
+        .check-log { transform: scale(1.3); margin-right: 10px; accent-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -241,24 +205,24 @@
 
 <div id="modal-extrato" onclick="fecharExtrato(event)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2001; align-items:center; justify-content:center; backdrop-filter:blur(5px)">
     <div class="modal-content" style="width:90%; max-width:400px; max-height:80vh; display:flex; flex-direction:column; padding:0; overflow:hidden">
-        <div style="background:var(--primary); color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between; align-items:center">
+        <div style="background:var(--primary); color:white; padding:12px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; font-size:12px">
             <span id="ext-nome">CLIENTE</span>
             <i class="fas fa-times" onclick="document.getElementById('modal-extrato').style.display='none'" style="cursor:pointer"></i>
         </div>
-        <div id="ext-lista" style="padding:15px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
-        <div id="ext-share-area" style="padding:15px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:8px">
-            <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:5px">COMPARTILHAR EXTRATO</div>
-            <button class="btn" style="background:#25d366; margin:0; padding:10px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
-            <div style="display:flex; gap:8px">
-                <button class="btn" style="background:#0277bd; margin:0; padding:10px; flex:1" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH</button>
-                <button class="btn" style="background:#d32f2f; margin:0; padding:10px; flex:1" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+        <div id="ext-lista" style="padding:12px; overflow-y:auto; flex:1; background:#f9f9f9"></div>
+        <div id="ext-share-area" style="padding:12px; background:white; border-top:1px solid #eee; display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:9px; color:#999; text-align:center; font-weight:bold; margin-bottom:4px">COMPARTILHAR EXTRATO</div>
+            <button class="btn" style="background:#25d366; margin:0; padding:8px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> WHATSAPP</button>
+            <div style="display:flex; gap:6px">
+                <button class="btn" style="background:#0277bd; margin:0; padding:8px; flex:1" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> BLUETOOTH</button>
+                <button class="btn" style="background:#d32f2f; margin:0; padding:8px; flex:1" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
             </div>
         </div>
     </div>
 </div>
 
 <header>
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v66 BT <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v70 PRIV <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:10px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -285,14 +249,14 @@
                 <div id="sug-v-prod" class="sugestoes"></div>
             </div>
 
-            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:15px; margin-top:20px; border-radius:12px">
-                <div style="font-size:10px; color:#999; text-align:center; margin-bottom:5px">ITENS DO CARRINHO</div>
-                <div id="carrinho-lista" style="font-size:12px; color:#888; text-align:center; padding:10px">VAZIO</div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:15px; padding-top:10px; border-top:1px solid #ddd">
-                    <label style="margin:0; font-size:11px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
-                    <input type="number" id="v-desc" placeholder="0.00" style="width:100px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderCarrinho()">
+            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
+                <div style="font-size:9px; color:#999; text-align:center; margin-bottom:5px">ITENS DO CARRINHO</div>
+                <div id="carrinho-lista" style="font-size:11px; color:#888; text-align:center; padding:10px">VAZIO</div>
+                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
+                    <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
+                    <input type="number" id="v-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderCarrinho()">
                 </div>
-                <div style="text-align:right; font-size:18px; font-weight:900; margin-top:10px; color:var(--primary);" id="v-total">TOTAL: R$ 0,00</div>
+                <div style="text-align:right; font-size:16px; font-weight:900; margin-top:8px; color:var(--primary);" id="v-total">TOTAL: R$ 0,00</div>
             </div>
             <button class="btn btn-primary" style="margin-top:15px; width:100%" onclick="finalizarVenda()">FINALIZAR VENDA</button>
         </div>
@@ -333,19 +297,20 @@
                 <div id="sug-os-item" class="sugestoes"></div>
             </div>
 
-            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:12px">
+            <div style="background:#f9f9f9; border:2px dashed #e0e0e0; padding:10px; margin-top:15px; border-radius:10px">
                 <div id="os-lista-itens"></div>
-                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:15px; padding-top:10px; border-top:1px solid #ddd">
-                    <label style="margin:0; font-size:11px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
-                    <input type="number" id="s-desc" placeholder="0.00" style="width:100px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
+                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #ddd">
+                    <label style="margin:0; font-size:10px; color:#d32f2f; font-weight:bold">DESCONTO (R$):</label>
+                    <input type="number" id="s-desc" placeholder="0.00" style="width:80px; margin:0; border-color:#d32f2f; color:#d32f2f; font-weight:bold; text-align:right" onkeyup="renderItemsOS()">
                 </div>
-                <div style="text-align:right; font-size:16px; font-weight:900; margin-top:10px; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
+                <div style="text-align:right; font-size:15px; font-weight:900; margin-top:8px; color:var(--primary);" id="s-total-display">TOTAL: R$ 0,00</div>
             </div>
             <button class="btn btn-primary" onclick="salvarOS()">SALVAR ORDEM</button>
         </div>
 
-        <div style="padding: 0 5px; margin-bottom: 10px;">
-            <div class="search-box"><input type="text" id="busca-kanban" placeholder="🔍 LOCALIZAR OS..." onkeyup="renderKanban()" style="background:white; border:2px solid #ddd; font-weight:bold"></div>
+        <div style="padding: 0 5px; margin-bottom: 8px; display:flex; gap:5px">
+            <div class="search-box" style="flex:1"><input type="text" id="busca-kanban" placeholder="🔍 LOCALIZAR OS..." onkeyup="renderKanban()" style="background:white; border:2px solid #ddd; font-weight:bold"></div>
+            <button class="btn-mini dark" onclick="verHistoricoOS()"><i class="fas fa-history"></i></button>
         </div>
         <div class="kanban-grid">
             <div class="k-col"><div class="k-head" style="color:#555">ANÁLISE</div><div id="k-pecas"></div></div>
@@ -366,7 +331,9 @@
             <button class="btn btn-primary" onclick="salvarCliente()">SALVAR CLIENTE</button>
         </div>
         <div class="card">
-            <h3>MEUS CLIENTES</h3>
+            <button class="btn-debt" onclick="abrirCarteiraDevedores()">
+                <i class="fas fa-book" style="font-size:16px"></i> CARTEIRA DE DEVEDORES
+            </button>
             <div class="search-box">
                 <input type="text" id="cli-search-input" placeholder="FILTRAR LISTA..." onkeyup="buscar('clientes', this.value, 'lista-clientes', true)">
                 <button type="button" class="search-btn" onclick="toggleSearch('listacli', 'cli-search-input', 'lista-clientes')"><i class="fas fa-search"></i></button>
@@ -387,7 +354,7 @@
                 <label style="margin-top:0; color:#c62828"><i class="fas fa-lock"></i> PREÇO DE CUSTO</label>
                 <div style="display:flex; gap:5px">
                     <input type="number" id="p-custo" placeholder="0.00" style="border-color:#ffcdd2">
-                    <button id="btn-ver-custo" class="btn-mini dark" style="flex:0; width:50px" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
+                    <button id="btn-ver-custo" class="btn-mini dark" style="flex:0; width:40px" onclick="revelarCusto()"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:10px">
@@ -405,27 +372,31 @@
     </div>
 
     <div id="page-relatorio" class="page">
-        <div class="card">
+        <div class="card" style="position:relative">
+            <i class="fas fa-eye" id="eye-rel" onclick="togglePriv()" style="position:absolute; top:12px; right:12px; color:var(--primary); font-size:16px; cursor:pointer; padding:5px; z-index:10"></i>
             <h3>RELATÓRIOS FINANCEIROS</h3>
-            <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:15px">
+            <select id="r-filtro" onchange="renderRelatorio()" style="margin-bottom:12px">
                 <option value="dia">HOJE</option>
                 <option value="semana">ÚLTIMOS 7 DIAS</option>
                 <option value="mes">MÊS ATUAL</option>
                 <option value="ano">ESTE ANO</option>
             </select>
-            <div style="background:var(--accent); color:white; padding:20px; border-radius:12px; text-align:center">
-                <div style="font-size:11px; opacity:0.8">FATURAMENTO TOTAL (LÍQUIDO)</div>
-                <div id="r-total" style="font-size:24px; font-weight:900; margin-top:5px">R$ 0,00</div>
+            <div style="background:var(--accent); color:white; padding:15px; border-radius:10px; text-align:center">
+                <div style="font-size:10px; opacity:0.8">FATURAMENTO TOTAL</div>
+                <div id="r-total" style="font-size:20px; font-weight:900; margin-top:4px">****</div>
+                
+                <div style="font-size:10px; opacity:0.8; margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:4px">LUCRO ESTIMADO</div>
+                <div id="r-lucro" style="font-size:16px; font-weight:900; color:#b2fab4">****</div>
             </div>
 
-            <h3 style="margin-top:25px; font-size:12px; color:#666">CLIENTES ATENDIDOS</h3>
-            <div class="search-box" style="margin-bottom:10px">
+            <h3 style="margin-top:20px; font-size:11px; color:#666">CLIENTES ATENDIDOS</h3>
+            <div class="search-box" style="margin-bottom:8px">
                 <input type="text" id="r-search" placeholder="🔍 BUSCAR CLIENTE..." onkeyup="renderRelatorio()" style="background:white; border:2px solid #ddd">
                 <div id="sug-r-cli" class="sugestoes"></div>
             </div>
             <div id="r-hist" style="max-height:300px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:5px"></div>
 
-            <h3 style="margin-top:20px; font-size:12px; color:#666">RANKINGS</h3>
+            <h3 style="margin-top:15px; font-size:11px; color:#666">RANKINGS</h3>
             <div class="rank-grid">
                 <div class="rank-box"><div class="rank-title">CLIENTES</div><div id="rank-cli"></div></div>
                 <div class="rank-box"><div class="rank-title">PRODUTOS</div><div id="rank-prod"></div></div>
@@ -461,30 +432,31 @@ const db = getFirestore(app);
 const SENHA = "0800"; 
 const EMPRESA = { nome: "FILHÃO.CELL", cnpj: "31.926.078/0001-65", tel: "(81) 9 9507-4007", end: "Rua Jose Medeiros Rego, 09, Centro", cid: "Surubim - PE", email: "filhao.cell@gmail.com" };
 
-window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[] };
+window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[], dividas:[], os_hist:[] };
 window.carrinho = []; window.carrinhoOS = []; window.shareData = null; window.tempImg = null; window.retornoVenda = false; window.retornoOS = false; window.osFotos = [null, null, null, null]; window.currentFotoIndex = 0; window.extratoAtual = null; window.editingDateId = null;
-window.callbackSenha = null;
+window.callbackSenha = null; window.verValores = false;
 
 onSnapshot(collection(db, "clientes"), s => { window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('clientes')) listarCli(); });
 onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque')) listarEstoque('prod'); });
 onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque')) listarEstoque('serv'); });
 onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); renderKanban(); });
 onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { window.db.logs = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('relatorio')) renderRelatorio(); });
+onSnapshot(collection(db, "dividas"), s => { window.db.dividas = s.docs.map(d=>({id:d.id, ...d.data()})); });
+onSnapshot(query(collection(db, "os_historico"), orderBy("data", "desc")), s => { window.db.os_hist = s.docs.map(d=>({id:d.id, ...d.data()})); });
 
 function isPg(p){ return document.getElementById('page-'+p).classList.contains('active'); }
 
-/* --- LÓGICA DE SENHA ADM VISUAL --- */
 window.abrirModalSenha = function(callback) {
     window.callbackSenha = callback;
     document.getElementById('modal-overlay').style.display = 'flex';
     document.getElementById('modal-content-default').innerHTML = `
         <h3 style="justify-content:center; border:none; margin-bottom:5px">ADMINISTRADOR</h3>
-        <i class="fas fa-user-shield" style="font-size:30px; color:var(--primary); margin-bottom:15px; display:block"></i>
+        <i class="fas fa-user-shield" style="font-size:26px; color:var(--primary); margin-bottom:12px; display:block"></i>
         <div class="password-container">
             <input type="password" id="input-senha-adm" placeholder="SENHA" onkeydown="if(event.key==='Enter') verificarSenha()">
             <i class="fas fa-eye" onclick="togglePass()" id="eye-icon"></i>
         </div>
-        <button class="btn btn-primary" onclick="verificarSenha()" style="margin-top:15px">CONFIRMAR</button>
+        <button class="btn btn-primary" onclick="verificarSenha()" style="margin-top:12px">CONFIRMAR</button>
         <button class="btn" style="background:#666; margin-top:5px" onclick="fecharModal({target:{id:'modal-overlay'}})">CANCELAR</button>
     `;
     setTimeout(() => document.getElementById('input-senha-adm').focus(), 100);
@@ -493,28 +465,14 @@ window.abrirModalSenha = function(callback) {
 window.togglePass = function() {
     const inp = document.getElementById('input-senha-adm');
     const ico = document.getElementById('eye-icon');
-    if (inp.type === "password") {
-        inp.type = "text";
-        ico.classList.remove('fa-eye');
-        ico.classList.add('fa-eye-slash');
-        ico.style.color = "var(--primary)";
-    } else {
-        inp.type = "password";
-        ico.classList.remove('fa-eye-slash');
-        ico.classList.add('fa-eye');
-        ico.style.color = "#777";
-    }
+    if (inp.type === "password") { inp.type = "text"; ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); ico.style.color = "var(--primary)"; } 
+    else { inp.type = "password"; ico.classList.remove('fa-eye-slash'); ico.classList.add('fa-eye'); ico.style.color = "#777"; }
 }
 
 window.verificarSenha = function() {
     const digitada = document.getElementById('input-senha-adm').value;
-    if (digitada === SENHA) {
-        document.getElementById('modal-overlay').style.display = 'none';
-        if (window.callbackSenha) window.callbackSenha();
-    } else {
-        alert("SENHA INCORRETA");
-        document.getElementById('input-senha-adm').value = '';
-    }
+    if (digitada === SENHA) { document.getElementById('modal-overlay').style.display = 'none'; if (window.callbackSenha) window.callbackSenha(); } 
+    else { alert("SENHA INCORRETA"); document.getElementById('input-senha-adm').value = ''; }
 }
 
 window.nav = function(p, el) {
@@ -524,6 +482,9 @@ window.nav = function(p, el) {
             document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
             document.getElementById('page-'+p).classList.add('active');
             if(el) el.classList.add('active');
+            window.verValores = false; // Reset eye on entry
+            document.getElementById('eye-rel').classList.remove('fa-eye-slash');
+            document.getElementById('eye-rel').classList.add('fa-eye');
             renderRelatorio();
         });
         return;
@@ -567,7 +528,6 @@ window.buscarVenda = function(txt, force=false) {
     const box = document.getElementById('sug-v-prod'); 
     const clearBtn = document.getElementById('v-clear-btn');
     if(txt) clearBtn.style.display = 'block'; else clearBtn.style.display = 'none';
-
     if(!txt && !force) { box.style.display='none'; return; }
     const term = (txt||'').toUpperCase();
     const prods = window.db.produtos.filter(i => (i.nome||'').toUpperCase().includes(term)).sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -586,12 +546,8 @@ window.limparBuscaVenda = function() {
 }
 
 window.limparVendas = function() {
-    document.getElementById('v-cli').value = '';
-    document.getElementById('v-busca').value = '';
-    document.getElementById('v-desc').value = '';
-    document.getElementById('sug-v-cli').style.display='none';
-    document.getElementById('sug-v-prod').style.display='none';
-    document.getElementById('v-clear-btn').style.display = 'none';
+    document.getElementById('v-cli').value = ''; document.getElementById('v-busca').value = ''; document.getElementById('v-desc').value = '';
+    document.getElementById('sug-v-cli').style.display='none'; document.getElementById('sug-v-prod').style.display='none'; document.getElementById('v-clear-btn').style.display = 'none';
 }
 
 window.addCar = function(id, tipo, nome, val) {
@@ -604,25 +560,7 @@ window.renderCarrinho = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinho.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:10px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:5px">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="flex:1; font-weight:bold">${i.qtd}x ${i.nome}</span>
-                <span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span>
-            </div>
-            <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
-                <label style="margin:0; font-size:9px">GAR:</label>
-                <select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaCar(${x}, this.value)">
-                    <option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option>
-                    <option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option>
-                    <option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option>
-                    <option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option>
-                </select>
-            </div>
-            <div class="actions-row">
-                <button class="btn-mini blue" onclick="editItemVenda(${x})"><i class="fas fa-pen"></i></button>
-                <button class="btn-mini red" onclick="delCar(${x})"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>`;
+        return `<div style="padding:8px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:4px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1; font-weight:bold">${i.qtd}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:5px; margin-top:5px;"><label style="margin:0; font-size:9px">GAR:</label><select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaCar(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemVenda(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delCar(${x})"><i class="fas fa-trash"></i></button></div></div>`;
     }).join('');
     const desc = parseFloat(document.getElementById('v-desc').value) || 0;
     document.getElementById('v-total').innerText = 'TOTAL: R$ ' + (subtotal - desc).toFixed(2);
@@ -637,13 +575,36 @@ window.finalizarVenda = async function() {
     if(!window.carrinho.length) return alert("VAZIO");
     const cli = (document.getElementById('v-cli').value || "CONSUMIDOR").toUpperCase(); 
     const desc = parseFloat(document.getElementById('v-desc').value) || 0;
+    const sub = window.carrinho.reduce((a,b)=>a+b.val,0);
+    const total = sub - desc;
+
+    let valorPago = parseFloat(prompt(`TOTAL: R$ ${total.toFixed(2)}\n\nQuanto o cliente vai pagar AGORA?`, total));
+    if(isNaN(valorPago)) return;
+    if(valorPago < 0) valorPago = 0;
+    
     for(let i of window.carrinho) {
         await addDoc(collection(db,"logs"), { tipo: i.tipo=='P'?'PRODUTO':'SERVICO', desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: cli, data: new Date().toISOString() });
     }
     if(desc>0) await addDoc(collection(db,"logs"), {tipo:'DESCONTO', desc:'DESCONTO', valor: -desc, cliente:cli, data:new Date().toISOString()});
-    const sub = window.carrinho.reduce((a,b)=>a+b.val,0);
-    window.shareData = { tipo:'VENDA', cliente:cli, itens:window.carrinho, subtotal: sub, desconto: desc, total: sub-desc };
+
+    let msgFiado = "";
+    if(valorPago < total) {
+        const restante = total - valorPago;
+        await addDoc(collection(db,"dividas"), {
+            cliente: cli,
+            valor_total: total,
+            valor_pago: valorPago,
+            restante: restante,
+            data_venda: new Date().toISOString(),
+            data_lembrete: "",
+            itens: window.carrinho.map(i=>`${i.qtd}x ${i.nome}`).join(', ')
+        });
+        msgFiado = `\n\nATENÇÃO: DÉBITO DE R$ ${restante.toFixed(2)} REGISTRADO!`;
+    }
+
+    window.shareData = { tipo:'VENDA', cliente:cli, itens:window.carrinho, subtotal: sub, desconto: desc, total: total };
     window.carrinho=[]; document.getElementById('v-cli').value=''; document.getElementById('v-desc').value=''; renderCarrinho();
+    alert("VENDA FINALIZADA!" + msgFiado);
     abrirModalShare();
 }
 
@@ -684,25 +645,7 @@ window.renderItemsOS = function() {
     let subtotal = 0;
     l.innerHTML = window.carrinhoOS.map((i,x) => {
         subtotal += i.val;
-        return `<div style="padding:10px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:5px">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span>
-                <span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span>
-            </div>
-            <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
-                <label style="margin:0; font-size:9px">GAR:</label>
-                <select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaOS(${x}, this.value)">
-                    <option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option>
-                    <option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option>
-                    <option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option>
-                    <option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option>
-                </select>
-            </div>
-            <div class="actions-row">
-                <button class="btn-mini blue" onclick="editItemOS(${x})"><i class="fas fa-pen"></i></button>
-                <button class="btn-mini red" onclick="delItemOS(${x})"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>`;
+        return `<div style="padding:8px; border-bottom:1px solid #eee; background:white; border-radius:8px; margin-bottom:4px"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="flex:1;cursor:pointer; font-weight:bold">${i.qtd||1}x ${i.nome}</span><span style="font-weight:bold; color:var(--primary)">R$ ${i.val.toFixed(2)}</span></div><div style="display:flex; align-items:center; gap:5px; margin-top:5px;"><label style="margin:0; font-size:9px">GAR:</label><select style="padding:2px; font-size:10px; width:auto;" onchange="setGarantiaOS(${x}, this.value)"><option value="SEM GARANTIA" ${i.garantia=='SEM GARANTIA'?'selected':''}>SEM</option><option value="30 DIAS" ${i.garantia=='30 DIAS'?'selected':''}>30 D</option><option value="90 DIAS" ${i.garantia=='90 DIAS'?'selected':''}>90 D</option><option value="1 ANO" ${i.garantia=='1 ANO'?'selected':''}>1 ANO</option></select></div><div class="actions-row"><button class="btn-mini blue" onclick="editItemOS(${x})"><i class="fas fa-pen"></i></button><button class="btn-mini red" onclick="delItemOS(${x})"><i class="fas fa-trash"></i></button></div></div>`;
     }).join('');
     const desc = parseFloat(document.getElementById('s-desc').value) || 0;
     document.getElementById('s-total-display').innerText = 'TOTAL: R$ ' + (subtotal - desc).toFixed(2);
@@ -720,30 +663,12 @@ window.salvarOS = async function() {
     if(!id) {
         const configRef = doc(db, "config", "contador");
         const configSnap = await getDoc(configRef);
-        if (configSnap.exists()) {
-            numOS = configSnap.data().last + 1;
-            await updateDoc(configRef, { last: numOS });
-        } else {
-            numOS = 1;
-            await setDoc(configRef, { last: 1 });
-        }
+        if (configSnap.exists()) { numOS = configSnap.data().last + 1; await updateDoc(configRef, { last: numOS }); } 
+        else { numOS = 1; await setDoc(configRef, { last: 1 }); }
     }
 
-    const os = { 
-        cliente: document.getElementById('s-cli').value.toUpperCase(), 
-        modelo: document.getElementById('s-mod').value.toUpperCase(), 
-        defeito: document.getElementById('s-def').value.toUpperCase(), 
-        senha: document.getElementById('s-senha').value.toUpperCase(), 
-        valor: sub - desc, 
-        desconto: desc, 
-        itens: window.carrinhoOS, 
-        fotos: window.osFotos, 
-        status: document.getElementById('os-status-orig').value || 'pecas', 
-        data: new Date().toISOString()
-    };
-    
+    const os = { cliente: document.getElementById('s-cli').value.toUpperCase(), modelo: document.getElementById('s-mod').value.toUpperCase(), defeito: document.getElementById('s-def').value.toUpperCase(), senha: document.getElementById('s-senha').value.toUpperCase(), valor: sub - desc, desconto: desc, itens: window.carrinhoOS, fotos: window.osFotos, status: document.getElementById('os-status-orig').value || 'pecas', data: new Date().toISOString() };
     if(!id) os.num = numOS;
-
     if(id) await updateDoc(doc(db,"os_ativa",id), os); else await addDoc(collection(db,"os_ativa"), os);
     limparOS(); alert("SALVO! OS Nº " + (id ? "ATUALIZADA" : numOS));
 }
@@ -755,14 +680,7 @@ window.limparOS = function() {
     const slots = document.querySelectorAll('.os-foto-slot'); slots.forEach(s => s.innerHTML = '<i class="fas fa-camera"></i>');
 }
 
-// CORREÇÃO SCROLL KANBAN
 window.renderKanban = function() {
-    const scrollPositions = {
-        pecas: document.getElementById('k-pecas').parentElement.scrollTop,
-        pgto: document.getElementById('k-pgto').parentElement.scrollTop,
-        retirado: document.getElementById('k-retirado').parentElement.scrollTop
-    };
-
     const c = {pecas:'', pgto:'', retirado:''}; const flow = ['pecas', 'pgto', 'retirado']; const term = document.getElementById('busca-kanban') ? document.getElementById('busca-kanban').value.toUpperCase() : '';
     window.db.os.forEach(o => {
         if(term) { const t = (o.cliente+' '+o.modelo+' '+o.status).toUpperCase(); if(!t.includes(term)) return; }
@@ -774,33 +692,60 @@ window.renderKanban = function() {
         const numDisplay = o.num ? `<b>#${o.num}</b> - ` : '';
         c[o.status] += `<div class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">R$ ${o.valor.toFixed(2)}</div><div class="actions-row">${nav}</div><div class="actions-row"><button class="btn-mini blue" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button><button class="btn-mini zap" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini red" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button></div></div>`;
     });
-    
-    document.getElementById('k-pecas').innerHTML = c.pecas; 
-    document.getElementById('k-pgto').innerHTML = c.pgto; 
-    document.getElementById('k-retirado').innerHTML = c.retirado;
-
-    document.getElementById('k-pecas').parentElement.scrollTop = scrollPositions.pecas;
-    document.getElementById('k-pgto').parentElement.scrollTop = scrollPositions.pgto;
-    document.getElementById('k-retirado').parentElement.scrollTop = scrollPositions.retirado;
+    document.getElementById('k-pecas').innerHTML = c.pecas; document.getElementById('k-pgto').innerHTML = c.pgto; document.getElementById('k-retirado').innerHTML = c.retirado;
 }
-
 window.delOS = async function(id) { abrirModalSenha(async () => { if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }); }
 window.moveOS = async function(id, dir) { const o = window.db.os.find(i=>i.id===id); const idx = ['pecas', 'pgto', 'retirado'].indexOf(o.status) + dir; await updateDoc(doc(db,"os_ativa",id), {status: ['pecas', 'pgto', 'retirado'][idx]}); }
 
 window.arqOS = async function(id) {
     if(!confirm("Arquivar?")) return; const o = window.db.os.find(i=>i.id===id);
+    // SALVAR NO HISTORICO
+    await setDoc(doc(db, "os_historico", id), o);
+    
+    // GERAR LOG FINANCEIRO
     if(o.itens && o.itens.length>0) { 
         for(let i of o.itens) {
             let tipoLog = 'SERVICO';
-            if (i.tipo === 'P' || i.tipo === 'PRODUTO') { tipoLog = 'PRODUTO'; }
-            else if (i.tipo === 'S' || i.tipo === 'SERVICO') { tipoLog = 'SERVICO'; }
-            else { const isProdName = window.db.produtos.some(p => p.nome === i.nome); tipoLog = isProdName ? 'PRODUTO' : 'SERVICO'; }
+            if (i.tipo === 'P' || i.tipo === 'PRODUTO') { tipoLog = 'PRODUTO'; } else if (i.tipo === 'S' || i.tipo === 'SERVICO') { tipoLog = 'SERVICO'; } else { const isProdName = window.db.produtos.some(p => p.nome === i.nome); tipoLog = isProdName ? 'PRODUTO' : 'SERVICO'; }
             await addDoc(collection(db,"logs"), {tipo: tipoLog, desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: o.cliente, data: new Date().toISOString()}); 
         } 
     } else { await addDoc(collection(db,"logs"), {tipo:'SERVICO', desc: 'OS: '+o.modelo, valor: o.valor, qtd: 1, cliente: o.cliente, data: new Date().toISOString()}); }
     if(o.desconto>0) await addDoc(collection(db,"logs"), {tipo:'DESCONTO', desc: 'DESCONTO OS', valor: -o.desconto, cliente: o.cliente, data: new Date().toISOString()});
+    
     await deleteDoc(doc(db,"os_ativa",id));
 }
+
+window.verHistoricoOS = function() {
+    let html = '';
+    if(window.db.os_hist.length === 0) html = '<div style="padding:20px;text-align:center;color:#999">VAZIO</div>';
+    else {
+        html = window.db.os_hist.map(o => {
+            return `<div class="fin-item" style="background:white; border-left-color:#666">
+                <div class="fin-date">${new Date(o.data).toLocaleDateString()} - #${o.num||'S/N'}</div>
+                <b>${o.cliente}</b> - ${o.modelo}<br>
+                R$ ${o.valor.toFixed(2)}
+                <button class="btn-mini blue" style="margin-top:5px; width:100%" onclick="reabrirOS('${o.id}')">REABRIR (CORRIGIR)</button>
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('ext-nome').innerText = "HISTÓRICO OS";
+    document.getElementById('ext-lista').innerHTML = html;
+    document.getElementById('ext-share-area').style.display = 'none';
+    document.getElementById('modal-extrato').style.display = 'flex';
+}
+
+window.reabrirOS = async function(id) {
+    if(!confirm("REABRIR OS?\n\nEla voltará para o status 'PRONTO' para correções.")) return;
+    const o = window.db.os_hist.find(x => x.id === id);
+    if(o) {
+        o.status = 'retirado'; // Define como Pronto/Retirado
+        await setDoc(doc(db, "os_ativa", id), o);
+        await deleteDoc(doc(db, "os_historico", id));
+        alert("OS REABERTA E PRONTA PARA CORREÇÃO!");
+        document.getElementById('modal-extrato').style.display = 'none';
+    }
+}
+
 window.editOS = function(id) {
     const o = window.db.os.find(i=>i.id===id); document.getElementById('os-id').value=id; document.getElementById('s-cli').value=o.cliente; document.getElementById('s-mod').value=o.modelo; document.getElementById('os-status-orig').value = o.status;
     document.getElementById('s-def').value=o.defeito; document.getElementById('s-senha').value=o.senha; document.getElementById('s-desc').value = o.desconto || '';
@@ -811,19 +756,11 @@ window.editOS = function(id) {
 }
 window.shareOS = function(id) {
     const o = window.db.os.find(i=>i.id===id); const it = (o.itens && o.itens.length) ? o.itens : [{nome:o.modelo, val:o.valor, qtd:1, garantia:'90 DIAS'}];
-    const sub = it.reduce((a,b)=>a+b.val,0); const desc = o.desconto || 0;
-    const numDisplay = o.num ? `Nº ${o.num}` : 'S/N';
+    const sub = it.reduce((a,b)=>a+b.val,0); const desc = o.desconto || 0; const numDisplay = o.num ? `Nº ${o.num}` : 'S/N';
     window.shareData={ tipo:'OS '+numDisplay, cliente:o.cliente, itens: it, subtotal: sub, desconto: desc, total: o.valor, obs: o.defeito, senha: o.senha, fotos: o.fotos || [] };
     abrirModalShare();
 }
-
-window.maskTel = function(o) {
-    let v = o.value.replace(/\D/g,"");
-    if(v.length > 11) v = v.substring(0,11);
-    if(v.length >= 2) v = "(" + v.substring(0,2) + ") " + v.substring(2);
-    if(v.length >= 7) v = v.substring(0,10) + "-" + v.substring(10);
-    o.value = v;
-}
+window.maskTel = function(o) { let v = o.value.replace(/\D/g,""); if(v.length > 11) v = v.substring(0,11); if(v.length >= 2) v = "(" + v.substring(0,2) + ") " + v.substring(2); if(v.length >= 7) v = v.substring(0,10) + "-" + v.substring(10); o.value = v; }
 
 window.salvarCliente = async function() {
     const id = document.getElementById('c-id').value; const d = { nome: document.getElementById('c-nome').value.toUpperCase(), tel: document.getElementById('c-tel').value, bairro: document.getElementById('c-bairro').value.toUpperCase(), cidade: document.getElementById('c-cidade').value.toUpperCase(), foto: window.tempImg||'' };
@@ -836,9 +773,98 @@ window.listarCli = function() { document.getElementById('lista-clientes').innerH
 window.limparCli = function() { document.getElementById('c-id').value = ''; document.getElementById('c-nome').value = ''; document.getElementById('c-tel').value = ''; document.getElementById('c-bairro').value = ''; document.getElementById('c-cidade').value = ''; window.tempImg = null; document.getElementById('c-foto-view').src = ''; document.getElementById('c-foto-view').classList.remove('has-img'); }
 function renderCliCard(c) {
     const zap = c.tel ? `https://wa.me/55${c.tel.replace(/\D/g,'')}` : '#';
-    return `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex; gap:10px; align-items:center">${c.foto?`<img src="${c.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-user"></i></div>`}<div><b>${c.nome}</b><br><span style="font-size:11px">${c.tel}</span><div style="font-size:9px; color:#666; font-weight:bold">${c.bairro||''} ${c.cidade?'- '+c.cidade:''}</div></div></div><div class="actions-row">${c.tel?`<a href="${zap}" target="_blank" class="btn-mini zap"><i class="fab fa-whatsapp"></i></a>`:''} <button class="btn-mini blue" onclick="edtCli('${c.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" onclick="del('clientes','${c.id}')"><i class="fas fa-trash"></i></button></div></div>`;
+    // Botões reduzidos inline
+    return `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex; gap:10px; align-items:center">${c.foto?`<img src="${c.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-user"></i></div>`}<div><b>${c.nome}</b><br><span style="font-size:11px">${c.tel}</span><div style="font-size:9px; color:#666; font-weight:bold">${c.bairro||''} ${c.cidade?'- '+c.cidade:''}</div></div></div><div class="actions-row" style="width:auto; gap:5px; justify-content:flex-end">${c.tel?`<a href="${zap}" target="_blank" class="btn-mini zap" style="padding:5px; font-size:12px; width:30px; flex:none"><i class="fab fa-whatsapp"></i></a>`:''} <button class="btn-mini blue" style="padding:5px; font-size:12px; width:30px; flex:none" onclick="edtCli('${c.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" style="padding:5px; font-size:12px; width:30px; flex:none" onclick="del('clientes','${c.id}')"><i class="fas fa-trash"></i></button></div></div>`;
 }
 window.edtCli = function(id) { const c=window.db.clientes.find(i=>i.id===id); document.getElementById('c-id').value=id; document.getElementById('c-nome').value=c.nome; document.getElementById('c-tel').value=c.tel; document.getElementById('c-bairro').value=c.bairro||''; document.getElementById('c-cidade').value=c.cidade||''; window.tempImg=c.foto; const view=document.getElementById('c-foto-view'); view.src=c.foto||''; if(c.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('form-cli').scrollIntoView(); }
+
+// FUNÇÕES DE DÍVIDAS
+window.abrirCarteiraDevedores = function() {
+    // Agrupa por cliente
+    const devedores = {};
+    window.db.dividas.forEach(d => {
+        if(d.restante > 0.01) {
+            if(!devedores[d.cliente]) devedores[d.cliente] = 0;
+            devedores[d.cliente] += d.restante;
+        }
+    });
+
+    const lista = Object.entries(devedores).sort((a,b)=>b[1]-a[1]);
+    let html = '';
+    
+    if(lista.length === 0) html = '<div style="text-align:center; padding:20px; color:#999">NINGUÉM DEVENDO!</div>';
+    else {
+        html = lista.map(([nome, total]) => {
+            return `<div class="fin-item" style="display:flex; justify-content:space-between; align-items:center; background:white; border-left-color:red">
+                <div>
+                    <b>${nome}</b><br>
+                    <span style="color:red; font-weight:bold">R$ ${total.toFixed(2)}</span>
+                </div>
+                <button class="btn-mini green" style="max-width:50px" onclick="gerenciarDividas('${nome}')"><i class="fas fa-eye"></i></button>
+            </div>`;
+        }).join('');
+    }
+
+    document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES";
+    document.getElementById('ext-lista').innerHTML = html;
+    document.getElementById('ext-share-area').style.display = 'none';
+    document.getElementById('modal-extrato').style.display = 'flex';
+}
+
+window.gerenciarDividas = function(nome) {
+    const dividas = window.db.dividas.filter(d => d.cliente === nome && d.restante > 0.01).sort((a,b)=>new Date(a.data_venda)-new Date(b.data_venda));
+    let html = '';
+    if(dividas.length === 0) html = '<div style="text-align:center; padding:20px; color:#999">NENHUM DÉBITO PENDENTE</div>';
+    else {
+        html = dividas.map(d => {
+            const date = new Date(d.data_venda).toLocaleDateString('pt-BR');
+            const lembrete = d.data_lembrete ? `<span style="color:red"><i class="fas fa-bell"></i> ${new Date(d.data_lembrete).toLocaleDateString('pt-BR')}</span>` : '';
+            return `<div class="fin-item">
+                <div class="fin-date">${date} - ${d.itens}</div>
+                <div style="display:flex; justify-content:space-between">
+                    <div>TOTAL: R$ ${d.valor_total.toFixed(2)}<br>PAGO: R$ ${d.valor_pago.toFixed(2)}</div>
+                    <div style="text-align:right">
+                        <div class="fin-val">RESTANTE: R$ ${d.restante.toFixed(2)}</div>
+                        ${lembrete}
+                    </div>
+                </div>
+                <div class="actions-row" style="margin-top:10px">
+                    <button class="btn-mini green" onclick="abaterDivida('${d.id}', '${nome}', ${d.restante})">PAGAR</button>
+                    <button class="btn-mini blue" onclick="agendarLembrete('${d.id}', '${nome}')">LEMBRETE</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome;
+    document.getElementById('ext-lista').innerHTML = html;
+    document.getElementById('ext-share-area').style.display = 'none';
+    document.getElementById('modal-extrato').style.display = 'flex';
+}
+
+window.abaterDivida = function(id, nome, max) {
+    abrirModalSenha(async () => {
+        const val = parseFloat(prompt(`Valor a pagar/abater (Máx: ${max.toFixed(2)}):`));
+        if(!val || val <= 0 || val > max) return alert("Valor inválido");
+        const div = window.db.dividas.find(d => d.id === id);
+        const novoPago = div.valor_pago + val;
+        const novoRestante = div.restante - val;
+        await updateDoc(doc(db,"dividas",id), { valor_pago: novoPago, restante: novoRestante });
+        // Logar pagamento
+        await addDoc(collection(db,"logs"), { tipo: 'PAGAMENTO DÍVIDA', desc: 'ABATIMENTO: '+nome, valor: val, qtd: 1, cliente: nome, data: new Date().toISOString() });
+        alert("PAGAMENTO REGISTRADO!");
+        gerenciarDividas(nome);
+    });
+}
+
+window.agendarLembrete = function(id, nome) {
+    abrirModalSenha(async () => {
+        const data = prompt("Data do lembrete (AAAA-MM-DD):");
+        if(!data) return;
+        await updateDoc(doc(db,"dividas",id), { data_lembrete: data });
+        alert("LEMBRETE DEFINIDO!");
+        gerenciarDividas(nome);
+    });
+}
 
 window.salvarProduto = async function(t) {
     const nome = document.getElementById('p-nome').value.toUpperCase(); 
@@ -857,6 +883,14 @@ window.listarEstoque = function(t) {
 window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id); document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||''; document.getElementById('p-custo').type='password'; document.getElementById('btn-ver-custo').style.display='block'; window.tempImg=i.foto; const view=document.getElementById('p-foto-view'); view.src=i.foto||''; if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('page-estoque').querySelector('.card').scrollIntoView(); }
 window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
 
+window.togglePriv = function() {
+    window.verValores = !window.verValores;
+    const ico = document.getElementById('eye-rel');
+    if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); }
+    else { ico.classList.remove('fa-eye-slash'); ico.classList.add('fa-eye'); }
+    renderRelatorio();
+}
+
 window.renderRelatorio = function() {
     const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
     const logsFiltrados = window.db.logs.filter(l => {
@@ -865,15 +899,32 @@ window.renderRelatorio = function() {
         let matchText = true; if(searchTxt) { matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt)); }
         return matchDate && matchText;
     });
-    const clientesMap = {}; let totalGeral = 0;
+    
+    // CALCULOS
+    let totalGeral = 0;
+    let lucroGeral = 0;
+    const clientesMap = {}; 
+
     logsFiltrados.forEach(l => {
-        totalGeral += l.valor; if(!clientesMap[l.cliente]) { clientesMap[l.cliente] = { nome: l.cliente, total: 0, count: 0 }; }
+        totalGeral += l.valor; 
+        
+        let custoItem = 0;
+        if(l.tipo === 'PRODUTO' || l.tipo === 'P') {
+            const prod = window.db.produtos.find(p => p.nome === l.desc);
+            if(prod && prod.custo) custoItem = parseFloat(prod.custo) * (l.qtd || 1);
+        }
+        lucroGeral += (l.valor - custoItem);
+
+        if(!clientesMap[l.cliente]) { clientesMap[l.cliente] = { nome: l.cliente, total: 0, count: 0 }; }
         clientesMap[l.cliente].total += l.valor; clientesMap[l.cliente].count++;
     });
+
     const clientesArray = Object.values(clientesMap).sort((a,b) => b.total - a.total);
-    document.getElementById('r-hist').innerHTML = clientesArray.map(c => `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center"><div style="font-size:11px"><b>${c.nome}</b><br><span style="color:#777">${c.count} mov.</span></div><div style="text-align:right"><b style="color:var(--primary); font-size:12px">R$ ${c.total.toFixed(2)}</b><br><div class="actions-row" style="justify-content:flex-end"><button class="btn-mini green" onclick="abrirExtratoCliente('${c.nome}')"><i class="fas fa-eye"></i></button> <button class="btn-mini blue" onclick="abrirOpcoesEdicao('${c.nome}')"><i class="fas fa-pen"></i></button></div></div></div>`).join('');
+    document.getElementById('r-hist').innerHTML = clientesArray.map(c => `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center"><div style="font-size:10px"><b>${c.nome}</b><br><span style="color:#777">${c.count} mov.</span></div><div style="text-align:right"><b style="color:var(--primary); font-size:11px">R$ ${c.total.toFixed(2)}</b><br><div class="actions-row" style="justify-content:flex-end"><button class="btn-mini green" onclick="abrirExtratoCliente('${c.nome}')"><i class="fas fa-eye"></i></button> <button class="btn-mini blue" onclick="abrirOpcoesEdicao('${c.nome}')"><i class="fas fa-pen"></i></button></div></div></div>`).join('');
     if(clientesArray.length === 0) document.getElementById('r-hist').innerHTML = '<div style="text-align:center; padding:20px; color:#ccc">NENHUM DADO ENCONTRADO</div>';
-    document.getElementById('r-total').innerText = "R$ " + totalGeral.toFixed(2);
+    
+    document.getElementById('r-total').innerText = window.verValores ? "R$ " + totalGeral.toFixed(2) : "****";
+    document.getElementById('r-lucro').innerText = window.verValores ? "R$ " + lucroGeral.toFixed(2) : "****";
     
     const rank = (k, d) => {
         const c={}; 
@@ -890,36 +941,35 @@ window.renderRelatorio = function() {
     rank('CLI','rank-cli'); rank('PROD','rank-prod'); rank('SERV','rank-serv');
 }
 
-window.abrirOpcoesEdicao = function(nome) { document.getElementById('modal-overlay').style.display = 'flex'; document.getElementById('modal-content-default').innerHTML = `<h3 style="justify-content:center">EDITAR</h3><div style="font-size:12px; text-align:center; margin-bottom:15px; font-weight:bold; color:var(--primary)">${nome}</div><button class="btn btn-primary" onclick="editarClienteRapido('${nome}')"><i class="fas fa-user-edit"></i> DADOS CLIENTE</button><button class="btn btn-dark" style="margin-top:10px" onclick="editarMovimentacaoCliente('${nome}')"><i class="fas fa-list-ul"></i> MOVIMENTAÇÕES</button><button class="btn" style="background:#666; margin-top:10px" onclick="fecharModal({target:{id:'modal-overlay'}})">CANCELAR</button>`; }
+window.abrirOpcoesEdicao = function(nome) { document.getElementById('modal-overlay').style.display = 'flex'; document.getElementById('modal-content-default').innerHTML = `<h3 style="justify-content:center">EDITAR</h3><div style="font-size:11px; text-align:center; margin-bottom:12px; font-weight:bold; color:var(--primary)">${nome}</div><button class="btn btn-primary" onclick="editarClienteRapido('${nome}')"><i class="fas fa-user-edit"></i> DADOS CLIENTE</button><button class="btn btn-dark" style="margin-top:10px" onclick="editarMovimentacaoCliente('${nome}')"><i class="fas fa-list-ul"></i> MOVIMENTAÇÕES</button><button class="btn" style="background:#666; margin-top:10px" onclick="fecharModal({target:{id:'modal-overlay'}})">CANCELAR</button>`; }
 window.editarClienteRapido = function(nome) { fecharModal({target:{id:'modal-overlay'}}); const cli = window.db.clientes.find(c => c.nome === nome); if(cli) { window.nav('clientes'); window.edtCli(cli.id); } else { if(confirm("Cliente não encontrado. Cadastrar?")) { window.nav('clientes'); document.getElementById('c-nome').value = nome; } } }
 
 window.editarMovimentacaoCliente = function(nome) {
     fecharModal({target:{id:'modal-overlay'}});
     const logs = window.db.logs.filter(l => l.cliente === nome).sort((a,b) => new Date(b.data) - new Date(a.data));
-    let html = `<div style="padding:10px; background:#ffebee; border-bottom:1px solid #d32f2f; text-align:center; color:#d32f2f; font-weight:bold; font-size:11px">
+    let html = `<div style="padding:10px; background:#ffebee; border-bottom:1px solid #d32f2f; text-align:center; color:#d32f2f; font-weight:bold; font-size:10px">
                     <button id="btn-del-sel" class="btn" style="background:#d32f2f; padding:8px; display:none; margin-bottom:10px" onclick="excluirSelecionados('${nome}')"><i class="fas fa-trash"></i> EXCLUIR SELECIONADOS</button>
                     CLIQUE NO LÁPIS PARA EDITAR DATA
                 </div>`;
     logs.forEach(i => {
          const dataVal = i.data.split('T')[0];
-         html += `<div style="background:white; padding:10px; border-bottom:1px solid #eee; display:flex; align-items:center;">
+         html += `<div style="background:white; padding:8px; border-bottom:1px solid #eee; display:flex; align-items:center;">
             <input type="checkbox" class="check-log" value="${i.id}" onchange="toggleBtnDelete()">
             <div style="flex:1">
-                <div id="date-display-${i.id}" style="display:flex; align-items:center; gap:5px; font-size:10px; color:#555">
+                <div id="date-display-${i.id}" style="display:flex; align-items:center; gap:5px; font-size:9px; color:#555">
                     <span>${new Date(i.data).toLocaleDateString('pt-BR')}</span>
                     <i class="fas fa-pencil-alt" style="cursor:pointer; color:orange" onclick="toggleEditDate('${i.id}')"></i>
                 </div>
                 <div id="date-edit-${i.id}" style="display:none; align-items:center; gap:5px;">
-                    <input type="date" id="input-date-${i.id}" value="${dataVal}" style="font-size:10px; padding:2px; width:auto">
-                    <i class="fas fa-check-circle" style="cursor:pointer; color:green; font-size:14px" onclick="saveNewDate('${i.id}', '${nome}')"></i>
+                    <input type="date" id="input-date-${i.id}" value="${dataVal}" style="font-size:9px; padding:2px; width:auto">
+                    <i class="fas fa-check-circle" style="cursor:pointer; color:green; font-size:12px" onclick="saveNewDate('${i.id}', '${nome}')"></i>
                 </div>
-                <b>${i.desc}</b>
+                <b style="font-size:10px">${i.desc}</b>
             </div>
             <div style="text-align:right">
-                <b>R$ ${i.valor.toFixed(2)}</b><br>
+                <b style="font-size:10px">R$ ${i.valor.toFixed(2)}</b><br>
                 <div class="actions-row" style="width:auto; gap:5px">
-                    <button class="btn-mini blue" onclick="editLog('${i.id}', '${nome}')"><i class="fas fa-pen"></i></button>
-                    <button class="btn-mini red" onclick="delLog('${i.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn-mini blue" onclick="refazerVendaLog('${i.id}', '${i.desc}', ${i.valor})"><i class="fas fa-undo"></i> REFAZER</button>
                 </div>
             </div>
          </div>`;
@@ -930,13 +980,21 @@ window.editarMovimentacaoCliente = function(nome) {
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
+window.refazerVendaLog = function(id, desc, val) {
+    if(!confirm("REABRIR ESTA VENDA?\n\nIsso adicionará o item ao carrinho de vendas para você corrigir.\n\nDepois você pode excluir este registro antigo se quiser.")) return;
+    document.getElementById('modal-extrato').style.display = 'none';
+    const tipo = (val < 0) ? 'D' : 'P'; // Se negativo é desconto, se nao produto
+    if(tipo === 'D') document.getElementById('v-desc').value = Math.abs(val);
+    else window.addCar('REOPEN', 'P', desc, val);
+    window.nav('vendas');
+}
+
 window.toggleBtnDelete = function() {
     const checked = document.querySelectorAll('.check-log:checked');
     document.getElementById('btn-del-sel').style.display = checked.length > 0 ? 'block' : 'none';
 }
 
 window.excluirSelecionados = async function(nome) {
-    // REMOVIDO PEDIDO DE SENHA
     const checked = document.querySelectorAll('.check-log:checked');
     if(!confirm(`Excluir ${checked.length} itens selecionados?`)) return;
     for(const cb of checked) { await deleteDoc(doc(db, "logs", cb.value)); }
@@ -953,18 +1011,7 @@ window.saveNewDate = async function(id, nome) {
     } 
 }
 
-window.editLog = async function(id, nome) { 
-    // REMOVIDO PEDIDO DE SENHA
-    const l = window.db.logs.find(i=>i.id===id); 
-    const novaDesc = prompt("NOVA DESCRIÇÃO:", l.desc); 
-    const novoVal = prompt("NOVO VALOR:", l.valor); 
-    if(novaDesc && novoVal) { 
-        await updateDoc(doc(db,"logs",id), { valor: parseFloat(novoVal), desc: novaDesc.toUpperCase() }); 
-        alert("Atualizado!"); window.editarMovimentacaoCliente(nome); 
-    } 
-}
 window.delLog = async function(id) { 
-    // REMOVIDO PEDIDO DE SENHA
     if(!confirm("Excluir este lançamento permanentemente?")) return;
     await deleteDoc(doc(db, "logs", id)); 
     alert("Excluído!"); 
@@ -978,19 +1025,19 @@ window.abrirExtratoCliente = function(nome) {
     logs.forEach(l => { const dStr = new Date(l.data).toLocaleDateString('pt-BR'); if(!porData[dStr]) porData[dStr] = []; porData[dStr].push(l); totalExtrato += l.valor; });
     let html = '';
     for (const [data, itens] of Object.entries(porData)) {
-        html += `<div style="margin-bottom:15px; background:white; padding:10px; border-radius:8px; border:1px solid #eee"><div style="font-weight:bold; color:var(--primary); font-size:11px; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:5px"><i class="far fa-calendar-alt"></i> ${data}</div>`;
+        html += `<div style="margin-bottom:12px; background:white; padding:8px; border-radius:8px; border:1px solid #eee"><div style="font-weight:bold; color:var(--primary); font-size:10px; border-bottom:1px solid #eee; padding-bottom:4px; margin-bottom:4px"><i class="far fa-calendar-alt"></i> ${data}</div>`;
         let subDia = 0;
         itens.forEach(i => {
             subDia += i.valor; const isDesc = (i.tipo === 'DESCONTO'); const color = isDesc ? 'color:red' : 'color:black'; 
             const qtdTxt = (!isDesc && (i.qtd > 1 || i.qtd === 1)) ? `<b>${i.qtd||1}x</b> ` : '';
-            html += `<div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:3px; ${color}"><span>${qtdTxt}${i.desc}</span><span style="font-weight:bold">${i.valor < 0 ? '' : 'R$ '}${i.valor.toFixed(2)}</span></div>`;
+            html += `<div style="display:flex; justify-content:space-between; font-size:9px; margin-bottom:2px; ${color}"><span>${qtdTxt}${i.desc}</span><span style="font-weight:bold">${i.valor < 0 ? '' : 'R$ '}${i.valor.toFixed(2)}</span></div>`;
         });
-        html += `<div style="text-align:right; font-size:10px; font-weight:900; color:#555; margin-top:5px; border-top:1px dashed #ccc; padding-top:2px">TOTAL DIA: R$ ${subDia.toFixed(2)}</div></div>`;
+        html += `<div style="text-align:right; font-size:9px; font-weight:900; color:#555; margin-top:4px; border-top:1px dashed #ccc; padding-top:2px">TOTAL DIA: R$ ${subDia.toFixed(2)}</div></div>`;
     }
     window.extratoAtual = { cliente: nome, html: html, dados: porData, total: totalExtrato };
     document.getElementById('ext-nome').innerText = nome; 
-    document.getElementById('ext-lista').innerHTML = html + `<div style="text-align:center; font-size:18px; font-weight:900; margin-top:20px; color:var(--primary)">TOTAL GERAL: R$ ${totalExtrato.toFixed(2)}</div>`;
-    document.getElementById('ext-share-area').style.display = 'flex'; // REAPARECE AQUI
+    document.getElementById('ext-lista').innerHTML = html + `<div style="text-align:center; font-size:16px; font-weight:900; margin-top:15px; color:var(--primary)">TOTAL GERAL: R$ ${totalExtrato.toFixed(2)}</div>`;
+    document.getElementById('ext-share-area').style.display = 'flex'; 
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
@@ -1012,7 +1059,7 @@ window.acaoShare = function(tipo) {
     if(tipo=='pdf') {
         let htmlPrint = `<div class="p-header"><div class="p-title">${EMPRESA.nome}</div><div class="p-info">${EMPRESA.end}</div><div class="p-info">${EMPRESA.cid}</div><div class="p-info">CNPJ: ${EMPRESA.cnpj}</div><div class="p-info">Tel: ${EMPRESA.tel}</div><div class="p-info">${EMPRESA.email}</div></div><div style="text-align:center; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px"><b>${new Date().toLocaleString()}</b></div>
         
-        <div style="margin-bottom:10px; font-weight:900; font-size:16px; border: 2px solid #000; padding: 5px;">CLIENTE: ${d.cliente || 'CONSUMIDOR'} <br> ${d.tipo}</div>
+        <div style="margin-bottom:10px; font-weight:900; font-size:14px; border: 2px solid #000; padding: 5px;">CLIENTE: ${d.cliente || 'CONSUMIDOR'} <br> ${d.tipo}</div>
 
         <table class="p-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">R$</th></tr></thead><tbody>${d.itens.map(i => `<tr><td style="width:20px">${i.qtd||1}x</td><td>${i.nome}<br><small>GAR: ${i.garantia||'--'}</small></td><td style="text-align:right">${i.val.toFixed(2)}</td></tr>`).join('')}</tbody></table>
         <div class="p-line"></div><div style="display:flex; justify-content:space-between; font-size:11px"><span>SUBTOTAL:</span><span>R$ ${d.subtotal.toFixed(2)}</span></div>`;
@@ -1033,12 +1080,9 @@ window.acaoShare = function(tipo) {
     }
 }
 
-// ZAP DIRETO EXTRATO
 window.shareExtrato = function(tipo) {
     if(!window.extratoAtual) return; const d = window.extratoAtual;
     if(tipo === 'zap') document.getElementById('modal-extrato').style.display='none';
-    
-    // ZAP
     if(tipo === 'zap') {
         let txt = `*EXTRATO - ${EMPRESA.nome}*\nCLI: ${d.cliente}\n\n`;
         for (const [data, itens] of Object.entries(d.dados)) {
@@ -1053,7 +1097,6 @@ window.shareExtrato = function(tipo) {
         if(phone.length >= 10) urlZap = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(txt)}`;
         window.location.href = urlZap;
     } 
-    // PDF
     else if(tipo === 'pdf') {
         let htmlPrint = `<div class="p-header"><div class="p-title">${EMPRESA.nome}</div><div class="p-info">${EMPRESA.end}</div><div class="p-info">${EMPRESA.cid}</div><div class="p-info">CNPJ: ${EMPRESA.cnpj}</div><div class="p-info">Tel: ${EMPRESA.tel}</div><div class="p-info">${EMPRESA.email}</div></div><div style="text-align:center; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px"><b>EXTRATO DO CLIENTE</b><br>${d.cliente}</div>`;
         for (const [data, itens] of Object.entries(d.dados)) {
@@ -1064,7 +1107,6 @@ window.shareExtrato = function(tipo) {
         htmlPrint += `<div class="p-total" style="font-size:14px; border-top:1px solid #000; margin-top:5px; padding-top:5px">TOTAL GERAL: R$ ${d.total.toFixed(2)}</div><div style="text-align:center; margin-top:10px; font-size:9px">EMITIDO EM ${new Date().toLocaleString()}</div>`;
         const area = document.getElementById('area-print'); area.innerHTML = htmlPrint; setTimeout(() => { window.print(); setTimeout(() => { area.innerHTML = ''; }, 500); }, 300);
     }
-    // BLUETOOTH
     else if(tipo === 'bluetooth') {
         let btTxt = `${EMPRESA.nome}%0AEXTRATO DE CLIENTE%0ACLIENTE: ${d.cliente}%0A--------------------------------%0A`;
         for (const [data, itens] of Object.entries(d.dados)) {
