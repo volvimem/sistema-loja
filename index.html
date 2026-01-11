@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FILHÃO.CELL v2.6 - REFAZER COMPLETO</title>
+    <title>FILHÃO.CELL v2.8 - FIX DIVIDAS & UI</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -110,7 +110,10 @@
 
         /* MODAIS E ELEMENTOS EXTRAS */
         .foto-preview { width: 80px; height: 80px; border-radius: 50%; background-color: #eee; border: 4px solid var(--primary); margin: 10px auto; display: block; cursor: pointer; object-fit: cover; }
-        #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 2000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        
+        /* CORREÇÃO: Z-INDEX 3000 GARANTE QUE A SENHA APAREÇA SOBRE O MODAL DA CARTEIRA */
+        #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 3000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        
         .modal-content { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 320px; text-align: center; border: 2px solid var(--primary); }
         .password-container { position: relative; width: 100%; }
         .password-container input { padding-right: 45px; }
@@ -201,7 +204,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.6 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.8 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -969,11 +972,47 @@ window.abrirCarteiraDevedores = function() {
         document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES"; document.getElementById('ext-lista').innerHTML = html; document.getElementById('ext-share-area').style.display = 'none'; document.getElementById('ext-preview-box').style.display = 'none'; document.getElementById('modal-extrato').style.display = 'flex';
     });
 }
+// FIX: BOTÃO DE LIXEIRA NA DÍVIDA
 window.gerenciarDividas = function(nome) {
-    const dividas = window.db.dividas.filter(d => d.cliente === nome && d.restante > 0.01).sort((a,b)=>new Date(a.data_venda)-new Date(b.data_venda)); let html = '';
+    const dividas = window.db.dividas.filter(d => d.cliente === nome && d.restante > 0.01).sort((a,b)=>new Date(a.data_venda)-new Date(b.data_venda)); 
+    let html = '';
     if(dividas.length === 0) html = '<div style="text-align:center; padding:20px; color:#999">NENHUM DÉBITO PENDENTE</div>';
-    else { html = dividas.map(d => { const date = new Date(d.data_venda).toLocaleDateString('pt-BR'); const dataLembretePt = d.data_lembrete ? d.data_lembrete.split('-').reverse().join('/') : ''; const lembrete = dataLembretePt ? `<span style="color:red"><i class="fas fa-bell"></i> ${dataLembretePt}</span>` : ''; return `<div class="fin-item"><div class="fin-date">${date} - ${d.itens}</div><div style="display:flex; justify-content:space-between"><div>TOTAL: R$ ${d.valor_total.toFixed(2)}<br>PAGO: R$ ${d.valor_pago.toFixed(2)}</div><div style="text-align:right"><div class="fin-val">RESTANTE: R$ ${d.restante.toFixed(2)}</div>${lembrete}</div></div><div class="actions-row" style="margin-top:10px"><button class="btn-mini green" onclick="abaterDivida('${d.id}', '${nome}', ${d.restante})">PAGAR</button><button class="btn-mini blue" onclick="agendarLembrete('${d.id}', '${nome}', '${dataLembretePt}')">LEMBRETE</button></div></div>`; }).join(''); }
+    else { 
+        html = dividas.map(d => { 
+            const date = new Date(d.data_venda).toLocaleDateString('pt-BR'); 
+            const dataLembretePt = d.data_lembrete ? d.data_lembrete.split('-').reverse().join('/') : ''; 
+            const lembrete = dataLembretePt ? `<span style="color:red"><i class="fas fa-bell"></i> ${dataLembretePt}</span>` : ''; 
+            
+            return `
+            <div class="fin-item">
+                <div class="fin-date">${date} - ${d.itens}</div>
+                <div style="display:flex; justify-content:space-between">
+                    <div>TOTAL: R$ ${d.valor_total.toFixed(2)}<br>PAGO: R$ ${d.valor_pago.toFixed(2)}</div>
+                    <div style="text-align:right">
+                        <div class="fin-val">RESTANTE: R$ ${d.restante.toFixed(2)}</div>${lembrete}
+                    </div>
+                </div>
+                <div class="actions-row" style="margin-top:10px">
+                    <button class="btn-mini green" onclick="abaterDivida('${d.id}', '${nome}', ${d.restante})">PAGAR</button>
+                    <button class="btn-mini blue" onclick="agendarLembrete('${d.id}', '${nome}', '${dataLembretePt}')">LEMBRETE</button>
+                    <button class="btn-mini red" style="flex:0; min-width:30px" onclick="excluirDivida('${d.id}', '${nome}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`; 
+        }).join(''); 
+    }
     document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome; document.getElementById('ext-lista').innerHTML = html; document.getElementById('ext-share-area').style.display = 'none'; document.getElementById('ext-preview-box').style.display = 'none'; document.getElementById('modal-extrato').style.display = 'flex';
+}
+
+// FIX: FUNÇÃO PARA EXCLUIR DÍVIDA INDIVIDUALMENTE
+window.excluirDivida = function(id, nome) {
+    abrirModalSenha(async () => {
+        document.getElementById('modal-overlay').style.display='none';
+        if(confirm("ATENÇÃO: Deseja apagar esta dívida permanentemente?\n(Não desfaz movimentações de caixa, apenas remove a cobrança)")) {
+            await deleteDoc(doc(db, "dividas", id));
+            gerenciarDividas(nome);
+            listarCli(); // Atualiza ícone de alerta
+        }
+    });
 }
 
 window.maskMoney = function(o) { let v = o.value.replace(/\D/g, ""); v = (v/100).toFixed(2) + ""; v = v.replace(".", ","); v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."); o.value = v; }
@@ -1190,6 +1229,11 @@ window.executarRefazerCompleto = async function(dados) {
     // 2. Tenta buscar no Histórico pelo Número
     if (dados.osNum && dados.osNum !== 'undefined') {
         try {
+            // FIX: APAGAR DÍVIDA SE O REFAZER FOR DE UMA OS
+            const qDiv = query(collection(db, "dividas"), where("origem_os", "==", parseInt(dados.osNum)));
+            const snapDiv = await getDocs(qDiv);
+            snapDiv.forEach(async (d) => await deleteDoc(doc(db, "dividas", d.id)));
+
             const q = query(collection(db, "os_historico"), where("num", "==", parseInt(dados.osNum)));
             const querySnapshot = await getDocs(q);
 
@@ -1574,29 +1618,30 @@ window.acaoShare = function(tipo) {
 
 window.fecharExtrato = function(e) { if(e.target.id === 'modal-extrato') document.getElementById('modal-extrato').style.display = 'none'; }
 
-// FUNÇÃO DELETE UNIFICADA COM AUTO-CLEAN DE DÍVIDAS
+// FUNÇÃO DELETE UNIFICADA COM AUTO-CLEAN DE DÍVIDAS E ÍCONES
 window.del = async function(c, id) { 
     if(c === 'logs') { 
         if(!confirm("Apagar Movimentação?\n\n(Dívidas associadas serão removidas)")) return; 
         
-        // Busca o log antes de apagar para ter os dados
         const docSnap = await getDoc(doc(db, "logs", id));
         if (docSnap.exists()) {
             const l = docSnap.data();
             
-            // Apaga o LOG
+            // 1. Apaga o Log
             await deleteDoc(doc(db, "logs", id));
             
-            // Tenta apagar DÍVIDA vinculada (Pelo OS ou pela Data Exata)
+            // 2. Apaga a Dívida associada (pela OS ou Data exata)
             const q = query(collection(db, "dividas"), where("cliente", "==", l.cliente));
             const querySnapshot = await getDocs(q);
             querySnapshot.forEach(async (docDiv) => {
                 const d = docDiv.data();
-                // Match: Mesma OS ou Mesma Data de Criação (Para Vendas de Balcão)
                 if ((l.osNum && d.origem_os == l.osNum) || (d.data_venda === l.data)) {
                     await deleteDoc(doc(db, "dividas", docDiv.id));
                 }
             });
+            
+            // 3. Atualiza Lista para remover Ícone de Alerta
+            listarCli();
         }
         return; 
     } 
