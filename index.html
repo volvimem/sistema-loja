@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FILHÃO.CELL v2.8 - FIX DIVIDAS & UI</title>
+    <title>FILHÃO.CELL v2.9 - FIX DIVIDAS & UI</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -46,8 +46,9 @@
             cursor: pointer; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 5px; transition: 0.3s;
         }
 
-        /* CORREÇÃO 2: Aumentado max-width para 1000px para ficar melhor no Tablet */
+        /* CORREÇÃO 2: Aumentado max-width para melhor uso em telas maiores (tablets) */
         .container { padding: 12px; max-width: 1000px; margin: auto; }
+        
         .page { display: none; animation: slideUp 0.3s ease-out; }
         .page.active { display: block; }
         @keyframes slideUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
@@ -163,13 +164,13 @@
         
         .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
         
-        /* CORREÇÃO 1: CSS MELHORADO PARA PDF NO ANDROID */
+        /* CORREÇÃO 1: CSS MELHORADO PARA PDF NO ANDROID - CORREÇÃO DE TELA BRANCA */
         #area-cupom-visual, #area-relatorio-visual { display: none; margin-bottom: 50px; }
 
         @media print {
             @page { margin: 0; size: auto; }
             
-            /* Oculta tudo por padrão */
+            /* Oculta tudo por padrão usando visibility para não quebrar o fluxo de renderização do Android */
             body { 
                 visibility: hidden; 
                 background: white;
@@ -238,7 +239,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.8 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.9 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
