@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FILHÃO.CELL v2.9 - FIX DIVIDAS & UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FILHÃO.CELL v2.8.1 - FIX DIVIDAS & UI</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
@@ -17,9 +17,9 @@
         :root { 
             --primary: #d50000;            
             --primary-dark: #b71c1c; 
-            --accent: #000000;              
-            --text: #212121;                   
-            --bg: #f5f5f5;                 
+            --accent: #000000;             
+            --text: #212121;                  
+            --bg: #f5f5f5;                
             --card-bg: #ffffff;             
             --success: #2e7d32;             
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -46,9 +46,7 @@
             cursor: pointer; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 5px; transition: 0.3s;
         }
 
-        /* CORREÇÃO 2: Aumentado max-width para melhor uso em telas maiores (tablets) */
-        .container { padding: 12px; max-width: 1000px; margin: auto; }
-        
+        .container { padding: 12px; max-width: 800px; margin: auto; }
         .page { display: none; animation: slideUp 0.3s ease-out; }
         .page.active { display: block; }
         @keyframes slideUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
@@ -164,46 +162,13 @@
         
         .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
         
-        /* CORREÇÃO 1: CSS MELHORADO PARA PDF NO ANDROID - CORREÇÃO DE TELA BRANCA */
         #area-cupom-visual, #area-relatorio-visual { display: none; margin-bottom: 50px; }
 
         @media print {
             @page { margin: 0; size: auto; }
-            
-            /* Oculta tudo por padrão usando visibility para não quebrar o fluxo de renderização do Android */
-            body { 
-                visibility: hidden; 
-                background: white;
-            }
-
-            /* Exibe apenas a área de cupom se tiver a classe certa */
-            body.printing-cupom #area-cupom-visual { 
-                visibility: visible;
-                display: block !important; 
-                position: absolute; 
-                top: 0; 
-                left: 0;
-                width: 100%; 
-                margin: 0; 
-                padding: 0;
-                background: white;
-                z-index: 9999;
-            }
-
-            /* Exibe apenas a área de relatório se tiver a classe certa */
-            body.printing-relatorio #area-relatorio-visual { 
-                visibility: visible;
-                display: block !important; 
-                position: absolute; 
-                top: 0; 
-                left: 0;
-                width: 100%; 
-                margin: 0; 
-                padding: 10mm;
-                background: white;
-                z-index: 9999;
-            }
-
+            body > :not(#area-cupom-visual):not(#area-relatorio-visual) { display: none !important; }
+            body.printing-cupom #area-cupom-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            body.printing-relatorio #area-relatorio-visual { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 10mm !important; }
             .cupom-wrapper { border: none; box-shadow: none; max-width: 100%; width: 100%; padding: 5mm; }
             * { color: #000 !important; text-shadow: none !important; }
             .c-section-title { background: none !important; border-color: #000 !important; }
@@ -239,7 +204,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.9 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.8 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -1423,12 +1388,11 @@ window.acaoImprimirRelatorio = function() {
         document.body.classList.remove('printing-cupom');
         document.body.classList.add('printing-relatorio');
         
-        // CORREÇÃO: Delay para Android (500ms)
-        setTimeout(() => {
-            window.print();
-            // Limpa classe após impressão (timeout para garantir)
-            setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
-        }, 500);
+        // Chama a impressão nativa (Browser gera o PDF)
+        window.print();
+
+        // Limpa classe após impressão (timeout para garantir)
+        setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
     });
 }
 
@@ -1562,12 +1526,8 @@ window.acaoShare = function(tipo) {
     if(tipo === 'pdf') {
         document.body.classList.remove('printing-relatorio');
         document.body.classList.add('printing-cupom');
-        
-        // CORREÇÃO: Delay para Android (500ms)
-        setTimeout(() => {
-            window.print(); 
-            setTimeout(() => { document.body.classList.remove('printing-cupom'); }, 1000);
-        }, 500);
+        window.print(); 
+        setTimeout(() => { document.body.classList.remove('printing-cupom'); }, 1000);
     }
     else if(tipo === 'bluetooth') {
         // GERAÇÃO DE TEXTO PURO FORMATADO MANUALMENTE (SEM CÓDIGOS [C][L])
