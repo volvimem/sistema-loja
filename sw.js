@@ -1,4 +1,4 @@
-const CACHE_NAME = 'filhao-cell-v62'; // Mudei para v60 para forçar atualização
+const CACHE_NAME = 'filhao-cell-v2.8'; // Mudei para v2.9 para forçar atualização
 const ASSETS = [
   './',
   './index.html',
@@ -47,3 +47,4 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
