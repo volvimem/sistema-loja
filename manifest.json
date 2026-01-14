@@ -1,19 +1,19 @@
 {
-  "name": "FILHAO.CELL Sistema",
-  "short_name": "FILHAO.CELL",
-  "start_url": "./index.html",
+  "name": "FILHÃO.CELL v2.9",
+  "short_name": "FILHÃO",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#f5f5f5",
+  "background_color": "#d50000",
   "theme_color": "#d50000",
-  "orientation": "portrait",
+  "orientation": "any",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
