@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FILHÃO.CELL v2.9.1 - FINAL</title>
+    <title>FILHÃO.CELL v2.9.2 - FINAL</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d50000">
     <meta name="background-color" content="#d50000">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -46,8 +48,11 @@
             cursor: pointer; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 5px; transition: 0.3s;
         }
 
-        /* CORREÇÃO TABLET: Container expande em telas grandes */
-        .container { padding: 12px; width: 100%; max-width: 1200px; margin: auto; }
+        /* CORREÇÃO TABLET: Container fluido para preencher a tela deitada */
+        .container { padding: 12px; width: 100%; margin: auto; }
+        @media (min-width: 800px) {
+            .container { max-width: 95%; } /* Usa 95% da tela no tablet */
+        }
         
         .page { display: none; animation: slideUp 0.3s ease-out; }
         .page.active { display: block; }
@@ -90,9 +95,10 @@
 
         .kanban-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: start; }
         
-        /* Ajuste específico para Tablet no Kanban */
-        @media (min-width: 768px) {
-             .kanban-grid { gap: 15px; }
+        /* CORREÇÃO: Layout do Kanban em modo Paisagem (Tablet) */
+        @media (orientation: landscape) and (min-width: 600px) {
+             .kanban-grid { grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+             .container { max-width: 100%; padding: 20px; }
         }
 
         .k-col { background: #f0f0f0; padding: 5px; border-radius: 8px; min-height: 100px; }
@@ -169,19 +175,14 @@
         
         .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
         
-        /* CORREÇÃO PDF ANDROID: Usar visibility garante renderização */
+        /* CORREÇÃO PDF ANDROID */
         #area-cupom-visual, #area-relatorio-visual { display: none; margin-bottom: 50px; }
 
         @media print {
             @page { margin: 0; size: auto; }
             body { visibility: hidden; background: white; }
-            
-            body.printing-cupom #area-cupom-visual { 
-                visibility: visible; display: block !important; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; background: white; z-index: 9999; 
-            }
-            body.printing-relatorio #area-relatorio-visual { 
-                visibility: visible; display: block !important; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 10mm; background: white; z-index: 9999; 
-            }
+            body.printing-cupom #area-cupom-visual { visibility: visible; display: block !important; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; background: white; z-index: 9999; }
+            body.printing-relatorio #area-relatorio-visual { visibility: visible; display: block !important; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 10mm; background: white; z-index: 9999; }
             .cupom-wrapper { border: none; box-shadow: none; max-width: 100%; width: 100%; padding: 5mm; }
             * { color: #000 !important; text-shadow: none !important; }
             .c-section-title { background: none !important; border-color: #000 !important; }
@@ -217,7 +218,7 @@
 </div>
 
 <header class="no-print">
-    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.9.1 <i class="fas fa-sync-alt"></i></div></h2>
+    <h2><i class="fas fa-fire"></i> FILHÃO.CELL <div class="version-btn" onclick="forcarAtualizacao()">v2.9.2 <i class="fas fa-sync-alt"></i></div></h2>
     <div id="status-conn" style="font-size:12px"><i class="fas fa-wifi"></i></div>
 </header>
 
@@ -455,8 +456,11 @@ window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[], dividas:[],
 window.carrinho = []; window.carrinhoOS = []; window.shareData = null; window.tempImg = null; window.retornoVenda = false; window.retornoOS = false; window.osFotos = [null, null, null, null]; window.currentFotoIndex = 0; window.extratoAtual = null; window.editingDateId = null;
 window.callbackSenha = null; window.verValores = false;
 window.isEditing = false; 
+
+// ESTADO DA ABA DE ESTOQUE
 window.estoqueTab = 'prod'; 
 
+// FUNÇÃO HELPER: REMOVER ACENTOS PARA BUSCA
 window.norm = (t) => t ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase() : "";
 
 // ESCUTAS DO BANCO DE DADOS
@@ -467,7 +471,7 @@ onSnapshot(collection(db, "clientes"), s => {
 onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque') && window.estoqueTab=='prod') renderListaEstoque(); });
 onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque') && window.estoqueTab=='serv') renderListaEstoque(); });
 
-// ATUALIZAÇÃO KANBAN (OS ATIVA)
+// ATUALIZAÇÃO KANBAN (OS ATIVA) - GARANTIR QUE RENDERIZA SEMPRE
 onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { 
     window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); 
     renderKanban(); 
@@ -1214,7 +1218,7 @@ window.acaoImprimirRelatorio = function() {
             return `<tr style="font-size:11px; border-bottom:1px solid #ccc;"><td style="padding:4px;">${new Date(l.data).toLocaleDateString()}</td><td style="padding:4px;">${l.cliente}</td><td style="padding:4px;">${l.desc}</td><td style="padding:4px; text-align:right; color:${color}">${l.valor.toFixed(2)}</td></tr>`;
         }).join('');
 
-        const htmlRelatorio = `<div style="font-family: Arial, sans-serif; padding:20px; color:#000;"><h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2><div style="text-align:center; font-size:12px; margin-bottom:20px;">RELATÓRIO FINANCEIRO - ${f.toUpperCase()}</div><div style="display:flex; justify-content:space-between; margin-bottom:20px; border:1px solid #000; padding:10px;"><div><b>EMISSÃO:</b> ${new Date().toLocaleString()}<br><b>ITENS:</b> ${logsFiltrados.length}</div><div style="text-align:right"><b>FATURAMENTO:</b> R$ ${totalGeral.toFixed(2)}<br><b>LUCRO EST.:</b> R$ ${lucroGeral.toFixed(2)}</div></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#eee; font-weight:bold; font-size:12px;"><th style="text-align:left; padding:5px;">DATA</th><th style="text-align:left; padding:5px;">CLIENTE</th><th style="text-align:left; padding:5px;">DESCRIÇÃO</th><th style="text-align:right; padding:5px;">VALOR</th></tr></thead><tbody>${linhasTabela}</tbody></table><div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v2.9.1</div></div>`;
+        const htmlRelatorio = `<div style="font-family: Arial, sans-serif; padding:20px; color:#000;"><h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2><div style="text-align:center; font-size:12px; margin-bottom:20px;">RELATÓRIO FINANCEIRO - ${f.toUpperCase()}</div><div style="display:flex; justify-content:space-between; margin-bottom:20px; border:1px solid #000; padding:10px;"><div><b>EMISSÃO:</b> ${new Date().toLocaleString()}<br><b>ITENS:</b> ${logsFiltrados.length}</div><div style="text-align:right"><b>FATURAMENTO:</b> R$ ${totalGeral.toFixed(2)}<br><b>LUCRO EST.:</b> R$ ${lucroGeral.toFixed(2)}</div></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#eee; font-weight:bold; font-size:12px;"><th style="text-align:left; padding:5px;">DATA</th><th style="text-align:left; padding:5px;">CLIENTE</th><th style="text-align:left; padding:5px;">DESCRIÇÃO</th><th style="text-align:right; padding:5px;">VALOR</th></tr></thead><tbody>${linhasTabela}</tbody></table><div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v2.9.2</div></div>`;
 
         document.getElementById('area-relatorio-visual').innerHTML = htmlRelatorio;
         document.body.classList.remove('printing-cupom');
@@ -1241,7 +1245,7 @@ window.montarHtmlCupom = function(d) {
         htmlFinanceiroExtra = `<div class="c-row"><span>SINAL (PAGO):</span> <span>- R$ ${parseFloat(d.sinal).toFixed(2)}</span></div><div class="c-total-box" style="border-style:dashed; margin-top:5px"><div style="font-size:10px; font-weight:bold;">RESTANTE A PAGAR:</div><div class="c-big-total" style="font-size:18px">R$ ${restante.toFixed(2)}</div></div>`;
     }
 
-    return `<div class="cupom-wrapper"><div class="c-header"><span class="c-company">${EMPRESA.nome}</span><span class="c-sub">${EMPRESA.end}</span><span class="c-sub">${EMPRESA.cid}</span><span class="c-sub">CNPJ: ${EMPRESA.cnpj}</span><span class="c-sub">Tel: ${EMPRESA.tel}</span></div><div class="c-body"><div class="c-destaque-os">${d.tipo}</div><div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div><div style="margin:5px 0; border-bottom:1px solid #ccc; padding-bottom:5px;"><span style="font-size:10px;">CLIENTE:</span><br><span class="c-destaque-nome">${d.cliente || 'CONSUMIDOR'}</span></div><table class="c-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead><tbody>${itensHtml}</tbody></table><div class="c-section-title">RESUMO FINANCEIRO</div><div class="c-row"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}<div style="margin-top:10px; text-align:right;"><div style="font-size:10px; font-weight:bold;">TOTAL GERAL:</div><div class="c-big-total">R$ ${d.total.toFixed(2)}</div></div>${htmlFinanceiroExtra}<div style="margin-top:10px">${d.valorPago ? `<div class="c-row"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}</div>${d.obs ? `<div style="margin-top:15px; border:1px solid #000; padding:8px; font-weight:bold; background:#eee;">OBS: ${d.obs}</div>` : ''}${d.senha ? `<div style="margin-top:10px; font-weight:bold; text-align:center; font-size:18px; border:2px solid #000; padding:5px;">SENHA: ${d.senha}</div>` : ''}</div><div class="c-footer"><div style="border-top:1px solid #000; width:70%; margin:40px auto 5px auto;"></div><div>ASSINATURA DO CLIENTE</div><br><div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div><div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v2.9.1</div></div></div>`;
+    return `<div class="cupom-wrapper"><div class="c-header"><span class="c-company">${EMPRESA.nome}</span><span class="c-sub">${EMPRESA.end}</span><span class="c-sub">${EMPRESA.cid}</span><span class="c-sub">CNPJ: ${EMPRESA.cnpj}</span><span class="c-sub">Tel: ${EMPRESA.tel}</span></div><div class="c-body"><div class="c-destaque-os">${d.tipo}</div><div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div><div style="margin:5px 0; border-bottom:1px solid #ccc; padding-bottom:5px;"><span style="font-size:10px;">CLIENTE:</span><br><span class="c-destaque-nome">${d.cliente || 'CONSUMIDOR'}</span></div><table class="c-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead><tbody>${itensHtml}</tbody></table><div class="c-section-title">RESUMO FINANCEIRO</div><div class="c-row"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}<div style="margin-top:10px; text-align:right;"><div style="font-size:10px; font-weight:bold;">TOTAL GERAL:</div><div class="c-big-total">R$ ${d.total.toFixed(2)}</div></div>${htmlFinanceiroExtra}<div style="margin-top:10px">${d.valorPago ? `<div class="c-row"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}</div>${d.obs ? `<div style="margin-top:15px; border:1px solid #000; padding:8px; font-weight:bold; background:#eee;">OBS: ${d.obs}</div>` : ''}${d.senha ? `<div style="margin-top:10px; font-weight:bold; text-align:center; font-size:18px; border:2px solid #000; padding:5px;">SENHA: ${d.senha}</div>` : ''}</div><div class="c-footer"><div style="border-top:1px solid #000; width:70%; margin:40px auto 5px auto;"></div><div>ASSINATURA DO CLIENTE</div><br><div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div><div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v2.9.2</div></div></div>`;
 }
 
 window.abrirModalShare = function() {
@@ -1276,7 +1280,7 @@ window.acaoShare = function(tipo) {
         if(d.troco) T += txtPair('TROCO:', 'R$ ' + d.troco.toFixed(2), W) + '\n';
         if(d.obs) { T += '\nOBSERVACOES:\n' + d.obs + '\n'; }
         if(d.senha) { T += '\n\n' + txtCenter('SENHA: ' + d.senha, W) + '\n'; }
-        T += '\n\n' + txtCenter('OBRIGADO PELA PREFERENCIA!', W) + '\n' + txtCenter('Filhao.Cell v2.9.1', W) + '\n\n\n';
+        T += '\n\n' + txtCenter('OBRIGADO PELA PREFERENCIA!', W) + '\n' + txtCenter('Filhao.Cell v2.9.2', W) + '\n\n\n';
         window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
     }
     else if(tipo === 'zap') {
