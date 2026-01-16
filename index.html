@@ -17,11 +17,11 @@
 
     <style>
         :root { 
-            --primary: #d50000;            
+            --primary: #d50000;             
             --primary-dark: #b71c1c; 
-            --accent: #000000;              
-            --text: #212121;                   
-            --bg: #f5f5f5;                 
+            --accent: #000000;               
+            --text: #212121;                    
+            --bg: #f5f5f5;                  
             --card-bg: #ffffff;             
             --success: #2e7d32;             
             --shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -822,42 +822,44 @@ window.renderKanban = function() {
 window.delOS = async function(id) { abrirModalSenha(async () => { document.getElementById('modal-overlay').style.display='none'; if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }); }
 window.moveOS = async function(id, dir) { const o = window.db.os.find(i=>i.id===id); const idx = ['pecas', 'pgto', 'retirado'].indexOf(o.status) + dir; await updateDoc(doc(db,"os_ativa",id), {status: ['pecas', 'pgto', 'retirado'][idx]}); }
 
-// CORREÇÃO CRÍTICA DE ARQUIVAMENTO E NOTIFICAÇÃO
+// MODIFICAÇÃO SOLICITADA: Lógica de pagamento/dívida
 window.arqOS = async function(id) {
-    if(!confirm("Arquivar?")) return; 
+    if(!confirm("Arquivar e Finalizar?")) return; 
     
     // 1. ATUALIZAÇÃO VISUAL OTIMISTA (REMOVE DA TELA IMEDIATAMENTE)
     const cardElement = document.getElementById(`os-card-${id}`);
     if(cardElement) cardElement.remove();
 
     const o = window.db.os.find(i=>i.id===id);
-    if(!o) return; // Se não achar no objeto local, aborta a lógica de banco mas o visual já foi
+    if(!o) return; 
 
-    // Cálculo forçado do restante
     const totalCalc = o.valor || 0;
     const sinalCalc = o.sinal || 0;
-    const restanteReal = totalCalc - sinalCalc;
 
-    // Criar dívida se houver restante
-    if (restanteReal > 0.01) {
-        // Normaliza o nome para garantir match com o cadastro de clientes
-        const nomeCliente = o.cliente.trim().toUpperCase();
+    // Só gera dívida se TIVER SINAL. Se sinal for 0, considera pago na retirada.
+    if (sinalCalc > 0) {
+        const restanteReal = totalCalc - sinalCalc;
         
-        await addDoc(collection(db, "dividas"), {
-            cliente: nomeCliente, 
-            valor_total: totalCalc, 
-            valor_pago: sinalCalc,
-            restante: restanteReal,
-            data_venda: o.data,
-            data_lembrete: "",
-            itens: (o.itens || []).map(x => x.nome).join(', '),
-            origem_os: o.num || 'S/N'
-        });
+        // Criar dívida se houver restante
+        if (restanteReal > 0.01) {
+            const nomeCliente = o.cliente.trim().toUpperCase();
+            
+            await addDoc(collection(db, "dividas"), {
+                cliente: nomeCliente, 
+                valor_total: totalCalc, 
+                valor_pago: sinalCalc,
+                restante: restanteReal,
+                data_venda: o.data,
+                data_lembrete: "",
+                itens: (o.itens || []).map(x => x.nome).join(', '),
+                origem_os: o.num || 'S/N'
+            });
+        }
     }
 
     await setDoc(doc(db, "os_historico", id), o);
     
-    // Registrar Logs
+    // Registrar Logs de Movimentação
     if(o.itens && o.itens.length>0) { 
         for(let i of o.itens) {
             let tipoLog = 'SERVICO';
@@ -873,7 +875,7 @@ window.arqOS = async function(id) {
     
     if(o.desconto>0) await addDoc(collection(db,"logs"), {tipo:'DESCONTO', desc: 'DESCONTO OS', valor: -o.desconto, cliente: o.cliente, data: o.data});
     
-    // Por fim, deleta do banco
+    // Por fim, deleta do banco de ativas
     await deleteDoc(doc(db,"os_ativa",id));
 }
 
