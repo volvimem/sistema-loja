@@ -959,3 +959,47 @@ window.fecharModal = function(e) { if(e.target.id=='modal-overlay') document.get
 window.onload = function() {
     window.restaurarEstadoLocal();
 };
+// --- SISTEMA DE SEGURANÇA: BACKUP ---
+
+window.fazerBackup = function() {
+    if(!window.db.clientes.length && !window.db.logs.length) {
+        alert("O sistema ainda está carregando ou está vazio. Espere os dados aparecerem.");
+        return;
+    }
+
+    if(!confirm("Baixar cópia de segurança de TUDO para o seu computador?")) return;
+    
+    // Pega tudo que está na memória do sistema agora
+    const backup = {
+        data: new Date().toISOString(),
+        sistema: "FILHAO_CELL",
+        dados: {
+            clientes: window.db.clientes || [],
+            produtos: window.db.produtos || [],
+            servicos: window.db.servicos || [],
+            os_ativa: window.db.os || [],
+            logs: window.db.logs || [],
+            dividas: window.db.dividas || [],
+            os_historico: window.db.os_hist || []
+        }
+    };
+
+    // Cria o arquivo para download
+    const blob = new Blob([JSON.stringify(backup)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `BACKUP_FILHAO_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Adicionar botão de Backup automaticamente no topo da tela (para facilitar)
+setTimeout(() => {
+    const btn = document.createElement('button');
+    btn.innerHTML = '<i class="fas fa-download"></i> BACKUP';
+    btn.style.cssText = "position:fixed; top:10px; right:10px; z-index:9999; background:black; color:white; padding:5px 10px; border:none; border-radius:5px; cursor:pointer; font-size:10px; opacity:0.7;";
+    btn.onclick = window.fazerBackup;
+    document.body.appendChild(btn);
+}, 3000); // Aparece 3 segundos após abrir o sistema
