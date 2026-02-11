@@ -90,6 +90,8 @@ document.addEventListener('keyup', (e) => {
 document.addEventListener('click', () => {
     setTimeout(window.salvarEstadoLocal, 100); // Salva após cliques (navegação, adicionar itens)
 });
+// Para manter compatibilidade com chamadas inline do HTML antigo
+window.salvarEstadoSessao = window.salvarEstadoLocal;
 
 // --- FIM LÓGICA PERSISTÊNCIA ---
 
@@ -615,20 +617,20 @@ window.gerenciarDividas = function(nome) {
             const date = new Date(d.data_venda).toLocaleDateString('pt-BR'); 
             const dataLembretePt = d.data_lembrete ? d.data_lembrete.split('-').reverse().join('/') : ''; 
             const lembrete = dataLembretePt ? `<span style="color:red"><i class="fas fa-bell"></i> ${dataLembretePt}</span>` : ''; 
-            return `
-            <div class="fin-item">
-                <div class="fin-date">${date} - ${d.itens}</div>
-                <div style="display:flex; justify-content:space-between">
-                    <div>TOTAL: R$ ${d.valor_total.toFixed(2)}<br>PAGO: R$ ${d.valor_pago.toFixed(2)}</div>
-                    <div style="text-align:right">
-                        <div class="fin-val">RESTANTE: R$ ${d.restante.toFixed(2)}</div>${lembrete}
-                    </div>
-                </div>
-                <div class="actions-row" style="margin-top:10px">
-                    <button class="btn-mini green" onclick="abaterDivida('${d.id}', '${nome}', ${d.restante})">PAGAR</button>
-                    <button class="btn-mini blue" onclick="agendarLembrete('${d.id}', '${nome}', '${dataLembretePt}')">LEMBRETE</button>
-                    <button class="btn-mini red" style="flex:0; min-width:30px" onclick="excluirDivida('${d.id}', '${nome}')"><i class="fas fa-trash"></i></button>
-                </div>
+            return `<br>
+            <div class="fin-item"><br>
+                <div class="fin-date">${date} - ${d.itens}</div><br>
+                <div style="display:flex; justify-content:space-between"><br>
+                    <div>TOTAL: R$ ${d.valor_total.toFixed(2)}<br>PAGO: R$ ${d.valor_pago.toFixed(2)}</div><br>
+                    <div style="text-align:right"><br>
+                        <div class="fin-val">RESTANTE: R$ ${d.restante.toFixed(2)}</div>${lembrete}<br>
+                    </div><br>
+                </div><br>
+                <div class="actions-row" style="margin-top:10px"><br>
+                    <button class="btn-mini green" onclick="abaterDivida('${d.id}', '${nome}', ${d.restante})">PAGAR</button><br>
+                    <button class="btn-mini blue" onclick="agendarLembrete('${d.id}', '${nome}', '${dataLembretePt}')">LEMBRETE</button><br>
+                    <button class="btn-mini red" style="flex:0; min-width:30px" onclick="excluirDivida('${d.id}', '${nome}')"><i class="fas fa-trash"></i></button><br>
+                </div><br>
             </div>`; 
         }).join(''); 
     }
@@ -711,7 +713,25 @@ window.renderRelatorio = function() {
     const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value; 
     const logsFiltrados = window.db.logs.filter(l => {
         const d = new Date(l.data); let matchDate = false;
-        if(f=='dia') matchDate = d.toDateString()===now.toDateString(); else if(f=='semana') matchDate = (now-d) < 604800000; else if(f=='mes') matchDate = d.getMonth()===now.getMonth(); else matchDate = d.getFullYear()===now.getFullYear();
+        
+        // --- LOGICA DO FILTRO ATUALIZADA ---
+        if(f=='dia') {
+            matchDate = d.toDateString()===now.toDateString(); 
+        } else if(f=='semana') {
+            matchDate = (now-d) < 604800000; 
+        } else if(f=='mes') {
+            // Mês Atual
+            matchDate = d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); 
+        } else if(f.startsWith('mes_')) {
+            // Lógica para Meses Específicos (Janeiro, Fevereiro...)
+            const mesEscolhido = parseInt(f.split('_')[1]); 
+            matchDate = d.getMonth() === mesEscolhido && d.getFullYear() === now.getFullYear();
+        } else {
+            // Ano
+            matchDate = d.getFullYear()===now.getFullYear();
+        }
+        // ------------------------------------
+
         let matchText = true; 
         if(searchTxt) { matchText = (l.cliente && window.norm(l.cliente).includes(window.norm(searchTxt))); } 
         return matchDate && matchText;
@@ -730,10 +750,7 @@ window.renderRelatorio = function() {
         const temDivida = window.db.dividas.some(d => d.cliente === c.nome && d.restante > 0.01);
         const iconDivida = temDivida ? '<span style="font-size:14px">⚠️</span> ' : '';
         const osTxt = c.lastOS ? `Nº ${c.lastOS}` : 'S/N';
-        return `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center">
-            <div style="font-size:10px">${iconDivida}<b>${c.nome}</b><br><span style="color:#777">${new Date(c.lastDate).toLocaleDateString()} - ${osTxt}</span></div>
-            <div style="text-align:right"><b style="color:var(--primary); font-size:11px">R$ ${c.total.toFixed(2)}</b><br><div class="actions-row" style="justify-content:flex-end"><button class="btn-mini green" onclick="abrirExtratoCliente('${c.nome}')"><i class="fas fa-eye"></i></button> <button class="btn-mini blue" onclick="abrirOpcoesEdicao('${c.nome}')"><i class="fas fa-pen"></i></button></div></div>
-        </div>`;
+        return `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center"><br>            <div style="font-size:10px">${iconDivida}<b>${c.nome}</b><br><span style="color:#777">${new Date(c.lastDate).toLocaleDateString()} - ${osTxt}</span></div><br>            <div style="text-align:right"><b style="color:var(--primary); font-size:11px">R$ ${c.total.toFixed(2)}</b><br><div class="actions-row" style="justify-content:flex-end"><button class="btn-mini green" onclick="abrirExtratoCliente('${c.nome}')"><i class="fas fa-eye"></i></button> <button class="btn-mini blue" onclick="abrirOpcoesEdicao('${c.nome}')"><i class="fas fa-pen"></i></button></div></div><br>        </div>`;
     }).join('');
 
     if(clientesArray.length === 0) document.getElementById('r-hist').innerHTML = '<div style="text-align:center; padding:20px; color:#ccc">NENHUM DADO ENCONTRADO</div>';
@@ -932,6 +949,82 @@ window.acaoShare = function(tipo) {
     }
 }
 
+// --- NOVA FUNÇÃO PARA COMPARTILHAR EXTRATO ---
+window.shareExtrato = function(tipo) {
+    if(!window.extratoAtual) return alert("Erro: Nenhum extrato carregado.");
+    
+    const nome = window.extratoAtual.cliente;
+    const total = window.extratoAtual.total;
+    const dados = window.extratoAtual.dados; // Objeto agrupado por data
+    
+    if(tipo === 'pdf') {
+        const conteudo = `
+            <div style="font-family: Arial, sans-serif; padding:20px; color:#000;">
+                <h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2>
+                <div style="text-align:center; font-size:12px; margin-bottom:20px;">EXTRATO DETALHADO</div>
+                <div style="border:1px solid #000; padding:10px; margin-bottom:15px;">
+                    <b>CLIENTE:</b> ${nome}<br>
+                    <b>EMISSÃO:</b> ${new Date().toLocaleString()}
+                </div>
+                ${window.extratoAtual.html}
+                <div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.0</div>
+            </div>
+        `;
+        document.getElementById('area-relatorio-visual').innerHTML = conteudo;
+        document.body.classList.remove('printing-cupom');
+        document.body.classList.add('printing-relatorio'); 
+        
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
+        }, 500);
+    }
+    else if(tipo === 'bluetooth') {
+        const W = 32; 
+        let T = '';
+        T += txtCenter(EMPRESA.nome, W) + '\n' + txtCenter('EXTRATO DE CLIENTE', W) + '\n' + txtLine(W) + '\n';
+        T += 'CLI: ' + nome + '\nDATA: ' + new Date().toLocaleDateString() + '\n' + txtLine(W) + '\n';
+
+        for (const [data, itens] of Object.entries(dados)) {
+            T += '\nDATA: ' + data + '\n';
+            let subDia = 0;
+            itens.forEach(i => {
+                subDia += i.valor;
+                let nomeItem = i.desc; 
+                if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20);
+                T += (i.qtd||1) + 'x ' + nomeItem + '\n' + txtPair('', 'R$ ' + i.valor.toFixed(2), W) + '\n';
+            });
+            T += txtPair(' TOTAL DIA:', 'R$ ' + subDia.toFixed(2), W) + '\n';
+            T += '- - - - - - - - - - - - - - - -\n';
+        }
+
+        T += '\n' + txtLine(W) + '\n' + txtCenter('TOTAL GERAL: R$ ' + total.toFixed(2), W) + '\n' + txtLine(W) + '\n\n\n';
+        window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
+    }
+    else if(tipo === 'zap') {
+        let txt = `*${EMPRESA.nome}*\n_Extrato Detalhado_\n\n*CLIENTE:* ${nome}\n*DATA:* ${new Date().toLocaleString()}\n----------------`;
+        
+        for (const [data, itens] of Object.entries(dados)) {
+            txt += `\n\n📅 *${data}*`;
+            let subDia = 0;
+            itens.forEach(i => {
+                subDia += i.valor;
+                txt += `\n▪ ${i.qtd||1}x ${i.desc} - R$ ${i.valor.toFixed(2)}`;
+            });
+            txt += `\n_Subtotal: R$ ${subDia.toFixed(2)}_`;
+        }
+
+        txt += `\n\n----------------\n*TOTAL GERAL: R$ ${total.toFixed(2)}*`;
+        
+        const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === nome.toUpperCase());
+        let phone = (cliObj && cliObj.tel) ? cliObj.tel.replace(/\D/g, '') : '';
+        let urlZap = `whatsapp://send?text=${encodeURIComponent(txt)}`;
+        if(phone.length >= 10) urlZap = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(txt)}`;
+        
+        window.location.href = urlZap;
+    }
+}
+
 window.fecharExtrato = function(e) { if(e.target.id === 'modal-extrato') document.getElementById('modal-extrato').style.display = 'none'; }
 window.del = async function(c, id) { 
     if(c === 'logs') { 
@@ -1002,4 +1095,4 @@ setTimeout(() => {
     btn.style.cssText = "position:fixed; top:10px; right:10px; z-index:9999; background:black; color:white; padding:5px 10px; border:none; border-radius:5px; cursor:pointer; font-size:10px; opacity:0.7;";
     btn.onclick = window.fazerBackup;
     document.body.appendChild(btn);
-}, 3000); // Aparece 3 segundos após abrir o sistema
+}, 3000);
