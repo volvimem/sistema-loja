@@ -127,8 +127,6 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
 .nav-item i { display: block; font-size: 22px; margin-bottom: 4px; color: var(--accent); }
 .nav-item.active i { color: var(--primary); }
 
-.check-log { transform: scale(1.4); margin-right: 12px; accent-color: var(--primary); }
-
 /* --- ESTILO PROFISSIONAL DO CUPOM (HTML/PDF) --- */
 .cupom-wrapper {
     background: #fff; color: #000;
@@ -156,24 +154,68 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
 
 .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
 
-/* CORREÇÃO PDF ANDROID E PC */
+/* Estilos aprimorados para o Relatório A4 impresso */
+.relatorio-print-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif; }
+.relatorio-print-table th { background: #f0f0f0; border: 1px solid #000; padding: 8px; font-size: 12px; }
+.relatorio-print-table td { border: 1px solid #ccc; padding: 6px 8px; font-size: 11px; }
+
+/* REGRAS RÍGIDAS DE IMPRESSÃO PROFISSIONAL (Remove o aspecto de 'Print de tela') */
 #area-cupom-visual, #area-relatorio-visual { display: none; }
 
 @media print {
+    /* Reseta a página para limpar margens automáticas e cores de fundo da interface */
     @page { margin: 0; size: auto; }
     
-    /* Oculta TUDO no body, exceto a área que queremos imprimir */
+    html, body { 
+        background-color: #ffffff !important; 
+        margin: 0 !important; 
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Oculta FORÇADAMENTE tudo que não for a área de impressão */
+    header, nav, .container, #modal-overlay, #modal-extrato, .no-print { 
+        display: none !important; 
+    }
+    
     body.printing-cupom > *:not(#area-cupom-visual) { display: none !important; }
     body.printing-relatorio > *:not(#area-relatorio-visual) { display: none !important; }
     
-    /* Exibe e formata a área correta de impressão */
-    body.printing-cupom #area-cupom-visual { display: block !important; width: 100%; margin: 0; padding: 5mm; background: white; }
-    body.printing-relatorio #area-relatorio-visual { display: block !important; width: 100%; margin: 0; padding: 10mm; background: white; }
+    /* Exibe APENAS a área que será impressa */
+    body.printing-cupom #area-cupom-visual { 
+        display: block !important; 
+        width: 100%; 
+        margin: 0; 
+        padding: 5mm; 
+        background: white; 
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
     
-    .cupom-wrapper { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; margin: 0 !important; }
+    body.printing-relatorio #area-relatorio-visual { 
+        display: block !important; 
+        width: 100%; 
+        margin: 0; 
+        padding: 10mm; 
+        background: white; 
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
     
-    /* Força cores nítidas e remove decorações desnecessárias */
-    * { color: #000 !important; text-shadow: none !important; }
+    /* Remove sombras e bordas estéticas para economizar tinta e ficar profissional */
+    .cupom-wrapper { 
+        border: none !important; 
+        box-shadow: none !important; 
+        max-width: 100% !important; 
+        width: 100% !important; 
+        margin: 0 !important; 
+    }
+    
+    /* Força cores pretas e fundo transparente */
+    * { color: #000 !important; text-shadow: none !important; box-shadow: none !important; }
     .c-section-title { border-color: #000 !important; background: transparent !important; }
-    .no-print { display: none !important; }
+    .c-destaque-os { background: transparent !important; }
 }
