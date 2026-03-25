@@ -20,10 +20,8 @@ window.carrinho = []; window.carrinhoOS = []; window.shareData = null; window.te
 window.callbackSenha = null; window.verValores = false;
 window.isEditing = false; 
 
-// ESTADO DA ABA DE ESTOQUE
 window.estoqueTab = 'prod'; 
 
-// --- NOVA LÓGICA DE PERSISTÊNCIA (MANTER DADOS AO ATUALIZAR) ---
 window.salvarEstadoLocal = function() {
     const estado = {
         abaAtiva: document.querySelector('.page.active')?.id.replace('page-', '') || 'vendas',
@@ -39,7 +37,7 @@ window.salvarEstadoLocal = function() {
             's-def': document.getElementById('s-def')?.value,
             's-desc': document.getElementById('s-desc')?.value,
             's-sinal': document.getElementById('s-sinal')?.value,
-            'os-id': document.getElementById('os-id')?.value, // Mantém ID se estiver editando
+            'os-id': document.getElementById('os-id')?.value,
             'isEditing': window.isEditing
         }
     };
@@ -51,25 +49,17 @@ window.restaurarEstadoLocal = function() {
     if (salvo) {
         try {
             const estado = JSON.parse(salvo);
-            
-            // Restaurar Variáveis Globais
             window.carrinho = estado.carrinhoVenda || [];
             window.carrinhoOS = estado.carrinhoOS || [];
             window.isEditing = estado.inputs.isEditing || false;
-
-            // Restaurar Inputs
             if(estado.inputs) {
                 for (const [id, val] of Object.entries(estado.inputs)) {
                     const el = document.getElementById(id);
                     if(el) el.value = val || '';
                 }
             }
-
-            // Renderizar Listas
             renderCarrinho();
             renderItemsOS();
-
-            // Navegar para a aba certa
             if(estado.abaAtiva) {
                 window.nav(estado.abaAtiva);
             }
@@ -77,26 +67,21 @@ window.restaurarEstadoLocal = function() {
             console.error("Erro ao restaurar estado", e);
         }
     } else {
-        window.nav('vendas'); // Padrão
+        window.nav('vendas');
     }
 }
 
-// Adicionar listener para salvar sempre que digitar algo importante
 document.addEventListener('keyup', (e) => {
     if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         window.salvarEstadoLocal();
     }
 });
 document.addEventListener('click', () => {
-    setTimeout(window.salvarEstadoLocal, 100); // Salva após cliques (navegação, adicionar itens)
+    setTimeout(window.salvarEstadoLocal, 100);
 });
 
-// --- FIM LÓGICA PERSISTÊNCIA ---
-
-// FUNÇÃO HELPER: REMOVER ACENTOS PARA BUSCA
 window.norm = (t) => t ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase() : "";
 
-// ESCUTAS DO BANCO DE DADOS
 onSnapshot(collection(db, "clientes"), s => { 
     window.db.clientes = s.docs.map(d=>({id:d.id, ...d.data()})); 
     if(isPg('clientes')) listarCli(); 
@@ -104,7 +89,6 @@ onSnapshot(collection(db, "clientes"), s => {
 onSnapshot(collection(db, "produtos"), s => { window.db.produtos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque') && window.estoqueTab=='prod') renderListaEstoque(); });
 onSnapshot(collection(db, "servicos_cad"), s => { window.db.servicos = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('estoque') && window.estoqueTab=='serv') renderListaEstoque(); });
 
-// ATUALIZAÇÃO KANBAN (OS ATIVA)
 onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => { 
     window.db.os = s.docs.map(d=>({id:d.id, ...d.data()})); 
     renderKanban(); 
@@ -112,7 +96,6 @@ onSnapshot(query(collection(db, "os_ativa"), orderBy("data", "desc")), s => {
 
 onSnapshot(query(collection(db, "logs"), orderBy("data", "desc")), s => { window.db.logs = s.docs.map(d=>({id:d.id, ...d.data()})); if(isPg('relatorio')) renderRelatorio(); });
 
-// ATUALIZAÇÃO DÍVIDAS
 onSnapshot(collection(db, "dividas"), s => { 
     window.db.dividas = s.docs.map(d=>({id:d.id, ...d.data()}));
     if(isPg('relatorio')) renderRelatorio();
@@ -174,8 +157,6 @@ function ativarAba(p, el) {
     document.querySelectorAll('.page').forEach(d=>d.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
     document.getElementById('page-'+p).classList.add('active');
-    
-    // Atualiza botão da nav bar
     const navBtn = document.querySelector(`button[onclick="nav('${p}', this)"]`);
     if(navBtn) navBtn.classList.add('active');
     else if(el) el.classList.add('active');
@@ -183,7 +164,6 @@ function ativarAba(p, el) {
 
 window.forcarAtualizacao = async function() { if(!confirm("Atualizar sistema?")) return; window.location.reload(true); }
 
-/* --- LÓGICA DE LUPA INTELIGENTE (TOGGLE) --- */
 window.toggleSearch = function(tipo, inpId, boxId) {
     const box = document.getElementById(boxId); 
     const val = document.getElementById(inpId).value;
@@ -707,21 +687,61 @@ window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos
 window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('modal-overlay').style.display='none'; document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
 
 window.togglePriv = function() { window.verValores = !window.verValores; const ico = document.getElementById('eye-rel'); if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); ico.classList.add('fa-eye'); } else { ico.classList.remove('fa-eye-slash'); ico.classList.add('fa-eye'); } renderRelatorio(); }
+
+// ============================================
+// FUNÇÃO RENDERRELATORIO ATUALIZADA COM FILTRO DE MESES
+// ============================================
 window.renderRelatorio = function() {
-    const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value; 
+    const f = document.getElementById('r-filtro').value; 
+    const now = new Date(); 
+    const searchTxt = document.getElementById('r-search').value; 
+    
     const logsFiltrados = window.db.logs.filter(l => {
-        const d = new Date(l.data); let matchDate = false;
-        if(f=='dia') matchDate = d.toDateString()===now.toDateString(); else if(f=='semana') matchDate = (now-d) < 604800000; else if(f=='mes') matchDate = d.getMonth()===now.getMonth(); else matchDate = d.getFullYear()===now.getFullYear();
+        const d = new Date(l.data); 
+        let matchDate = false;
+        
+        if(f=='dia') {
+            matchDate = d.toDateString()===now.toDateString();
+        } else if(f=='semana') {
+            matchDate = (now-d) < 604800000;
+        } else if(f=='mes') {
+            matchDate = d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+        } else if(f=='ano') {
+            matchDate = d.getFullYear()===now.getFullYear();
+        } else if(f.length === 2 && !isNaN(f)) {
+            // NOVO: Filtro mês específico (01-12)
+            const mesEscolhido = parseInt(f) - 1;
+            matchDate = d.getMonth() === mesEscolhido && d.getFullYear() === now.getFullYear();
+        }
+        
         let matchText = true; 
-        if(searchTxt) { matchText = (l.cliente && window.norm(l.cliente).includes(window.norm(searchTxt))); } 
+        if(searchTxt) { 
+            matchText = (l.cliente && window.norm(l.cliente).includes(window.norm(searchTxt))); 
+        } 
         return matchDate && matchText;
     });
-    let totalGeral = 0; let lucroGeral = 0; const clientesMap = {}; 
+    
+    let totalGeral = 0; 
+    let lucroGeral = 0; 
+    const clientesMap = {}; 
+    
     logsFiltrados.forEach(l => {
-        totalGeral += l.valor; let custoItem = 0; if(l.tipo === 'PRODUTO' || l.tipo === 'P') { const prod = window.db.produtos.find(p => p.nome === l.desc); if(prod && prod.custo) custoItem = parseFloat(prod.custo) * (l.qtd || 1); } lucroGeral += (l.valor - custoItem);
-        if(!clientesMap[l.cliente]) { clientesMap[l.cliente] = { nome: l.cliente, total: 0, count: 0, lastDate: l.data, lastOS: null }; } 
-        clientesMap[l.cliente].total += l.valor; clientesMap[l.cliente].count++;
-        if (new Date(l.data) > new Date(clientesMap[l.cliente].lastDate)) { clientesMap[l.cliente].lastDate = l.data; }
+        totalGeral += l.valor; 
+        let custoItem = 0; 
+        if(l.tipo === 'PRODUTO' || l.tipo === 'P') { 
+            const prod = window.db.produtos.find(p => p.nome === l.desc); 
+            if(prod && prod.custo) custoItem = parseFloat(prod.custo) * (l.qtd || 1); 
+        } 
+        lucroGeral += (l.valor - custoItem);
+        
+        if(!clientesMap[l.cliente]) { 
+            clientesMap[l.cliente] = { nome: l.cliente, total: 0, count: 0, lastDate: l.data, lastOS: null }; 
+        } 
+        clientesMap[l.cliente].total += l.valor; 
+        clientesMap[l.cliente].count++;
+        if (new Date(l.data) > new Date(clientesMap[l.cliente].lastDate)) { 
+            clientesMap[l.cliente].lastDate = l.data; 
+        }
         if (l.osNum) clientesMap[l.cliente].lastOS = l.osNum;
     });
     
@@ -737,368 +757,9 @@ window.renderRelatorio = function() {
     }).join('');
 
     if(clientesArray.length === 0) document.getElementById('r-hist').innerHTML = '<div style="text-align:center; padding:20px; color:#ccc">NENHUM DADO ENCONTRADO</div>';
-    document.getElementById('r-total').innerText = window.verValores ? "R$ " + totalGeral.toFixed(2) : "****"; document.getElementById('r-lucro').innerText = window.verValores ? "R$ " + lucroGeral.toFixed(2) : "****";
+    document.getElementById('r-total').innerText = window.verValores ? "R$ " + totalGeral.toFixed(2) : "****"; 
+    document.getElementById('r-lucro').innerText = window.verValores ? "R$ " + lucroGeral.toFixed(2) : "****";
     
     const rank = (k, d) => { 
         const c={}; 
-        window.db.logs.forEach(i => { 
-            if(i.tipo === 'DESCONTO') return;
-            const isProd = (i.tipo === 'PRODUTO' || i.tipo === 'P'); 
-            const isServ = (i.tipo === 'SERVICO' || i.tipo === 'S'); 
-            const qtd = i.qtd || 1; 
-            if(k === 'CLI') { const n = i.cliente; c[n] = (c[n]||0) + 1; } 
-            else if(k === 'PROD' && isProd) { const n = i.desc; c[n] = (c[n]||0) + qtd; } 
-            else if(k === 'SERV' && isServ) { const n = i.desc; c[n] = (c[n]||0) + qtd; } 
-        }); 
-        document.getElementById(d).innerHTML = Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>`<div class="rank-item"><span>${x[0]}</span><b>${x[1]}</b></div>`).join(''); 
-    }
-    rank('CLI','rank-cli'); rank('PROD','rank-prod'); rank('SERV','rank-serv');
-}
-
-window.abrirOpcoesEdicao = function(nome) { document.getElementById('modal-overlay').style.display = 'flex'; document.getElementById('modal-content-default').innerHTML = `<h3 style="justify-content:center">EDITAR</h3><div style="font-size:11px; text-align:center; margin-bottom:12px; font-weight:bold; color:var(--primary)">${nome}</div><button class="btn btn-primary" onclick="editarClienteRapido('${nome}')"><i class="fas fa-user-edit"></i> DADOS CLIENTE</button><button class="btn btn-dark" style="margin-top:10px" onclick="editarMovimentacaoCliente('${nome}')"><i class="fas fa-list-ul"></i> MOVIMENTAÇÕES</button><button class="btn" style="background:#666; margin-top:10px" onclick="fecharModal({target:{id:'modal-overlay'}})">CANCELAR</button>`; }
-window.editarClienteRapido = function(nome) { fecharModal({target:{id:'modal-overlay'}}); const cli = window.db.clientes.find(c => c.nome === nome); if(cli) { window.nav('clientes'); window.edtCli(cli.id); } else { if(confirm("Cliente não encontrado. Cadastrar?")) { window.nav('clientes'); document.getElementById('c-nome').value = nome; } } }
-
-window.editarMovimentacaoCliente = function(nome) {
-    fecharModal({target:{id:'modal-overlay'}}); const logs = window.db.logs.filter(l => l.cliente === nome).sort((a,b) => new Date(b.data) - new Date(a.data));
-    let html = `<div style="padding:10px; background:#ffebee; border-bottom:1px solid #d32f2f; text-align:center; color:#d32f2f; font-weight:bold; font-size:10px"><button id="btn-del-sel" class="btn" style="background:#d32f2f; padding:8px; display:none; margin-bottom:10px" onclick="excluirSelecionados('${nome}')"><i class="fas fa-trash"></i> EXCLUIR SELECIONADOS</button>CLIQUE NO LÁPIS PARA EDITAR DATA</div>`;
-    logs.forEach(i => { 
-        const dataVal = i.data.split('T')[0]; 
-        html += `<div style="background:white; padding:8px; border-bottom:1px solid #eee; display:flex; align-items:center;"><input type="checkbox" class="check-log" value="${i.id}" onchange="toggleBtnDelete()"><div style="flex:1"><div id="date-display-${i.id}" style="display:flex; align-items:center; gap:5px; font-size:9px; color:#555"><span>${new Date(i.data).toLocaleDateString('pt-BR')}</span><i class="fas fa-pencil-alt" style="cursor:pointer; color:orange" onclick="toggleEditDate('${i.id}')"></i></div><div id="date-edit-${i.id}" style="display:none; align-items:center; gap:5px;"><input type="date" id="input-date-${i.id}" value="${dataVal}" style="font-size:9px; padding:2px; width:auto"><i class="fas fa-check-circle" style="cursor:pointer; color:green; font-size:12px" onclick="saveNewDate('${i.id}', '${nome}')"></i></div><b style="font-size:10px">${i.desc}</b></div><div style="text-align:right"><b style="font-size:10px">R$ ${i.valor.toFixed(2)}</b><br><div class="actions-row" style="width:auto; gap:5px"><button class="btn-mini blue btn-refazer-acao" data-id="${i.id}" data-desc="${i.desc.replace(/"/g, '&quot;')}" data-valor="${i.valor}" data-cliente="${nome}" data-garantia="${i.garantia || '90 DIAS'}" data-osnum="${i.osNum || ''}"><i class="fas fa-undo"></i> REFAZER</button></div></div></div>`; 
-    });
-    document.getElementById('ext-nome').innerText = "EDITAR: " + nome; document.getElementById('ext-lista').innerHTML = html; document.getElementById('ext-share-area').style.display = 'none'; document.getElementById('ext-preview-box').style.display = 'none'; document.getElementById('modal-extrato').style.display = 'flex';
-}
-
-document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.btn-refazer-acao');
-    if (btn) {
-        e.preventDefault();
-        const dados = { id: btn.getAttribute('data-id'), desc: btn.getAttribute('data-desc'), valor: btn.getAttribute('data-valor'), cliente: btn.getAttribute('data-cliente'), garantia: btn.getAttribute('data-garantia'), osNum: btn.getAttribute('data-osnum') };
-        executarRefazerCompleto(dados);
-    }
-});
-
-window.executarRefazerCompleto = async function(dados) {
-    if(!confirm("REFAZER ESTA O.S.?\n\nO sistema buscará Modelo, Defeito, Senha e Fotos originais do histórico.")) return;
-    document.getElementById('modal-extrato').style.display = 'none';
-    limparOS();
-    document.getElementById('s-cli').value = dados.cliente;
-    let encontrouHistorico = false;
-    if (dados.osNum && dados.osNum !== 'undefined') {
-        try {
-            const qDiv = query(collection(db, "dividas"), where("origem_os", "==", parseInt(dados.osNum)));
-            const snapDiv = await getDocs(qDiv);
-            snapDiv.forEach(async (d) => await deleteDoc(doc(db, "dividas", d.id)));
-
-            const q = query(collection(db, "os_historico"), where("num", "==", parseInt(dados.osNum)));
-            const querySnapshot = await getDocs(q);
-
-            if (!querySnapshot.empty) {
-                const osOriginal = querySnapshot.docs[0].data();
-                document.getElementById('s-mod').value = osOriginal.modelo || '';
-                document.getElementById('s-senha').value = osOriginal.senha || '';
-                document.getElementById('s-def').value = osOriginal.defeito || '';
-                document.getElementById('s-sinal').value = osOriginal.sinal || '';
-                document.getElementById('s-desc').value = osOriginal.desconto || '';
-
-                if (osOriginal.fotos) {
-                    window.osFotos = osOriginal.fotos;
-                    const slots = document.querySelectorAll('.os-foto-slot'); 
-                    window.osFotos.forEach((f, i) => { if(f) slots[i].innerHTML = `<img src="${f}">`; else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; });
-                }
-                if (osOriginal.itens && osOriginal.itens.length > 0) { window.carrinhoOS = osOriginal.itens; } 
-                else { window.carrinhoOS.push({ id: 'REOPEN', tipo: 'S', nome: dados.desc, val: Math.abs(parseFloat(dados.valor)), qtd: 1, unit: Math.abs(parseFloat(dados.valor)), garantia: dados.garantia }); }
-                encontrouHistorico = true;
-                alert("SUCESSO! Dados completos recuperados.");
-            }
-        } catch (error) { console.error("Erro ao buscar histórico:", error); }
-    }
-    if (!encontrouHistorico) {
-        window.carrinhoOS.push({ id: 'REOPEN', tipo: 'S', nome: dados.desc, val: Math.abs(parseFloat(dados.valor)), qtd: 1, unit: Math.abs(parseFloat(dados.valor)), garantia: dados.garantia });
-        alert("Atenção: Detalhes completos não encontrados. Preenchido apenas o básico.");
-    }
-    window.isEditing = true; renderItemsOS(); window.nav('servicos');
-    window.salvarEstadoLocal();
-}
-
-window.toggleBtnDelete = function() { const checked = document.querySelectorAll('.check-log:checked'); document.getElementById('btn-del-sel').style.display = checked.length > 0 ? 'block' : 'none'; }
-window.excluirSelecionados = async function(nome) { const checked = document.querySelectorAll('.check-log:checked'); if(!confirm(`Excluir ${checked.length} itens selecionados?`)) return; for(const cb of checked) { await deleteDoc(doc(db, "logs", cb.value)); } alert("Excluídos!"); window.editarMovimentacaoCliente(nome); }
-window.toggleEditDate = function(id) { document.getElementById(`date-display-${id}`).style.display='none'; document.getElementById(`date-edit-${id}`).style.display='flex'; }
-window.saveNewDate = async function(id, nome) { const nova = document.getElementById(`input-date-${id}`).value; if(nova){ await updateDoc(doc(db,"logs",id), { data: new Date(nova).toISOString() }); alert("DATA ATUALIZADA!"); renderRelatorio(); window.editarMovimentacaoCliente(nome); } }
-window.delLog = async function(id) { if(!confirm("Excluir este lançamento permanentemente?")) return; await deleteDoc(doc(db, "logs", id)); alert("Excluído!"); document.getElementById('modal-extrato').style.display='none'; renderRelatorio(); }
-
-window.abrirExtratoCliente = function(nome) {
-    const logs = window.db.logs.filter(l => l.cliente === nome).sort((a,b) => new Date(b.data) - new Date(a.data)); 
-    const porData = {}; let totalExtrato = 0;
-    logs.forEach(l => { const dStr = new Date(l.data).toLocaleDateString('pt-BR'); if(!porData[dStr]) porData[dStr] = []; porData[dStr].push(l); totalExtrato += l.valor; });
-    
-    let html = '';
-    for (const [data, itens] of Object.entries(porData)) { 
-        html += `<div style="margin-bottom:12px; background:white; padding:8px; border-radius:8px; border:1px solid #eee"><div style="font-weight:bold; color:var(--primary); font-size:10px; border-bottom:1px solid #eee; padding-bottom:4px; margin-bottom:4px"><i class="far fa-calendar-alt"></i> ${data}</div>`; 
-        let subDia = 0; 
-        
-        itens.forEach(i => { 
-            subDia += i.valor; 
-            const isDesc = (i.tipo === 'DESCONTO'); 
-            const color = isDesc ? 'color:red' : 'color:black'; 
-            const qtdTxt = (!isDesc && (i.qtd > 1 || i.qtd === 1)) ? `<b>${i.qtd||1}x</b> ` : ''; 
-            
-            // --- NOVO: BUSCAR DADOS EXTRAS DA OS SE EXISTIREM ---
-            let extraOsHtml = '';
-            if(i.osNum) {
-                // Procura a OS no histórico ou nas ativas
-                const osRelacionada = window.db.os_hist.find(o => o.num === i.osNum) || window.db.os.find(o => o.num === i.osNum);
-                if(osRelacionada) {
-                    let detalhes = [];
-                    if(osRelacionada.modelo) detalhes.push(`Mod: ${osRelacionada.modelo}`);
-                    if(osRelacionada.senha) detalhes.push(`Senha: ${osRelacionada.senha}`);
-                    if(osRelacionada.defeito) detalhes.push(`Obs: ${osRelacionada.defeito}`);
-                    if(osRelacionada.desconto && osRelacionada.desconto > 0) detalhes.push(`Desc: R$ ${osRelacionada.desconto.toFixed(2)}`);
-                    
-                    if(detalhes.length > 0) {
-                        extraOsHtml = `<div style="font-size:8px; color:#666; margin-top:3px; font-style:italic"><i class="fas fa-info-circle"></i> ${detalhes.join(' | ')}</div>`;
-                    }
-                }
-            }
-            // --------------------------------------------------
-
-            html += `<div style="display:flex; justify-content:space-between; font-size:9px; margin-bottom:4px; border-bottom:1px dotted #fafafa; padding-bottom:4px; ${color}"><div style="flex:1"><span>${qtdTxt}${i.desc}</span>${extraOsHtml}</div><span style="font-weight:bold; padding-left:10px">${i.valor < 0 ? '' : 'R$ '}${i.valor.toFixed(2)}</span></div>`; 
-        }); 
-        html += `<div style="text-align:right; font-size:9px; font-weight:900; color:#555; margin-top:4px; border-top:1px dashed #ccc; padding-top:2px">TOTAL DIA: R$ ${subDia.toFixed(2)}</div></div>`; 
-    }
-    
-    window.extratoAtual = { cliente: nome, html: html, dados: porData, total: totalExtrato }; 
-    document.getElementById('ext-nome').innerText = nome; 
-    document.getElementById('ext-lista').innerHTML = html + `<div style="text-align:center; font-size:16px; font-weight:900; margin-top:15px; color:var(--primary)">TOTAL GERAL: R$ ${totalExtrato.toFixed(2)}</div>`; 
-    document.getElementById('ext-share-area').style.display = 'flex'; 
-    document.getElementById('modal-extrato').style.display = 'flex';
-}
-
-window.shareExtrato = function(tipo) {
-    if(!window.extratoAtual) return;
-    const d = window.extratoAtual;
-    
-    if (tipo === 'pdf') {
-        let htmlPdf = `<div style="font-family: Arial, sans-serif; padding:20px; color:#000;">
-            <h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2>
-            <div style="text-align:center; font-size:12px; margin-bottom:20px;">EXTRATO DO CLIENTE: ${d.cliente}</div>
-            ${d.html}
-        </div>`;
-        document.getElementById('area-relatorio-visual').innerHTML = htmlPdf;
-        document.body.classList.remove('printing-cupom');
-        document.body.classList.add('printing-relatorio');
-        setTimeout(() => { window.print(); setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000); }, 500);
-    } 
-    else if (tipo === 'zap') {
-        let txt = `*${EMPRESA.nome}*\nEXTRATO: ${d.cliente}\n\n`;
-        for (const [data, itens] of Object.entries(d.dados)) {
-            txt += `*${data}*\n`;
-            itens.forEach(i => {
-                const descTxt = (i.qtd > 1 ? i.qtd+'x ' : '') + i.desc;
-                txt += `- ${descTxt}: R$ ${i.valor.toFixed(2)}\n`;
-                if(i.osNum) {
-                    const osR = window.db.os_hist.find(o => o.num === i.osNum) || window.db.os.find(o => o.num === i.osNum);
-                    if(osR) {
-                       let det = [];
-                       if(osR.modelo) det.push(`Mod: ${osR.modelo}`);
-                       if(osR.defeito) det.push(`Obs: ${osR.defeito}`);
-                       if(det.length > 0) txt += `  _${det.join(' | ')}_\n`;
-                    }
-                }
-            });
-            txt += `\n`;
-        }
-        txt += `*TOTAL GERAL: R$ ${d.total.toFixed(2)}*`;
-        const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === d.cliente.toUpperCase());
-        let phone = (cliObj && cliObj.tel) ? cliObj.tel.replace(/\D/g, '') : '';
-        let urlZap = `whatsapp://send?text=${encodeURIComponent(txt)}`;
-        if(phone.length >= 10) urlZap = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(txt)}`;
-        window.location.href = urlZap;
-    } 
-    else if (tipo === 'bluetooth') {
-        const W = 32; let T = '';
-        T += txtCenter(EMPRESA.nome, W) + '\n' + txtCenter('EXTRATO DE CLIENTE', W) + '\n' + txtLine(W) + '\n';
-        T += 'CLIENTE: ' + d.cliente + '\n' + txtLine(W) + '\n\n';
-        for (const [data, itens] of Object.entries(d.dados)) {
-            T += 'DATA: ' + data + '\n';
-            itens.forEach(i => {
-                let n = i.desc; if(n.length > 20) n = n.substring(0,20);
-                T += (i.qtd||1) + 'x ' + n + '\n' + txtPair('', 'R$ ' + i.valor.toFixed(2), W) + '\n';
-            });
-            T += '\n';
-        }
-        T += txtLine(W) + '\n' + txtCenter('TOTAL GERAL: R$ ' + d.total.toFixed(2), W) + '\n\n\n';
-        window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
-    }
-}
-
-
-window.acaoImprimirRelatorio = function() {
-    abrirModalSenha(() => {
-        document.getElementById('modal-overlay').style.display='none';
-        const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
-        const logsFiltrados = window.db.logs.filter(l => {
-            const d = new Date(l.data); let matchDate = false;
-            if(f=='dia') matchDate = d.toDateString()===now.toDateString(); else if(f=='semana') matchDate = (now-d) < 604800000; else if(f=='mes') matchDate = d.getMonth()===now.getMonth(); else matchDate = d.getFullYear()===now.getFullYear();
-            let matchText = true; if(searchTxt) { matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt)); } return matchDate && matchText;
-        }).sort((a,b) => new Date(b.data) - new Date(a.data));
-
-        let totalGeral = 0; let lucroGeral = 0;
-        const linhasTabela = logsFiltrados.map(l => {
-            totalGeral += l.valor; let custoItem = 0; 
-            if(l.tipo === 'PRODUTO' || l.tipo === 'P') { const prod = window.db.produtos.find(p => p.nome === l.desc); if(prod && prod.custo) custoItem = parseFloat(prod.custo) * (l.qtd || 1); } 
-            lucroGeral += (l.valor - custoItem);
-            const color = (l.valor < 0) ? 'red' : 'black';
-            return `<tr style="font-size:11px; border-bottom:1px solid #ccc;"><td style="padding:4px;">${new Date(l.data).toLocaleDateString()}</td><td style="padding:4px;">${l.cliente}</td><td style="padding:4px;">${l.desc}</td><td style="padding:4px; text-align:right; color:${color}">${l.valor.toFixed(2)}</td></tr>`;
-        }).join('');
-
-        const htmlRelatorio = `<div style="font-family: Arial, sans-serif; padding:20px; color:#000;"><h2 style="text-align:center; margin-bottom:5px;">${EMPRESA.nome}</h2><div style="text-align:center; font-size:12px; margin-bottom:20px;">RELATÓRIO FINANCEIRO - ${f.toUpperCase()}</div><div style="display:flex; justify-content:space-between; margin-bottom:20px; border:1px solid #000; padding:10px;"><div><b>EMISSÃO:</b> ${new Date().toLocaleString()}<br><b>ITENS:</b> ${logsFiltrados.length}</div><div style="text-align:right"><b>FATURAMENTO:</b> R$ ${totalGeral.toFixed(2)}<br><b>LUCRO EST.:</b> R$ ${lucroGeral.toFixed(2)}</div></div><table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#eee; font-weight:bold; font-size:12px;"><th style="text-align:left; padding:5px;">DATA</th><th style="text-align:left; padding:5px;">CLIENTE</th><th style="text-align:left; padding:5px;">DESCRIÇÃO</th><th style="text-align:right; padding:5px;">VALOR</th></tr></thead><tbody>${linhasTabela}</tbody></table><div style="margin-top:20px; text-align:center; font-size:10px;">Sistema Filhão.Cell v1.0</div></div>`;
-
-        document.getElementById('area-relatorio-visual').innerHTML = htmlRelatorio;
-        document.body.classList.remove('printing-cupom');
-        document.body.classList.add('printing-relatorio');
-        
-        setTimeout(() => {
-            window.print();
-            setTimeout(() => { document.body.classList.remove('printing-relatorio'); }, 1000);
-        }, 500);
-    });
-}
-
-window.montarHtmlCupom = function(d) {
-    const agora = new Date(); 
-    const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR').substring(0,5);
-    const itensHtml = d.itens.map(i => {
-        const totalItem = (i.val).toFixed(2);
-        return `<tr><td style="width:10%"><strong>${i.qtd || 1}x</strong></td><td style="width:65%"><span class="c-item-name">${i.nome}</span>${i.garantia ? `<span class="c-item-meta">GAR: ${i.garantia}</span>` : ''}</td><td style="width:25%; text-align:right">R$ ${totalItem}</td></tr>`;
-    }).join('');
-
-    let htmlFinanceiroExtra = '';
-    if (d.sinal && d.sinal > 0) {
-        const restante = d.total - d.sinal;
-        htmlFinanceiroExtra = `<div class="c-row"><span>SINAL (PAGO):</span> <span>- R$ ${parseFloat(d.sinal).toFixed(2)}</span></div><div class="c-total-box" style="border-style:dashed; margin-top:5px"><div style="font-size:10px; font-weight:bold;">RESTANTE A PAGAR:</div><div class="c-big-total" style="font-size:18px">R$ ${restante.toFixed(2)}</div></div>`;
-    }
-
-    return `<div class="cupom-wrapper"><div class="c-header"><span class="c-company">${EMPRESA.nome}</span><span class="c-sub">${EMPRESA.end}</span><span class="c-sub">${EMPRESA.cid}</span><span class="c-sub">CNPJ: ${EMPRESA.cnpj}</span><span class="c-sub">Tel: ${EMPRESA.tel}</span></div><div class="c-body"><div class="c-destaque-os">${d.tipo}</div><div class="c-row"><span>DATA:</span> <span>${dataHora}</span></div><div style="margin:5px 0; border-bottom:1px solid #ccc; padding-bottom:5px;"><span style="font-size:10px;">CLIENTE:</span><br><span class="c-destaque-nome">${d.cliente || 'CONSUMIDOR'}</span></div><table class="c-table"><thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead><tbody>${itensHtml}</tbody></table><div class="c-section-title">RESUMO FINANCEIRO</div><div class="c-row"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}<div style="margin-top:10px; text-align:right;"><div style="font-size:10px; font-weight:bold;">TOTAL GERAL:</div><div class="c-big-total">R$ ${d.total.toFixed(2)}</div></div>${htmlFinanceiroExtra}<div style="margin-top:10px">${d.valorPago ? `<div class="c-row"><span>VALOR PAGO:</span> <span>R$ ${d.valorPago.toFixed(2)}</span></div>` : ''}${d.troco ? `<div class="c-row"><span>TROCO:</span> <span>R$ ${d.troco.toFixed(2)}</span></div>` : ''}</div>${d.obs ? `<div style="margin-top:15px; border:1px solid #000; padding:8px; font-weight:bold; background:#eee;">OBS: ${d.obs}</div>` : ''}${d.senha ? `<div style="margin-top:10px; font-weight:bold; text-align:center; font-size:18px; border:2px solid #000; padding:5px;">SENHA: ${d.senha}</div>` : ''}</div><div class="c-footer"><div style="border-top:1px solid #000; width:70%; margin:40px auto 5px auto;"></div><div>ASSINATURA DO CLIENTE</div><br><div style="font-weight:bold; font-size:12px">OBRIGADO PELA PREFERÊNCIA!</div><div style="font-size:10px; margin-top:5px; font-style:italic">Sistema Filhão.Cell v1.0</div></div></div>`;
-}
-
-window.abrirModalShare = function() {
-    const htmlCupom = montarHtmlCupom(window.shareData);
-    document.getElementById('area-cupom-visual').innerHTML = htmlCupom;
-    document.getElementById('modal-content-default').innerHTML = `<h3 class="no-print" style="justify-content:center"><i class="fas fa-check-circle"></i> SUCESSO!</h3><div class="no-print" style="display:flex; flex-direction:column; gap:10px; margin-top:15px"><button class="btn" style="background:#007bff; margin:0; padding:12px" onclick="acaoShare('bluetooth')"><i class="fas fa-print"></i> IMPRIMIR BLUETOOTH</button><button class="btn" style="background:#333; margin:0; padding:12px" onclick="acaoShare('pdf')"><i class="fas fa-file-pdf"></i> PDF / PC (CTRL+P)</button><button class="btn" style="background:#28a745; margin:0; padding:12px" onclick="verComprovanteTela()"><i class="fas fa-eye"></i> VER NA TELA</button><button class="btn" style="background:#25d366; margin:0; padding:12px" onclick="acaoShare('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button><button class="btn" style="background:#d32f2f; margin:0; padding:12px" onclick="fecharModal({target:{id:'modal-overlay'}})"> <i class="fas fa-times"></i> FECHAR</button></div>`; 
-    document.getElementById('modal-overlay').style.display='flex'; 
-}
-
-function txtCenter(text, width=32) { if(text.length >= width) return text.substring(0, width); const padding = Math.floor((width - text.length) / 2); return ' '.repeat(padding) + text; }
-function txtPair(left, right, width=32) { const space = width - left.length - right.length; if(space < 1) return left.substring(0, width-right.length-1) + ' ' + right; return left + ' '.repeat(space) + right; }
-function txtLine(width=32) { return '-'.repeat(width); }
-
-window.acaoShare = function(tipo) {
-    const d = window.shareData; 
-    if(tipo === 'pdf') {
-        document.body.classList.remove('printing-relatorio');
-        document.body.classList.add('printing-cupom');
-        setTimeout(() => { window.print(); setTimeout(() => { document.body.classList.remove('printing-cupom'); }, 1000); }, 500);
-    }
-    else if(tipo === 'bluetooth') {
-        const W = 32; let T = '';
-        T += txtCenter(EMPRESA.nome, W) + '\n' + txtCenter('ASSISTENCIA TECNICA', W) + '\n' + txtCenter(EMPRESA.tel, W) + '\n' + txtLine(W) + '\n';
-        T += 'DATA: ' + new Date().toLocaleString() + '\nTIPO: ' + d.tipo + '\nCLIENTE: ' + d.cliente + '\n' + txtLine(W) + '\n';
-        T += txtPair('QTD ITEM', 'TOTAL', W) + '\n';
-        d.itens.forEach(i => { let nomeItem = i.nome; if(nomeItem.length > 20) nomeItem = nomeItem.substring(0,20); T += (i.qtd||1) + 'x ' + nomeItem + '\n' + txtPair('', 'R$ ' + i.val.toFixed(2), W) + '\n'; if(i.garantia) T += '   (GAR: ' + i.garantia + ')\n'; });
-        T += '\n' + txtPair('SUBTOTAL:', 'R$ ' + d.subtotal.toFixed(2), W) + '\n';
-        if(d.desconto > 0) { T += txtPair('DESCONTO:', '- R$ ' + d.desconto.toFixed(2), W) + '\n'; }
-        T += txtLine(W) + '\n' + txtCenter('TOTAL: R$ ' + d.total.toFixed(2), W) + '\n' + txtLine(W) + '\n';
-        if(d.sinal && d.sinal > 0) { const restante = d.total - d.sinal; T += txtPair('SINAL PAGO:', 'R$ ' + parseFloat(d.sinal).toFixed(2), W) + '\n\n' + txtCenter('*** RESTANTE ***', W) + '\n' + txtCenter('R$ ' + restante.toFixed(2), W) + '\n\n'; }
-        if(d.valorPago) T += txtPair('VALOR PAGO:', 'R$ ' + d.valorPago.toFixed(2), W) + '\n';
-        if(d.troco) T += txtPair('TROCO:', 'R$ ' + d.troco.toFixed(2), W) + '\n';
-        if(d.obs) { T += '\nOBSERVACOES:\n' + d.obs + '\n'; }
-        if(d.senha) { T += '\n\n' + txtCenter('SENHA: ' + d.senha, W) + '\n'; }
-        T += '\n\n' + txtCenter('OBRIGADO PELA PREFERENCIA!', W) + '\n' + txtCenter('Filhao.Cell v1.0', W) + '\n\n\n';
-        window.location.href = 'rawbt:data?val=' + encodeURIComponent(T);
-    }
-    else if(tipo === 'zap') {
-        let txt = `*${EMPRESA.nome}*\n----------------\n*${d.tipo}*\nCLI: ${d.cliente}\nDATA: ${new Date().toLocaleString()}\n----------------\n`;
-        d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome}\n   R$ ${i.val.toFixed(2)}\n`; });
-        txt += `----------------\n*TOTAL: R$ ${d.total.toFixed(2)}*`;
-        if(d.desconto > 0) txt += `\n(Desc: R$ ${d.desconto.toFixed(2)})`;
-        if(d.sinal > 0) { const rest = d.total - d.sinal; txt += `\nSINAL: R$ ${parseFloat(d.sinal).toFixed(2)}`; txt += `\n*RESTANTE: R$ ${rest.toFixed(2)}*`; }
-        if(d.obs) txt += `\nOBS: ${d.obs}`;
-        const cliObj = window.db.clientes.find(c => c.nome.toUpperCase() === (d.cliente||'').toUpperCase());
-        let phone = (cliObj && cliObj.tel) ? cliObj.tel.replace(/\D/g, '') : '';
-        let urlZap = `whatsapp://send?text=${encodeURIComponent(txt)}`;
-        if(phone.length >= 10) urlZap = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(txt)}`;
-        window.location.href = urlZap;
-    }
-}
-
-window.fecharExtrato = function(e) { if(e.target.id === 'modal-extrato') document.getElementById('modal-extrato').style.display = 'none'; }
-window.del = async function(c, id) { 
-    if(c === 'logs') { 
-        if(!confirm("Apagar Movimentação?\n\n(Dívidas associadas serão removidas)")) return; 
-        const docSnap = await getDoc(doc(db, "logs", id));
-        if (docSnap.exists()) {
-            const l = docSnap.data();
-            await deleteDoc(doc(db, "logs", id));
-            const q = query(collection(db, "dividas"), where("cliente", "==", l.cliente));
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach(async (docDiv) => {
-                const d = docDiv.data();
-                if ((l.osNum && d.origem_os == l.osNum) || (d.data_venda === l.data)) { await deleteDoc(doc(db, "dividas", docDiv.id)); }
-            });
-            listarCli();
-        }
-        return; 
-    } 
-    abrirModalSenha(async () => { document.getElementById('modal-overlay').style.display='none'; await deleteDoc(doc(db,c,id)); }); 
-}
-
-window.fecharModal = function(e) { if(e.target.id=='modal-overlay') document.getElementById('modal-overlay').style.display='none'; }
-
-// INICIALIZAR: Recuperar o estado salvo
-window.onload = function() {
-    window.restaurarEstadoLocal();
-};
-// --- SISTEMA DE SEGURANÇA: BACKUP ---
-
-window.fazerBackup = function() {
-    if(!window.db.clientes.length && !window.db.logs.length) {
-        alert("O sistema ainda está carregando ou está vazio. Espere os dados aparecerem.");
-        return;
-    }
-
-    if(!confirm("Baixar cópia de segurança de TUDO para o seu computador?")) return;
-    
-    // Pega tudo que está na memória do sistema agora
-    const backup = {
-        data: new Date().toISOString(),
-        sistema: "FILHAO_CELL",
-        dados: {
-            clientes: window.db.clientes || [],
-            produtos: window.db.produtos || [],
-            servicos: window.db.servicos || [],
-            os_ativa: window.db.os || [],
-            logs: window.db.logs || [],
-            dividas: window.db.dividas || [],
-            os_historico: window.db.os_hist || []
-        }
-    };
-
-    // Cria o arquivo para download
-    const blob = new Blob([JSON.stringify(backup)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `BACKUP_FILHAO_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
-// Adicionar botão de Backup automaticamente no topo da tela (para facilitar)
-setTimeout(() => {
-    const btn = document.createElement('button');
-    btn.innerHTML = '<i class="fas fa-download"></i> BACKUP';
-    btn.style.cssText = "position:fixed; top:10px; right:10px; z-index:9999; background:black; color:white; padding:5px 10px; border:none; border-radius:5px; cursor:pointer; font-size:10px; opacity:0.7;";
-    btn.onclick = window.fazerBackup;
-    document.body.appendChild(btn);
-}, 3000); // Aparece 3 segundos após abrir o sistema
+        window.db.logs.forEach(i =>
