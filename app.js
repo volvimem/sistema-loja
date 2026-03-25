@@ -176,7 +176,6 @@ function ativarAba(p, el) {
     document.querySelectorAll('.nav-item').forEach(d=>d.classList.remove('active'));
     document.getElementById('page-'+p).classList.add('active');
     
-    // Atualiza botão da nav bar
     const navBtn = document.querySelector(`button[onclick="nav('${p}', this)"]`);
     if(navBtn) navBtn.classList.add('active');
     else if(el) el.classList.add('active');
@@ -184,7 +183,6 @@ function ativarAba(p, el) {
 
 window.forcarAtualizacao = async function() { if(!confirm("Atualizar sistema?")) return; window.location.reload(true); }
 
-/* --- LÓGICA DE LUPA INTELIGENTE (TOGGLE) --- */
 window.toggleSearch = function(tipo, inpId, boxId) {
     const box = document.getElementById(boxId);
     const val = document.getElementById(inpId).value;
@@ -746,16 +744,24 @@ window.revelarCusto = function() { abrirModalSenha(() => { document.getElementBy
 
 window.togglePriv = function() { window.verValores = !window.verValores; const ico = document.getElementById('eye-rel'); if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); ico.classList.add('fa-eye'); } else { ico.classList.remove('fa-eye-slash');
     ico.classList.add('fa-eye'); } renderRelatorio(); }
+
+// FUNÇÃO DE RENDERIZAR RELATÓRIO CORRIGIDA PARA FILTRAR CORRETAMENTE O MÊS
 window.renderRelatorio = function() {
     const f = document.getElementById('r-filtro').value; const now = new Date();
     const searchTxt = document.getElementById('r-search').value; 
+    
     const logsFiltrados = window.db.logs.filter(l => {
         const d = new Date(l.data); let matchDate = false;
-        if(f=='dia') matchDate = d.toDateString()===now.toDateString(); else if(f=='semana') matchDate = (now-d) < 604800000; else if(f=='mes') matchDate = d.getMonth()===now.getMonth(); else matchDate = d.getFullYear()===now.getFullYear();
+        if(f=='dia') matchDate = d.toDateString()===now.toDateString(); 
+        else if(f=='semana') matchDate = (now-d) < 604800000; 
+        else if(f=='mes') matchDate = d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); 
+        else matchDate = d.getFullYear()===now.getFullYear();
+        
         let matchText = true; 
         if(searchTxt) { matchText = (l.cliente && window.norm(l.cliente).includes(window.norm(searchTxt))); } 
         return matchDate && matchText;
     });
+
     let totalGeral = 0; let lucroGeral = 0; const clientesMap = {};
     logsFiltrados.forEach(l => {
         totalGeral += l.valor; let custoItem = 0; if(l.tipo === 'PRODUTO' || l.tipo === 'P') { const prod = window.db.produtos.find(p => p.nome === l.desc); if(prod && prod.custo) custoItem = parseFloat(prod.custo) * (l.qtd || 1); } lucroGeral += (l.valor - custoItem);
@@ -764,6 +770,7 @@ window.renderRelatorio = function() {
         if (new Date(l.data) > new Date(clientesMap[l.cliente].lastDate)) { clientesMap[l.cliente].lastDate = l.data; }
         if (l.osNum) clientesMap[l.cliente].lastOS = l.osNum;
     });
+
     const clientesArray = Object.values(clientesMap).sort((a,b) => b.total - a.total);
     document.getElementById('r-hist').innerHTML = clientesArray.map(c => {
         const temDivida = window.db.dividas.some(d => d.cliente === c.nome && d.restante > 0.01);
@@ -777,9 +784,10 @@ window.renderRelatorio = function() {
 
     if(clientesArray.length === 0) document.getElementById('r-hist').innerHTML = '<div style="text-align:center; padding:20px; color:#ccc">NENHUM DADO ENCONTRADO</div>';
     document.getElementById('r-total').innerText = window.verValores ? "R$ " + totalGeral.toFixed(2) : "****"; document.getElementById('r-lucro').innerText = window.verValores ? "R$ " + lucroGeral.toFixed(2) : "****";
+    
     const rank = (k, d) => { 
         const c={};
-        window.db.logs.forEach(i => { 
+        logsFiltrados.forEach(i => { // Usa apenas os logs filtrados para o ranking não bugar
             if(i.tipo === 'DESCONTO') return;
             const isProd = (i.tipo === 'PRODUTO' || i.tipo === 'P'); 
             const isServ = (i.tipo === 'SERVICO' || i.tipo === 'S'); 
@@ -930,13 +938,18 @@ window.abrirExtratoCliente = function(nome) {
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
+// FUNÇÃO DE IMPRIMIR O RELATÓRIO TAMBÉM CORRIGIDA PARA O MÊS ATUAL
 window.acaoImprimirRelatorio = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display='none';
         const f = document.getElementById('r-filtro').value; const now = new Date(); const searchTxt = document.getElementById('r-search').value.toUpperCase(); 
         const logsFiltrados = window.db.logs.filter(l => {
             const d = new Date(l.data); let matchDate = false;
-            if(f=='dia') matchDate = d.toDateString()===now.toDateString(); else if(f=='semana') matchDate = (now-d) < 604800000; else if(f=='mes') matchDate = d.getMonth()===now.getMonth(); else matchDate = d.getFullYear()===now.getFullYear();
+            if(f=='dia') matchDate = d.toDateString()===now.toDateString(); 
+            else if(f=='semana') matchDate = (now-d) < 604800000; 
+            else if(f=='mes') matchDate = d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); 
+            else matchDate = d.getFullYear()===now.getFullYear();
+            
             let matchText = true; if(searchTxt) { matchText = (l.cliente && l.cliente.toUpperCase().includes(searchTxt)); } return matchDate && matchText;
         }).sort((a,b) => new Date(b.data) - new Date(a.data));
 
@@ -992,6 +1005,7 @@ function txtCenter(text, width=32) { if(text.length >= width) return text.substr
 function txtPair(left, right, width=32) { const space = width - left.length - right.length; if(space < 1) return left.substring(0, width-right.length-1) + ' ' + right; return left + ' '.repeat(space) + right; }
 function txtLine(width=32) { return '-'.repeat(width); }
 
+// ESSA É A FUNÇÃO QUE TINHA SIDO CORTADA E AGORA VAI VOLTAR A FUNCIONAR
 window.acaoShare = function(tipo) {
     const d = window.shareData;
     if(tipo === 'pdf') {
