@@ -688,8 +688,9 @@ window.revelarCusto = function() { abrirModalSenha(() => { document.getElementBy
 
 window.togglePriv = function() { window.verValores = !window.verValores; const ico = document.getElementById('eye-rel'); if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); ico.classList.add('fa-eye'); } else { ico.classList.remove('fa-eye-slash'); ico.classList.add('fa-eye'); } renderRelatorio(); }
 
+
 // ============================================
-// FUNÇÃO RENDERRELATORIO ATUALIZADA COM FILTRO DE MESES
+// LÓGICA DO RELATÓRIO E FILTRAGEM
 // ============================================
 window.renderRelatorio = function() {
     const f = document.getElementById('r-filtro').value; 
@@ -700,17 +701,17 @@ window.renderRelatorio = function() {
         const d = new Date(l.data); 
         let matchDate = false;
         
-        if(f=='dia') {
-            matchDate = d.toDateString()===now.toDateString();
-        } else if(f=='semana') {
-            matchDate = (now-d) < 604800000;
-        } else if(f=='mes') {
-            matchDate = d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
-        } else if(f=='ano') {
-            matchDate = d.getFullYear()===now.getFullYear();
+        if(f === 'dia') {
+            matchDate = d.toDateString() === now.toDateString();
+        } else if(f === 'semana') {
+            matchDate = (now - d) < 604800000;
+        } else if(f === 'mes') {
+            matchDate = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        } else if(f === 'ano') {
+            matchDate = d.getFullYear() === now.getFullYear();
         } else if(f.length === 2 && !isNaN(f)) {
-            // NOVO: Filtro mês específico (01-12)
-            const mesEscolhido = parseInt(f) - 1;
+            // Verifica o mês específico selecionado na lista (01 = Jan, 12 = Dez)
+            const mesEscolhido = parseInt(f) - 1; 
             matchDate = d.getMonth() === mesEscolhido && d.getFullYear() === now.getFullYear();
         }
         
@@ -752,7 +753,7 @@ window.renderRelatorio = function() {
         const osTxt = c.lastOS ? `Nº ${c.lastOS}` : 'S/N';
         return `<div style="padding:10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center">
             <div style="font-size:10px">${iconDivida}<b>${c.nome}</b><br><span style="color:#777">${new Date(c.lastDate).toLocaleDateString()} - ${osTxt}</span></div>
-            <div style="text-align:right"><b style="color:var(--primary); font-size:11px">R$ ${c.total.toFixed(2)}</b><br><div class="actions-row" style="justify-content:flex-end"><button class="btn-mini green" onclick="abrirExtratoCliente('${c.nome}')"><i class="fas fa-eye"></i></button> <button class="btn-mini blue" onclick="abrirOpcoesEdicao('${c.nome}')"><i class="fas fa-pen"></i></button></div></div>
+            <div style="text-align:right"><b style="color:var(--primary); font-size:11px">R$ ${c.total.toFixed(2)}</b><br><div class="actions-row" style="justify-content:flex-end"><button class="btn-mini green" onclick="abrirExtratoCliente('${c.nome}')"><i class="fas fa-eye"></i></button></div></div>
         </div>`;
     }).join('');
 
@@ -760,6 +761,190 @@ window.renderRelatorio = function() {
     document.getElementById('r-total').innerText = window.verValores ? "R$ " + totalGeral.toFixed(2) : "****"; 
     document.getElementById('r-lucro').innerText = window.verValores ? "R$ " + lucroGeral.toFixed(2) : "****";
     
-    const rank = (k, d) => { 
-        const c={}; 
-        window.db.logs.forEach(i =>
+    // Calcula os Rankings para a tela
+    const rank = (tipo) => {
+        const contagem = {};
+        logsFiltrados.forEach(l => {
+            if(tipo === 'cliente' && l.cliente) {
+                contagem[l.cliente] = (contagem[l.cliente] || 0) + l.valor;
+            } else if (tipo === 'produto' && (l.tipo === 'PRODUTO' || l.tipo === 'P')) {
+                contagem[l.desc] = (contagem[l.desc] || 0) + (l.qtd || 1);
+            } else if (tipo === 'servico' && (l.tipo === 'SERVICO' || l.tipo === 'S')) {
+                contagem[l.desc] = (contagem[l.desc] || 0) + (l.qtd || 1);
+            }
+        });
+        return Object.entries(contagem).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    };
+
+    const rankCli = rank('cliente');
+    document.getElementById('rank-cli').innerHTML = rankCli.length ? rankCli.map(c => `<div class="rank-item"><span>${c[0]}</span> <b>R$ ${c[1].toFixed(2)}</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
+
+    const rankProd = rank('produto');
+    document.getElementById('rank-prod').innerHTML = rankProd.length ? rankProd.map(p => `<div class="rank-item"><span>${p[0]}</span> <b>${p[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
+
+    const rankServ = rank('servico');
+    document.getElementById('rank-serv').innerHTML = rankServ.length ? rankServ.map(s => `<div class="rank-item"><span>${s[0]}</span> <b>${s[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
+}
+
+
+// ============================================
+// FUNÇÕES DE COMPARTILHAMENTO E IMPRESSÃO
+// ============================================
+
+window.abrirModalShare = function() {
+    if(!window.shareData) return;
+    const d = window.shareData;
+    
+    let htmlPreview = `
+        <div class="cupom-wrapper">
+            <div class="c-header">
+                <span class="c-company">${EMPRESA.nome}</span>
+                <span class="c-sub">${EMPRESA.cnpj} | ${EMPRESA.tel}</span>
+                <span class="c-sub">${EMPRESA.end}</span>
+            </div>
+            <div class="c-section-title">COMPROVANTE DE ${d.tipo}</div>
+            <div class="c-row"><span>CLIENTE:</span> <span class="c-row bold">${d.cliente}</span></div>
+            <div class="c-row"><span>DATA:</span> <span>${new Date().toLocaleString()}</span></div>
+            
+            <table class="c-table">
+                <thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead>
+                <tbody>
+                    ${d.itens.map(i => `
+                        <tr>
+                            <td>${i.qtd || 1}x</td>
+                            <td><span class="c-item-name">${i.nome}</span>
+                                ${i.garantia && i.garantia !== 'SEM GARANTIA' ? `<span class="c-item-meta">Garantia: ${i.garantia}</span>` : ''}
+                            </td>
+                            <td style="text-align:right">R$ ${i.val.toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <div class="c-total-box">
+                <div class="c-row"><span>SUBTOTAL:</span> <span>R$ ${d.subtotal.toFixed(2)}</span></div>
+                ${d.desconto > 0 ? `<div class="c-row"><span>DESCONTO:</span> <span>- R$ ${d.desconto.toFixed(2)}</span></div>` : ''}
+                <div class="c-big-total">TOTAL: R$ ${d.total.toFixed(2)}</div>
+            </div>
+            
+            ${d.sinal > 0 ? `<div class="c-row" style="margin-top:10px"><span>SINAL PAGO:</span> <span>R$ ${d.sinal.toFixed(2)}</span></div>` : ''}
+            ${(d.total - (d.sinal || d.valorPago || 0)) > 0 ? `<div class="c-row"><span>RESTANTE:</span> <span class="c-row bold" style="color:red">R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}</span></div>` : ''}
+            
+            ${d.obs ? `<div class="c-section-title">OBSERVAÇÕES</div><div style="font-size:10px; text-align:center">${d.obs}</div>` : ''}
+            
+            <div class="c-footer">
+                OBRIGADO PELA PREFERÊNCIA!<br>
+                SISTEMA FILHÃO.CELL
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('ext-nome').innerText = "COMPARTILHAR";
+    document.getElementById('ext-lista').innerHTML = '';
+    document.getElementById('ext-preview-box').innerHTML = htmlPreview;
+    document.getElementById('ext-preview-box').style.display = 'block';
+    document.getElementById('ext-share-area').style.display = 'flex';
+    document.getElementById('modal-extrato').style.display = 'flex';
+}
+
+window.shareExtrato = function(metodo) {
+    if(metodo === 'pdf') {
+        const area = document.getElementById('area-cupom-visual');
+        area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
+        
+        // Ativa o layout de impressão pro CSS isolar o Cupom
+        document.body.classList.add('printing-cupom');
+        window.print();
+        
+        // Limpeza após iniciar o diálogo de impressão
+        setTimeout(() => {
+            document.body.classList.remove('printing-cupom');
+            area.innerHTML = '';
+        }, 500);
+        
+    } else if (metodo === 'zap') {
+        alert("Nesta versão a função do Zap exige integração com API oficial ou cópia do texto.");
+    } else if (metodo === 'bluetooth') {
+        alert("No celular, a impressão Bluetooth (RawBT) captura o texto gerado e envia para a impressora.");
+    }
+}
+
+window.acaoImprimirRelatorio = function() {
+    const area = document.getElementById('area-relatorio-visual');
+    const selectBox = document.getElementById('r-filtro');
+    const fNome = selectBox.options[selectBox.selectedIndex].text;
+    const total = document.getElementById('r-total').innerText;
+    const lucro = document.getElementById('r-lucro').innerText;
+
+    // Constrói a tabela profissional para impressão A4
+    let html = `
+        <div style="text-align:center; margin-bottom: 20px;">
+            <h2 style="margin:0; font-family:sans-serif;">${EMPRESA.nome}</h2>
+            <div style="font-size:14px; color:#555; font-weight:bold; font-family:sans-serif;">RELATÓRIO FINANCEIRO - ${fNome}</div>
+            <div style="font-size:12px; margin-top:5px; font-family:sans-serif;">Gerado em: ${new Date().toLocaleString()}</div>
+        </div>
+        <div style="display:flex; justify-content:space-around; margin-bottom: 20px; border: 1px solid #000; padding: 15px; background:#f9f9f9; font-family:sans-serif;">
+            <div style="font-size:16px;"><strong>FATURAMENTO TOTAL:</strong> ${total}</div>
+            <div style="font-size:16px;"><strong>LUCRO ESTIMADO:</strong> ${lucro}</div>
+        </div>
+        <table class="relatorio-print-table">
+            <thead>
+                <tr>
+                    <th>DATA</th>
+                    <th>TIPO</th>
+                    <th>DESCRIÇÃO / ITEM</th>
+                    <th>CLIENTE</th>
+                    <th>VALOR (R$)</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    const filtroVal = document.getElementById('r-filtro').value;
+    const now = new Date();
+    const logsPrint = window.db.logs.filter(l => {
+        const d = new Date(l.data);
+        if(filtroVal === 'dia') return d.toDateString() === now.toDateString();
+        if(filtroVal === 'semana') return (now-d) < 604800000;
+        if(filtroVal === 'mes') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        if(filtroVal === 'ano') return d.getFullYear() === now.getFullYear();
+        if(filtroVal.length === 2 && !isNaN(filtroVal)) return d.getMonth() === (parseInt(filtroVal) - 1) && d.getFullYear() === now.getFullYear();
+        return true;
+    });
+
+    logsPrint.forEach(l => {
+        html += `
+            <tr>
+                <td>${new Date(l.data).toLocaleDateString()}</td>
+                <td>${l.tipo}</td>
+                <td>${l.desc}</td>
+                <td>${l.cliente || '-'}</td>
+                <td>R$ ${l.valor.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table>`;
+    area.innerHTML = html;
+
+    // Isola a página inteira apenas para mostrar o relatório
+    document.body.classList.add('printing-relatorio');
+    window.print();
+    
+    setTimeout(() => {
+        document.body.classList.remove('printing-relatorio');
+        area.innerHTML = '';
+    }, 500);
+}
+
+window.fecharExtrato = function(e) {
+    if(e.target.id === 'modal-extrato') {
+        document.getElementById('modal-extrato').style.display = 'none';
+    }
+}
+
+window.fecharModal = function(e) {
+    if(e.target.id === 'modal-overlay') {
+        document.getElementById('modal-overlay').style.display = 'none';
+    }
+}
