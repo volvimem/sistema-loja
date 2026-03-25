@@ -5,7 +5,7 @@
     --text: #212121;                    
     --bg: #f5f5f5;                  
     --card-bg: #ffffff;             
-    --success: #2e7d32;             
+    --success: #2e7d32;
     --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
@@ -16,8 +16,7 @@ body { background: var(--bg); color: var(--text); padding-bottom: 85px; user-sel
 /* HEADER */
 header { 
     background: linear-gradient(135deg, var(--accent) 30%, var(--primary) 100%); 
-    color: white; padding: 15px; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+    color: white; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
     position: sticky; top: 0; z-index: 100; 
     display:flex; justify-content:space-between; align-items:center; 
     border-bottom: 3px solid var(--primary);
@@ -59,8 +58,7 @@ input:focus { border-color: var(--primary); background: #fff; }
 .search-trigger {
     position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
     background: var(--primary); color: white; border: none;
-    width: 35px; height: 35px; border-radius: 6px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; z-index: 20;
+    width: 35px; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 20;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 .search-trigger:active { transform: translateY(-50%) scale(0.95); }
@@ -156,16 +154,37 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
 
 .c-footer { text-align: center; margin-top: 25px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
 
-/* CORREÇÃO PDF ANDROID */
+/* CORREÇÃO PDF ANDROID E TELA BRANCA */
 #area-cupom-visual, #area-relatorio-visual { display: none; margin-bottom: 50px; }
 
 @media print {
     @page { margin: 0; size: auto; }
-    body { visibility: hidden; background: white; }
-    body.printing-cupom #area-cupom-visual { visibility: visible; display: block !important; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; background: white; z-index: 9999; }
-    body.printing-relatorio #area-relatorio-visual { visibility: visible; display: block !important; position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 10mm; background: white; z-index: 9999; }
-    .cupom-wrapper { border: none; box-shadow: none; max-width: 100%; width: 100%; padding: 5mm; }
-    * { color: #000 !important; text-shadow: none !important; }
-    .c-section-title { background: none !important; border-color: #000 !important; }
+    body { background: white; margin: 0; padding: 0; }
+
+    /* A MÁGICA PARA NÃO FICAR TELA BRANCA: Esconde todo o layout raiz exceto a área de impressão correta */
+    body.printing-cupom > *:not(#area-cupom-visual) { display: none !important; }
+    body.printing-relatorio > *:not(#area-relatorio-visual) { display: none !important; }
+
+    /* Exibe as áreas de impressão formatadas corretamente */
+    body.printing-cupom #area-cupom-visual,
+    body.printing-relatorio #area-relatorio-visual {
+        display: block !important;
+        position: relative;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .cupom-wrapper { 
+        border: none !important; 
+        box-shadow: none !important; 
+        max-width: 100% !important; 
+        width: 100% !important; 
+        padding: 0 !important; 
+        margin: 0 !important; 
+    }
+    
+    * { color: #000 !important; text-shadow: none !important; background: transparent !important; }
+    .c-section-title { border-color: #000 !important; }
     .no-print { display: none !important; }
 }
