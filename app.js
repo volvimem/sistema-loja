@@ -23,6 +23,15 @@ window.currentOSCollection = 'os_ativa';
 
 window.estoqueTab = 'prod'; 
 
+// ==========================================
+// CORREÇÃO DO BUG DA FOLHA BRANCA NA IMPRESSÃO
+// ==========================================
+window.addEventListener('afterprint', () => {
+    document.body.classList.remove('printing-cupom', 'printing-relatorio');
+    document.getElementById('area-cupom-visual').innerHTML = '';
+    document.getElementById('area-relatorio-visual').innerHTML = '';
+});
+
 window.salvarEstadoLocal = function() {
     const estado = {
         abaAtiva: document.querySelector('.page.active')?.id.replace('page-', '') || 'vendas',
@@ -245,11 +254,6 @@ window.renderCarrinho = function() {
     const restante = totalLiq - entrada;
 
     document.getElementById('v-total').innerText = 'TOTAL: R$ ' + subtotal.toFixed(2);
-    if(restante > 0) {
-        document.getElementById('v-restante').innerHTML = `<span style="color:red">RESTANTE (FIADO): R$ ${restante.toFixed(2)}</span>`;
-    } else {
-        document.getElementById('v-restante').innerHTML = `<span style="color:green">QUITADO</span>`;
-    }
 }
 window.setGarantiaCar = function(idx, val) { window.carrinho[idx].garantia = val; window.salvarEstadoLocal(); }
 window.editItemVenda = function(index) { const i=window.carrinho[index]; const n=prompt(`Valor TOTAL ${i.nome} (${i.qtd}x):`, i.val); if(n!==null){const v=parseFloat(n); if(!isNaN(v)){window.carrinho[index].val=v; renderCarrinho(); window.salvarEstadoLocal();}} }
@@ -361,10 +365,8 @@ window.renderItemsOS = function() {
     const desc = parseFloat(document.getElementById('s-desc').value) || 0;
     const sinal = parseFloat(document.getElementById('s-sinal').value) || 0;
     const totalLiquido = subtotal - desc;
-    const restante = totalLiquido - sinal;
 
     document.getElementById('s-total-display').innerText = 'TOTAL: R$ ' + subtotal.toFixed(2);
-    document.getElementById('s-restante-display').innerText = 'RESTANTE: R$ ' + restante.toFixed(2);
 }
 window.setGarantiaOS = function(idx, val) { window.carrinhoOS[idx].garantia = val; window.salvarEstadoLocal(); }
 window.editItemOS = function(index) { const i=window.carrinhoOS[index]; const n=prompt(`Valor TOTAL ${i.nome}:`, i.val); if(n!==null){const v=parseFloat(n); if(!isNaN(v)){window.carrinhoOS[index].val=v; renderItemsOS(); window.salvarEstadoLocal();}} }
@@ -597,7 +599,7 @@ window.editOS = function(id, isHist = false) {
 window.shareOS = function(id) {
     const o = window.db.os.find(i=>i.id===id); const it = (o.itens && o.itens.length) ? o.itens : [{nome:o.modelo, val:o.valor, qtd:1, garantia:'90 DIAS'}];
     const sub = it.reduce((a,b)=>a+b.val,0); const desc = o.desconto || 0; const numDisplay = o.num ? `Nº ${o.num}` : 'S/N';
-    window.shareData={ tipo:'OS '+numDisplay, cliente:o.cliente, itens: it, subtotal: sub, desconto: desc, sinal: o.sinal || 0, total: o.valor, obs: o.defeito, senha: o.senha, fotos: o.fotos || [] };
+    window.shareData={ tipo:'OS '+numDisplay, cliente:o.cliente, modelo:o.modelo, itens: it, subtotal: sub, desconto: desc, sinal: o.sinal || 0, total: o.valor, obs: o.defeito, senha: o.senha, fotos: o.fotos || [] };
     abrirModalShare();
 }
 window.maskTel = function(o) { let v = o.value.replace(/\D/g,""); if(v.length > 11) v = v.substring(0,11); if(v.length >= 2) v = "(" + v.substring(0,2) + ") " + v.substring(2); if(v.length >= 7) v = v.substring(0,10) + "-" + v.substring(10); o.value = v; }
@@ -867,7 +869,6 @@ window.abrirExtratoCliente = function(nome) {
     document.getElementById('ext-nome').innerText = "HISTÓRICO: " + nome;
     document.getElementById('ext-lista').innerHTML = html;
     
-    // OCULTA OS BOTÕES DE COMPARTILHAR AQUI (MOSTRA SÓ A LISTA)
     document.getElementById('ext-share-area').style.display = 'none'; 
     document.getElementById('ext-preview-box').style.display = 'none';
     document.getElementById('modal-extrato').style.display = 'flex';
@@ -887,12 +888,12 @@ window.prepararReciboOS = function(id, isFechada) {
     window.shareData = { 
         tipo: 'OS ' + numDisplay, 
         cliente: o.cliente, 
+        modelo: o.modelo,
         itens: it, 
         subtotal: sub, 
         desconto: desc, 
         sinal: o.sinal || 0, 
         total: o.valor, 
-        // obs: o.defeito,  <-- Mantido oculto propositalmente para WhatsApp/Impressão
         senha: o.senha, 
         fotos: o.fotos || [] 
     };
@@ -916,6 +917,7 @@ window.abrirModalShare = function() {
             </div>
             <div class="c-section-title">COMPROVANTE DE ${d.tipo}</div>
             <div class="c-row"><span>CLIENTE:</span> <span class="c-row bold">${d.cliente}</span></div>
+            ${d.modelo ? `<div class="c-row"><span>APARELHO:</span> <span class="c-row bold">${d.modelo}</span></div>` : ''}
             <div class="c-row"><span>DATA:</span> <span>${new Date().toLocaleString()}</span></div>
             
             <table class="c-table">
@@ -940,7 +942,6 @@ window.abrirModalShare = function() {
             </div>
             
             ${d.sinal > 0 ? `<div class="c-row" style="margin-top:10px"><span>SINAL PAGO:</span> <span>R$ ${d.sinal.toFixed(2)}</span></div>` : ''}
-            ${(d.total - (d.sinal || d.valorPago || 0)) > 0 ? `<div class="c-row"><span>RESTANTE:</span> <span class="c-row bold" style="color:red">R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}</span></div>` : ''}
             
             <div class="c-footer">
                 OBRIGADO PELA PREFERÊNCIA!<br>
@@ -975,12 +976,11 @@ window.shareExtrato = function(metodo) {
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         
         document.body.classList.add('printing-cupom');
-        window.print();
         
-        setTimeout(() => {
-            document.body.classList.remove('printing-cupom');
-            area.innerHTML = '';
-        }, 500);
+        // Timeout pequeno apenas para garantir a renderização antes de abrir o print()
+        setTimeout(() => { 
+            window.print(); 
+        }, 150);
         
     } else if (metodo === 'zap') {
         let telefoneCli = '';
@@ -997,6 +997,7 @@ window.shareExtrato = function(metodo) {
             let txt = `*${EMPRESA.nome}*\n`;
             txt += `Comprovante: ${d.tipo}\n`;
             txt += `Cliente: ${d.cliente}\n`;
+            if (d.modelo) txt += `Aparelho: ${d.modelo}\n`;
             txt += `Data: ${new Date().toLocaleString()}\n\n`;
             txt += `*ITENS:*\n`;
             d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
@@ -1004,7 +1005,6 @@ window.shareExtrato = function(metodo) {
             if(d.desconto > 0) txt += `*DESCONTO:* - R$ ${d.desconto.toFixed(2)}\n`;
             txt += `*TOTAL:* R$ ${d.total.toFixed(2)}\n`;
             if(d.sinal > 0) txt += `*SINAL PAGO:* R$ ${d.sinal.toFixed(2)}\n`;
-            if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `*RESTANTE:* R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
             
             const encoded = encodeURIComponent(txt);
             const url = telefoneCli ? `https://wa.me/${telefoneCli}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
@@ -1074,12 +1074,11 @@ window.acaoImprimirRelatorio = function() {
     area.innerHTML = html;
 
     document.body.classList.add('printing-relatorio');
-    window.print();
     
-    setTimeout(() => {
-        document.body.classList.remove('printing-relatorio');
-        area.innerHTML = '';
-    }, 500);
+    // Timeout pequeno apenas para garantir a renderização antes de abrir o print()
+    setTimeout(() => { 
+        window.print(); 
+    }, 150);
 }
 
 window.fecharExtrato = function(e) {
