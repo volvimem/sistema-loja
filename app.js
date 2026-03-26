@@ -686,22 +686,10 @@ window.renderListaEstoque = function() {
 window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id); document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||''; document.getElementById('p-custo').type='password'; document.getElementById('btn-ver-custo').style.display='block'; window.tempImg=i.foto; const view=document.getElementById('p-foto-view'); view.src=i.foto||''; if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('page-estoque').querySelector('.card').scrollIntoView(); }
 window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('modal-overlay').style.display='none'; document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
 
-
-// ============================================
-// LÓGICA DO RELATÓRIO E BOTÃO DO OLHO (CORRIGIDO)
-// ============================================
-
 window.togglePriv = function() { 
     window.verValores = !window.verValores; 
     const ico = document.getElementById('eye-rel'); 
-    
-    if(window.verValores) { 
-        ico.classList.remove('fa-eye'); 
-        ico.classList.add('fa-eye-slash'); 
-    } else { 
-        ico.classList.remove('fa-eye-slash'); 
-        ico.classList.add('fa-eye'); 
-    } 
+    if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); } else { ico.classList.remove('fa-eye-slash'); ico.classList.add('fa-eye'); } 
     renderRelatorio(); 
 }
 
@@ -713,24 +701,13 @@ window.renderRelatorio = function() {
     const logsFiltrados = window.db.logs.filter(l => {
         const d = new Date(l.data); 
         let matchDate = false;
-        
-        if(f === 'dia') {
-            matchDate = d.toDateString() === now.toDateString();
-        } else if(f === 'semana') {
-            matchDate = (now - d) < 604800000;
-        } else if(f === 'mes') {
-            matchDate = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-        } else if(f === 'ano') {
-            matchDate = d.getFullYear() === now.getFullYear();
-        } else if(f.length === 2 && !isNaN(f)) {
-            const mesEscolhido = parseInt(f) - 1; 
-            matchDate = d.getMonth() === mesEscolhido && d.getFullYear() === now.getFullYear();
-        }
-        
+        if(f === 'dia') matchDate = d.toDateString() === now.toDateString();
+        else if(f === 'semana') matchDate = (now - d) < 604800000;
+        else if(f === 'mes') matchDate = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        else if(f === 'ano') matchDate = d.getFullYear() === now.getFullYear();
+        else if(f.length === 2 && !isNaN(f)) matchDate = d.getMonth() === (parseInt(f) - 1) && d.getFullYear() === now.getFullYear();
         let matchText = true; 
-        if(searchTxt) { 
-            matchText = (l.cliente && window.norm(l.cliente).includes(window.norm(searchTxt))); 
-        } 
+        if(searchTxt) matchText = (l.cliente && window.norm(l.cliente).includes(window.norm(searchTxt))); 
         return matchDate && matchText;
     });
     
@@ -747,14 +724,10 @@ window.renderRelatorio = function() {
         } 
         lucroGeral += (l.valor - custoItem);
         
-        if(!clientesMap[l.cliente]) { 
-            clientesMap[l.cliente] = { nome: l.cliente, total: 0, count: 0, lastDate: l.data, lastOS: null }; 
-        } 
+        if(!clientesMap[l.cliente]) clientesMap[l.cliente] = { nome: l.cliente, total: 0, count: 0, lastDate: l.data, lastOS: null }; 
         clientesMap[l.cliente].total += l.valor; 
         clientesMap[l.cliente].count++;
-        if (new Date(l.data) > new Date(clientesMap[l.cliente].lastDate)) { 
-            clientesMap[l.cliente].lastDate = l.data; 
-        }
+        if (new Date(l.data) > new Date(clientesMap[l.cliente].lastDate)) clientesMap[l.cliente].lastDate = l.data; 
         if (l.osNum) clientesMap[l.cliente].lastOS = l.osNum;
     });
     
@@ -776,67 +749,103 @@ window.renderRelatorio = function() {
     const rank = (tipo) => {
         const contagem = {};
         logsFiltrados.forEach(l => {
-            if(tipo === 'cliente' && l.cliente) {
-                contagem[l.cliente] = (contagem[l.cliente] || 0) + l.valor;
-            } else if (tipo === 'produto' && (l.tipo === 'PRODUTO' || l.tipo === 'P')) {
-                contagem[l.desc] = (contagem[l.desc] || 0) + (l.qtd || 1);
-            } else if (tipo === 'servico' && (l.tipo === 'SERVICO' || l.tipo === 'S')) {
-                contagem[l.desc] = (contagem[l.desc] || 0) + (l.qtd || 1);
-            }
+            if(tipo === 'cliente' && l.cliente) contagem[l.cliente] = (contagem[l.cliente] || 0) + l.valor;
+            else if (tipo === 'produto' && (l.tipo === 'PRODUTO' || l.tipo === 'P')) contagem[l.desc] = (contagem[l.desc] || 0) + (l.qtd || 1);
+            else if (tipo === 'servico' && (l.tipo === 'SERVICO' || l.tipo === 'S')) contagem[l.desc] = (contagem[l.desc] || 0) + (l.qtd || 1);
         });
         return Object.entries(contagem).sort((a,b) => b[1] - a[1]).slice(0, 5);
     };
 
     const rankCli = rank('cliente');
     document.getElementById('rank-cli').innerHTML = rankCli.length ? rankCli.map(c => `<div class="rank-item"><span>${c[0]}</span> <b>R$ ${c[1].toFixed(2)}</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
-
     const rankProd = rank('produto');
     document.getElementById('rank-prod').innerHTML = rankProd.length ? rankProd.map(p => `<div class="rank-item"><span>${p[0]}</span> <b>${p[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
-
     const rankServ = rank('servico');
     document.getElementById('rank-serv').innerHTML = rankServ.length ? rankServ.map(s => `<div class="rank-item"><span>${s[0]}</span> <b>${s[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
 }
 
 
 // ============================================
-// FUNÇÃO NOVA: ABRIR EXTRATO INDIVIDUAL DO CLIENTE (OLHINHO VERDE)
+// NOVO: ABRIR EXTRATO COMPLETO DO CLIENTE (OLHINHO VERDE)
 // ============================================
 
 window.abrirExtratoCliente = function(nome) {
-    // Pega todos os logs daquele cliente específico e organiza do mais novo para o mais antigo
-    const logsCliente = window.db.logs.filter(l => l.cliente === nome).sort((a, b) => new Date(b.data) - new Date(a.data));
-    
     let html = '';
     
-    if(logsCliente.length === 0) {
-        html = '<div style="text-align:center; padding:20px; color:#999">NENHUM REGISTRO ENCONTRADO</div>';
-    } else {
-        html = logsCliente.map(l => {
-            const dataObj = new Date(l.data);
-            const dateStr = dataObj.toLocaleDateString('pt-BR') + ' ' + dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            const osBadge = l.osNum ? ` <span style="background:#000;color:#fff;padding:2px 4px;border-radius:4px;font-size:8px;margin-left:5px">OS #${l.osNum}</span>` : '';
+    // 1. Puxa as Ordens de Serviço (Histórico + Ativas)
+    const oss = [...window.db.os_hist, ...window.db.os].filter(o => o.cliente === nome);
+    
+    oss.sort((a,b) => new Date(b.data) - new Date(a.data)).forEach(o => {
+        const isFechada = window.db.os_hist.some(h => h.id === o.id);
+        const statusLabel = isFechada ? 'FINALIZADA' : 'ATIVA';
+        
+        html += `
+        <div class="fin-item" style="background:white; border-left-color: ${isFechada ? '#4caf50' : '#ff9800'}">
+            <div class="fin-date">${new Date(o.data).toLocaleDateString()} - OS #${o.num||'S/N'} (${statusLabel})</div>
+            <div style="font-size:12px; margin-bottom:4px"><b>MODELO:</b> ${o.modelo}</div>
+            ${o.senha ? `<div style="font-size:11px; color:#555"><b>SENHA:</b> ${o.senha}</div>` : ''}
+            ${o.defeito ? `<div style="font-size:11px; color:#555"><b>OBS:</b> ${o.defeito}</div>` : ''}
+            <div style="font-weight:900; color:var(--primary); margin-top:5px; font-size:14px">TOTAL: R$ ${o.valor.toFixed(2)}</div>
             
-            // Se for desconto, o valor fica vermelho. Se for compra/serviço, fica verde
+            <div class="actions-row" style="margin-top:10px">
+                <button class="btn-mini blue" onclick="prepararReciboOS('${o.id}', ${isFechada})"><i class="fas fa-print"></i> RECIBO</button>
+                ${isFechada ? `<button class="btn-mini dark" onclick="reabrirOS('${o.id}')"><i class="fas fa-lock-open"></i> REABRIR OS</button>` : `<button class="btn-mini dark" onclick="fecharModal({target:{id:'modal-overlay'}}); editOS('${o.id}')"><i class="fas fa-pen"></i> EDITAR</button>`}
+            </div>
+        </div>`;
+    });
+    
+    // 2. Puxa compras/serviços que não estão vinculadas a uma OS
+    const logsVendas = window.db.logs.filter(l => l.cliente === nome && !l.osNum).sort((a,b) => new Date(b.data) - new Date(a.data));
+    
+    if (logsVendas.length > 0) {
+        html += `<h4 style="margin:15px 0 10px 0; font-size:11px; text-align:center; color:#666">OUTRAS MOVIMENTAÇÕES (VENDAS GERAIS)</h4>`;
+        logsVendas.forEach(l => {
             const color = l.valor < 0 ? 'red' : 'var(--primary)';
-            
-            return `
-            <div class="fin-item" style="background:white; border-left-color:${color}">
-                <div class="fin-date">${dateStr}${osBadge}</div>
+            html += `
+            <div class="fin-item" style="background:white; border-left-color:${color}; padding: 8px;">
+                <div class="fin-date">${new Date(l.data).toLocaleDateString()} ${new Date(l.data).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</div>
                 <div style="display:flex; justify-content:space-between; align-items:center">
                     <div><b>${l.tipo}</b><br><span style="font-size:10px">${l.desc}</span></div>
                     <div style="font-weight:bold; color:${color}">R$ ${l.valor.toFixed(2)}</div>
                 </div>
             </div>`;
-        }).join('');
+        });
     }
-    
-    document.getElementById('ext-nome').innerText = "EXTRATO: " + nome;
+
+    if(!html) html = '<div style="text-align:center; padding:20px; color:#999">NENHUM REGISTRO ENCONTRADO</div>';
+
+    document.getElementById('ext-nome').innerText = "HISTÓRICO: " + nome;
     document.getElementById('ext-lista').innerHTML = html;
-    document.getElementById('ext-share-area').style.display = 'none';
+    document.getElementById('ext-share-area').style.display = 'none'; // Esconde os botões de Zap/Print até apertar em 'Recibo'
     document.getElementById('ext-preview-box').style.display = 'none';
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
+// Gera o Recibo quando clica no botão dentro do histórico
+window.prepararReciboOS = function(id, isFechada) {
+    const o = isFechada ? window.db.os_hist.find(x => x.id === id) : window.db.os.find(x => x.id === id);
+    if(!o) return;
+    
+    const it = (o.itens && o.itens.length) ? o.itens : [{nome: o.modelo, val: o.valor, qtd: 1, garantia: '90 DIAS'}];
+    const sub = it.reduce((a,b)=>a+b.val,0); 
+    const desc = o.desconto || 0; 
+    const numDisplay = o.num ? `Nº ${o.num}` : 'S/N';
+    
+    window.shareData = { 
+        tipo: 'OS ' + numDisplay, 
+        cliente: o.cliente, 
+        itens: it, 
+        subtotal: sub, 
+        desconto: desc, 
+        sinal: o.sinal || 0, 
+        total: o.valor, 
+        obs: o.defeito, 
+        senha: o.senha, 
+        fotos: o.fotos || [] 
+    };
+    
+    abrirModalShare();
+}
 
 // ============================================
 // FUNÇÕES DE COMPARTILHAMENTO E IMPRESSÃO
@@ -890,7 +899,7 @@ window.abrirModalShare = function() {
         </div>
     `;
     
-    document.getElementById('ext-nome').innerText = "COMPARTILHAR";
+    document.getElementById('ext-nome').innerText = "COMPARTILHAR RECIBO";
     document.getElementById('ext-lista').innerHTML = '';
     document.getElementById('ext-preview-box').innerHTML = htmlPreview;
     document.getElementById('ext-preview-box').style.display = 'block';
@@ -899,6 +908,9 @@ window.abrirModalShare = function() {
 }
 
 window.shareExtrato = function(metodo) {
+    if(!window.shareData) return;
+    const d = window.shareData;
+
     if(metodo === 'pdf') {
         const area = document.getElementById('area-cupom-visual');
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
@@ -912,9 +924,36 @@ window.shareExtrato = function(metodo) {
         }, 500);
         
     } else if (metodo === 'zap') {
-        alert("Nesta versão a função do Zap exige integração com API oficial ou cópia do texto.");
+        // Envia direto pro Zap montando o texto bonitinho!
+        let txt = `*${EMPRESA.nome}*\n`;
+        txt += `Comprovante: ${d.tipo}\n`;
+        txt += `Cliente: ${d.cliente}\n`;
+        txt += `Data: ${new Date().toLocaleString()}\n\n`;
+        txt += `*ITENS:*\n`;
+        d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
+        txt += `\n*SUBTOTAL:* R$ ${d.subtotal.toFixed(2)}\n`;
+        if(d.desconto > 0) txt += `*DESCONTO:* - R$ ${d.desconto.toFixed(2)}\n`;
+        txt += `*TOTAL:* R$ ${d.total.toFixed(2)}\n`;
+        if(d.sinal > 0) txt += `*SINAL PAGO:* R$ ${d.sinal.toFixed(2)}\n`;
+        if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `*RESTANTE:* R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
+        if(d.obs) txt += `\n*OBS:* ${d.obs}\n`;
+        
+        const encoded = encodeURIComponent(txt);
+        window.open(`https://wa.me/?text=${encoded}`, '_blank');
+        
     } else if (metodo === 'bluetooth') {
-        alert("No celular, a impressão Bluetooth (RawBT) captura o texto gerado e envia para a impressora.");
+        // Envia para o RawBT pra imprimir térmico no Celular
+        let txt = `${EMPRESA.nome}\n`;
+        txt += `COMPROVANTE: ${d.tipo}\n`;
+        txt += `CLIENTE: ${d.cliente}\n`;
+        txt += `DATA: ${new Date().toLocaleString()}\n`;
+        txt += `--------------------------\n`;
+        d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
+        txt += `--------------------------\n`;
+        txt += `TOTAL: R$ ${d.total.toFixed(2)}\n`;
+        
+        const b64 = btoa(unescape(encodeURIComponent(txt)));
+        window.location.href = `intent:${b64}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
     }
 }
 
@@ -928,17 +967,20 @@ window.acaoImprimirRelatorio = function() {
     let html = `
         <div style="text-align:center; margin-bottom: 20px;">
             <h2 style="margin:0; font-family:sans-serif;">${EMPRESA.nome}</h2>
-            <div style="font-size:14px; color:#555; font-weight:bold; font-family:sans-serif;">RELATÓRIO FINANCEIRO - ${fNome}</div>
+            <div style="font-size:12px; margin-top:5px; font-family:sans-serif;">${EMPRESA.cnpj} | ${EMPRESA.tel}</div>
+            <div style="font-size:12px; font-family:sans-serif; margin-bottom:15px">${EMPRESA.end}</div>
+
+            <div style="font-size:16px; color:#333; font-weight:bold; font-family:sans-serif; border-bottom: 2px dashed #000; padding-bottom:5px;">RELATÓRIO FINANCEIRO - ${fNome}</div>
             <div style="font-size:12px; margin-top:5px; font-family:sans-serif;">Gerado em: ${new Date().toLocaleString()}</div>
         </div>
         <div style="display:flex; justify-content:space-around; margin-bottom: 20px; border: 1px solid #000; padding: 15px; background:#f9f9f9; font-family:sans-serif;">
-            <div style="font-size:16px;"><strong>FATURAMENTO TOTAL:</strong> ${total}</div>
+            <div style="font-size:16px;"><strong>FATURAMENTO:</strong> ${total}</div>
             <div style="font-size:16px;"><strong>LUCRO ESTIMADO:</strong> ${lucro}</div>
         </div>
         <table class="relatorio-print-table">
             <thead>
                 <tr>
-                    <th>DATA</th>
+                    <th>DATA / HORA</th>
                     <th>TIPO</th>
                     <th>DESCRIÇÃO / ITEM</th>
                     <th>CLIENTE</th>
@@ -963,7 +1005,7 @@ window.acaoImprimirRelatorio = function() {
     logsPrint.forEach(l => {
         html += `
             <tr>
-                <td>${new Date(l.data).toLocaleDateString()}</td>
+                <td>${new Date(l.data).toLocaleDateString()} ${new Date(l.data).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</td>
                 <td>${l.tipo}</td>
                 <td>${l.desc}</td>
                 <td>${l.cliente || '-'}</td>
