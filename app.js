@@ -696,11 +696,9 @@ window.togglePriv = function() {
     const ico = document.getElementById('eye-rel'); 
     
     if(window.verValores) { 
-        // Mostrando os valores, ícone fica cortado
         ico.classList.remove('fa-eye'); 
         ico.classList.add('fa-eye-slash'); 
     } else { 
-        // Escondendo os valores, volta pro ícone de olho normal
         ico.classList.remove('fa-eye-slash'); 
         ico.classList.add('fa-eye'); 
     } 
@@ -725,7 +723,6 @@ window.renderRelatorio = function() {
         } else if(f === 'ano') {
             matchDate = d.getFullYear() === now.getFullYear();
         } else if(f.length === 2 && !isNaN(f)) {
-            // Verifica o mês específico selecionado na lista (01 = Jan, 12 = Dez)
             const mesEscolhido = parseInt(f) - 1; 
             matchDate = d.getMonth() === mesEscolhido && d.getFullYear() === now.getFullYear();
         }
@@ -776,7 +773,6 @@ window.renderRelatorio = function() {
     document.getElementById('r-total').innerText = window.verValores ? "R$ " + totalGeral.toFixed(2) : "****"; 
     document.getElementById('r-lucro').innerText = window.verValores ? "R$ " + lucroGeral.toFixed(2) : "****";
     
-    // Calcula os Rankings para a tela
     const rank = (tipo) => {
         const contagem = {};
         logsFiltrados.forEach(l => {
@@ -799,6 +795,46 @@ window.renderRelatorio = function() {
 
     const rankServ = rank('servico');
     document.getElementById('rank-serv').innerHTML = rankServ.length ? rankServ.map(s => `<div class="rank-item"><span>${s[0]}</span> <b>${s[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
+}
+
+
+// ============================================
+// FUNÇÃO NOVA: ABRIR EXTRATO INDIVIDUAL DO CLIENTE (OLHINHO VERDE)
+// ============================================
+
+window.abrirExtratoCliente = function(nome) {
+    // Pega todos os logs daquele cliente específico e organiza do mais novo para o mais antigo
+    const logsCliente = window.db.logs.filter(l => l.cliente === nome).sort((a, b) => new Date(b.data) - new Date(a.data));
+    
+    let html = '';
+    
+    if(logsCliente.length === 0) {
+        html = '<div style="text-align:center; padding:20px; color:#999">NENHUM REGISTRO ENCONTRADO</div>';
+    } else {
+        html = logsCliente.map(l => {
+            const dataObj = new Date(l.data);
+            const dateStr = dataObj.toLocaleDateString('pt-BR') + ' ' + dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const osBadge = l.osNum ? ` <span style="background:#000;color:#fff;padding:2px 4px;border-radius:4px;font-size:8px;margin-left:5px">OS #${l.osNum}</span>` : '';
+            
+            // Se for desconto, o valor fica vermelho. Se for compra/serviço, fica verde
+            const color = l.valor < 0 ? 'red' : 'var(--primary)';
+            
+            return `
+            <div class="fin-item" style="background:white; border-left-color:${color}">
+                <div class="fin-date">${dateStr}${osBadge}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div><b>${l.tipo}</b><br><span style="font-size:10px">${l.desc}</span></div>
+                    <div style="font-weight:bold; color:${color}">R$ ${l.valor.toFixed(2)}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    
+    document.getElementById('ext-nome').innerText = "EXTRATO: " + nome;
+    document.getElementById('ext-lista').innerHTML = html;
+    document.getElementById('ext-share-area').style.display = 'none';
+    document.getElementById('ext-preview-box').style.display = 'none';
+    document.getElementById('modal-extrato').style.display = 'flex';
 }
 
 
@@ -867,11 +903,9 @@ window.shareExtrato = function(metodo) {
         const area = document.getElementById('area-cupom-visual');
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         
-        // Ativa o layout de impressão pro CSS isolar o Cupom
         document.body.classList.add('printing-cupom');
         window.print();
         
-        // Limpeza após iniciar o diálogo de impressão
         setTimeout(() => {
             document.body.classList.remove('printing-cupom');
             area.innerHTML = '';
@@ -891,7 +925,6 @@ window.acaoImprimirRelatorio = function() {
     const total = document.getElementById('r-total').innerText;
     const lucro = document.getElementById('r-lucro').innerText;
 
-    // Constrói a tabela profissional para impressão A4
     let html = `
         <div style="text-align:center; margin-bottom: 20px;">
             <h2 style="margin:0; font-family:sans-serif;">${EMPRESA.nome}</h2>
@@ -942,7 +975,6 @@ window.acaoImprimirRelatorio = function() {
     html += `</tbody></table>`;
     area.innerHTML = html;
 
-    // Isola a página inteira apenas para mostrar o relatório
     document.body.classList.add('printing-relatorio');
     window.print();
     
