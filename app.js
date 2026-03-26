@@ -23,13 +23,6 @@ window.currentOSCollection = 'os_ativa';
 
 window.estoqueTab = 'prod'; 
 
-// Garante que a tela volte ao normal após confirmar ou cancelar qualquer impressão
-window.addEventListener('afterprint', () => {
-    document.body.classList.remove('printing-cupom', 'printing-relatorio');
-    document.getElementById('area-cupom-visual').innerHTML = '';
-    document.getElementById('area-relatorio-visual').innerHTML = '';
-});
-
 window.salvarEstadoLocal = function() {
     const estado = {
         abaAtiva: document.querySelector('.page.active')?.id.replace('page-', '') || 'vendas',
@@ -286,6 +279,8 @@ window.finalizarVenda = async function() {
     }
     
     let troco = 0; if(valorPago > total) { troco = valorPago - total; }
+    
+    // AQUI: Registra a data/hora exata que a Venda foi finalizada
     const nowISO = new Date().toISOString();
 
     for(let i of window.carrinho) { await addDoc(collection(db,"logs"), { tipo: i.tipo=='P'?'PRODUTO':'SERVICO', desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: cli, data: nowISO }); }
@@ -519,20 +514,23 @@ window.arqOS = async function(id) {
 
     await setDoc(doc(db, "os_historico", id), o);
     
+    // AQUI: Salva no relatório com a Data/Hora exata em que foi fechada a OS (HOJE!)
+    const dataFechamento = new Date().toISOString();
+    
     if(o.itens && o.itens.length>0) { 
         for(let i of o.itens) {
             let tipoLog = 'SERVICO';
             if (i.tipo === 'P' || i.tipo === 'PRODUTO') { tipoLog = 'PRODUTO'; } else if (i.tipo === 'S' || i.tipo === 'SERVICO') { tipoLog = 'SERVICO'; } else { const isProdName = window.db.produtos.some(p => p.nome === i.nome); tipoLog = isProdName ? 'PRODUTO' : 'SERVICO'; }
             
             await addDoc(collection(db,"logs"), {
-                tipo: tipoLog, desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: o.cliente, data: o.data, osNum: o.num
+                tipo: tipoLog, desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: o.cliente, data: dataFechamento, osNum: o.num
             }); 
         } 
     } else { 
-        await addDoc(collection(db,"logs"), {tipo:'SERVICO', desc: 'OS: '+o.modelo, valor: o.valor, qtd: 1, cliente: o.cliente, data: o.data, osNum: o.num}); 
+        await addDoc(collection(db,"logs"), {tipo:'SERVICO', desc: 'OS: '+o.modelo, valor: o.valor, qtd: 1, cliente: o.cliente, data: dataFechamento, osNum: o.num}); 
     }
     
-    if(o.desconto>0) await addDoc(collection(db,"logs"), {tipo:'DESCONTO', desc: 'DESCONTO OS', valor: -o.desconto, cliente: o.cliente, data: o.data});
+    if(o.desconto>0) await addDoc(collection(db,"logs"), {tipo:'DESCONTO', desc: 'DESCONTO OS', valor: -o.desconto, cliente: o.cliente, data: dataFechamento});
     await deleteDoc(doc(db,"os_ativa",id));
 }
 
@@ -977,16 +975,14 @@ window.shareExtrato = function(metodo) {
         
         document.body.classList.add('printing-cupom');
         
-        // Chamada imediata, usando o novo EventListener AfterPrint pra limpar
-        setTimeout(() => {
-            window.print();
-        }, 200);
+        // Android exige que a chamada seja sincrona aqui
+        window.print();
         
     } else if (metodo === 'bluetooth') {
         if (window.shareData) {
             const d = window.shareData;
             
-            // Texto formatado para Bobina de 80mm (~48 colunas)
+            // Texto formatado perfeitamente para 80mm (Aprox. 48 caracteres)
             let txt = `================================================\n`;
             txt += `              ${EMPRESA.nome}              \n`;
             txt += `             ${EMPRESA.tel}              \n`;
@@ -1013,7 +1009,7 @@ window.shareExtrato = function(metodo) {
             txt += `================================================\n`;
             txt += `           OBRIGADO PELA PREFERENCIA!           \n\n\n`;
 
-            // Envia como Texto codificado, sem btoa (Base64 que estava causando o bug de códigos loucos)
+            // Chama o RawBT usando URI com texto encode, sem Base64 (que causa letras doidas)
             const encodedText = encodeURIComponent(txt);
             window.location.href = `intent:${encodedText}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
         }
@@ -1111,9 +1107,8 @@ window.acaoImprimirRelatorio = function() {
 
     document.body.classList.add('printing-relatorio');
     
-    setTimeout(() => {
-        window.print();
-    }, 200);
+    // Sem atraso
+    window.print();
 }
 
 window.fecharExtrato = function(e) {
