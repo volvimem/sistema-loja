@@ -23,15 +23,6 @@ window.currentOSCollection = 'os_ativa';
 
 window.estoqueTab = 'prod'; 
 
-// ==========================================
-// CORREÇÃO DO BUG DA FOLHA BRANCA NA IMPRESSÃO
-// ==========================================
-window.addEventListener('afterprint', () => {
-    document.body.classList.remove('printing-cupom', 'printing-relatorio');
-    document.getElementById('area-cupom-visual').innerHTML = '';
-    document.getElementById('area-relatorio-visual').innerHTML = '';
-});
-
 window.salvarEstadoLocal = function() {
     const estado = {
         abaAtiva: document.querySelector('.page.active')?.id.replace('page-', '') || 'vendas',
@@ -254,6 +245,11 @@ window.renderCarrinho = function() {
     const restante = totalLiq - entrada;
 
     document.getElementById('v-total').innerText = 'TOTAL: R$ ' + subtotal.toFixed(2);
+    if(restante > 0) {
+        document.getElementById('v-restante').innerHTML = `<span style="color:red">RESTANTE (FIADO): R$ ${restante.toFixed(2)}</span>`;
+    } else {
+        document.getElementById('v-restante').innerHTML = `<span style="color:green">QUITADO</span>`;
+    }
 }
 window.setGarantiaCar = function(idx, val) { window.carrinho[idx].garantia = val; window.salvarEstadoLocal(); }
 window.editItemVenda = function(index) { const i=window.carrinho[index]; const n=prompt(`Valor TOTAL ${i.nome} (${i.qtd}x):`, i.val); if(n!==null){const v=parseFloat(n); if(!isNaN(v)){window.carrinho[index].val=v; renderCarrinho(); window.salvarEstadoLocal();}} }
@@ -365,8 +361,10 @@ window.renderItemsOS = function() {
     const desc = parseFloat(document.getElementById('s-desc').value) || 0;
     const sinal = parseFloat(document.getElementById('s-sinal').value) || 0;
     const totalLiquido = subtotal - desc;
+    const restante = totalLiquido - sinal;
 
     document.getElementById('s-total-display').innerText = 'TOTAL: R$ ' + subtotal.toFixed(2);
+    document.getElementById('s-restante-display').innerText = 'RESTANTE: R$ ' + restante.toFixed(2);
 }
 window.setGarantiaOS = function(idx, val) { window.carrinhoOS[idx].garantia = val; window.salvarEstadoLocal(); }
 window.editItemOS = function(index) { const i=window.carrinhoOS[index]; const n=prompt(`Valor TOTAL ${i.nome}:`, i.val); if(n!==null){const v=parseFloat(n); if(!isNaN(v)){window.carrinhoOS[index].val=v; renderItemsOS(); window.salvarEstadoLocal();}} }
@@ -531,10 +529,6 @@ window.arqOS = async function(id) {
     await deleteDoc(doc(db,"os_ativa",id));
 }
 
-// ==============================================================
-// LISTAS DOS MODAIS - ÁREA DE COMPARTILHAMENTO FICA OCULTA AQUI
-// ==============================================================
-
 window.verHistoricoOS = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display = 'none';
@@ -559,7 +553,7 @@ window.verHistoricoOS = function() {
         }
         document.getElementById('ext-nome').innerText = "HISTÓRICO OS"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO AQUI
+        document.getElementById('ext-share-area').style.display = 'none'; 
         document.getElementById('ext-preview-box').style.display = 'none';
         document.getElementById('modal-extrato').style.display = 'flex';
         window.shareData = null; 
@@ -632,7 +626,7 @@ window.abrirCarteiraDevedores = function() {
         
         document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO AQUI
+        document.getElementById('ext-share-area').style.display = 'none'; 
         document.getElementById('ext-preview-box').style.display = 'none'; 
         document.getElementById('modal-extrato').style.display = 'flex';
         window.shareData = null; 
@@ -667,7 +661,7 @@ window.gerenciarDividas = function(nome) {
     }
     document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome; 
     document.getElementById('ext-lista').innerHTML = html; 
-    document.getElementById('ext-share-area').style.display = 'none'; // OCULTO AQUI
+    document.getElementById('ext-share-area').style.display = 'none'; 
     document.getElementById('ext-preview-box').style.display = 'none'; 
     document.getElementById('modal-extrato').style.display = 'flex';
     window.shareData = null; 
@@ -901,9 +895,6 @@ window.prepararReciboOS = function(id, isFechada) {
     abrirModalShare();
 }
 
-// =========================================================
-// GERA OS BOTÕES FORÇADAMENTE SÓ DENTRO DO RECIBO
-// =========================================================
 window.abrirModalShare = function() {
     if(!window.shareData) return;
     const d = window.shareData;
@@ -955,33 +946,64 @@ window.abrirModalShare = function() {
     
     const shareArea = document.getElementById('ext-share-area');
     
-    // GERA OS BOTÕES NO MODAL
     shareArea.innerHTML = `
         <div id="ext-preview-box" style="display:block; margin-bottom:15px; max-height:40vh; overflow-y:auto; border:1px solid #ccc; border-radius:8px; padding:5px">${htmlPreview}</div>
         <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:10px">ESCOLHA COMO ENVIAR OU IMPRIMIR</div>
         <button class="btn" style="background:#25d366; margin:0 0 8px 0; padding:12px; width:100%" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
-        <button class="btn" style="background:#0277bd; margin:0 0 8px 0; padding:12px; width:100%" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> IMPRIMIR RAWBT (BLUETOOTH)</button>
-        <button class="btn" style="background:#333; margin:0; padding:12px; width:100%" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> GERAR PDF / IMPRIMIR A4</button>
+        <button class="btn" style="background:#0277bd; margin:0 0 8px 0; padding:12px; width:100%" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> IMPRIMIR RAWBT (BLUETOOTH 80MM)</button>
+        <button class="btn" style="background:#333; margin:0; padding:12px; width:100%" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> GERAR PDF / IMPRESSORA A4</button>
     `;
     
     shareArea.style.display = 'flex';
     shareArea.style.flexDirection = 'column';
-    
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
 window.shareExtrato = function(metodo) {
-    if(metodo === 'pdf' || metodo === 'bluetooth') {
+    if (metodo === 'pdf') {
         const area = document.getElementById('area-cupom-visual');
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         
         document.body.classList.add('printing-cupom');
         
-        // Timeout pequeno apenas para garantir a renderização antes de abrir o print()
-        setTimeout(() => { 
-            window.print(); 
-        }, 150);
+        // Chamada imediata (Síncrona) para evitar bloqueio do Android
+        window.print();
         
+    } else if (metodo === 'bluetooth') {
+        // Envia o texto direto para o RawBT formatado para bobina 80mm (Aprox. 48 caracteres de largura)
+        if (window.shareData) {
+            const d = window.shareData;
+            
+            let txt = `================================================\n`;
+            txt += `              ${EMPRESA.nome}              \n`;
+            txt += `             ${EMPRESA.tel}              \n`;
+            txt += `================================================\n`;
+            txt += `COMPROVANTE: ${d.tipo}\n`;
+            txt += `CLIENTE: ${d.cliente}\n`;
+            if (d.modelo) txt += `APARELHO: ${d.modelo}\n`;
+            txt += `DATA: ${new Date().toLocaleString()}\n`;
+            txt += `------------------------------------------------\n`;
+            
+            d.itens.forEach(i => {
+                let nomeItem = i.nome;
+                if(nomeItem.length > 25) nomeItem = nomeItem.substring(0, 25) + '...';
+                txt += `${i.qtd || 1}x ${nomeItem}\n`;
+                txt += `                                     R$ ${i.val.toFixed(2)}\n`;
+            });
+            
+            txt += `------------------------------------------------\n`;
+            txt += `SUBTOTAL:                              R$ ${d.subtotal.toFixed(2)}\n`;
+            if(d.desconto > 0) txt += `DESCONTO:                             -R$ ${d.desconto.toFixed(2)}\n`;
+            txt += `TOTAL:                                 R$ ${d.total.toFixed(2)}\n`;
+            if(d.sinal > 0) txt += `SINAL PAGO:                            R$ ${d.sinal.toFixed(2)}\n`;
+            
+            txt += `================================================\n`;
+            txt += `           OBRIGADO PELA PREFERENCIA!           \n\n\n`;
+
+            const b64 = btoa(unescape(encodeURIComponent(txt)));
+            window.location.href = `intent:${b64}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+        }
+
     } else if (metodo === 'zap') {
         let telefoneCli = '';
         
@@ -1075,10 +1097,8 @@ window.acaoImprimirRelatorio = function() {
 
     document.body.classList.add('printing-relatorio');
     
-    // Timeout pequeno apenas para garantir a renderização antes de abrir o print()
-    setTimeout(() => { 
-        window.print(); 
-    }, 150);
+    // Chamada imediata (Síncrona)
+    window.print();
 }
 
 window.fecharExtrato = function(e) {
