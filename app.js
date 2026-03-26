@@ -19,7 +19,7 @@ window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[], dividas:[],
 window.carrinho = []; window.carrinhoOS = []; window.shareData = null; window.tempImg = null; window.retornoVenda = false; window.retornoOS = false; window.osFotos = [null, null, null, null]; window.currentFotoIndex = 0; window.extratoAtual = null; window.editingDateId = null;
 window.callbackSenha = null; window.verValores = false;
 window.isEditing = false; 
-window.currentOSCollection = 'os_ativa'; // NOVO: Controla se estamos editando OS Ativa ou Histórico
+window.currentOSCollection = 'os_ativa'; 
 
 window.estoqueTab = 'prod'; 
 
@@ -370,9 +370,6 @@ window.setGarantiaOS = function(idx, val) { window.carrinhoOS[idx].garantia = va
 window.editItemOS = function(index) { const i=window.carrinhoOS[index]; const n=prompt(`Valor TOTAL ${i.nome}:`, i.val); if(n!==null){const v=parseFloat(n); if(!isNaN(v)){window.carrinhoOS[index].val=v; renderItemsOS(); window.salvarEstadoLocal();}} }
 window.delItemOS = function(i) { window.carrinhoOS.splice(i,1); renderItemsOS(); window.salvarEstadoLocal(); }
 
-// ============================================
-// NOVO: SALVAR OS INTELIGENTE (SUPORTA EDIÇÃO NO HISTÓRICO)
-// ============================================
 window.salvarOS = async function() {
     const id = document.getElementById('os-id').value; 
     const cliField = document.getElementById('s-cli').value.trim();
@@ -404,20 +401,18 @@ window.salvarOS = async function() {
     };
 
     if(id) {
-        // Se estamos editando uma OS existente, procuramos a original para não perder a data e o numero de registro
         const isHist = window.currentOSCollection === 'os_historico';
         const original = isHist ? window.db.os_hist.find(x => x.id === id) : window.db.os.find(x => x.id === id);
         
         if (original) {
-            os.data = original.data; // Mantém a data de criação
-            if (original.num) os.num = original.num; // Mantém o número original #
+            os.data = original.data; 
+            if (original.num) os.num = original.num; 
         } else {
-            os.data = new Date().toISOString(); // Failsafe
+            os.data = new Date().toISOString(); 
         }
         
         await updateDoc(doc(db, isHist ? "os_historico" : "os_ativa", id), os);
     } else {
-        // Se é uma OS Nova
         const configRef = doc(db, "config", "contador"); 
         const configSnap = await getDoc(configRef);
         let numOS = 1;
@@ -439,7 +434,7 @@ window.salvarOS = async function() {
 
 window.limparOS = function() {
     window.isEditing = false; 
-    window.currentOSCollection = 'os_ativa'; // Reseta
+    window.currentOSCollection = 'os_ativa'; 
     document.getElementById('os-id').value = ''; document.getElementById('s-cli').value = ''; document.getElementById('s-mod').value = ''; document.getElementById('s-senha').value = ''; document.getElementById('s-def').value = ''; 
     document.getElementById('s-desc').value = ''; document.getElementById('s-sinal').value = ''; 
     window.carrinhoOS = []; window.osFotos = [null,null,null,null]; renderItemsOS(); const slots = document.querySelectorAll('.os-foto-slot'); slots.forEach(s => s.innerHTML = '<i class="fas fa-camera"></i>');
@@ -464,7 +459,6 @@ window.renderKanban = function() {
     document.getElementById('k-pecas').innerHTML = c.pecas; document.getElementById('k-pgto').innerHTML = c.pgto; document.getElementById('k-retirado').innerHTML = c.retirado;
 }
 
-// NOVO: Exclusão Inteligente (Deleta tanto OS Ativa quanto do Histórico)
 window.delOS = async function(id, isHist = false) { 
     abrirModalSenha(async () => { 
         document.getElementById('modal-overlay').style.display='none'; 
@@ -472,7 +466,6 @@ window.delOS = async function(id, isHist = false) {
             const col = isHist ? "os_historico" : "os_ativa";
             await deleteDoc(doc(db, col, id)); 
             
-            // Recarrega o modal se estiver aberto
             if(isHist) {
                 const extNome = document.getElementById('ext-nome').innerText;
                 if(extNome.includes("HISTÓRICO OS")) {
@@ -536,7 +529,10 @@ window.arqOS = async function(id) {
     await deleteDoc(doc(db,"os_ativa",id));
 }
 
-// NOVO: Adicionado botões diretos de RECIBO, EDITAR (Caneta) e EXCLUIR (Lixeira) sem Reabrir!
+// ==============================================================
+// LISTAS DOS MODAIS - ÁREA DE COMPARTILHAMENTO FICA OCULTA AQUI
+// ==============================================================
+
 window.verHistoricoOS = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display = 'none';
@@ -561,19 +557,17 @@ window.verHistoricoOS = function() {
         }
         document.getElementById('ext-nome').innerText = "HISTÓRICO OS"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'flex'; 
+        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO
         document.getElementById('ext-preview-box').style.display = 'none';
         document.getElementById('modal-extrato').style.display = 'flex';
         window.shareData = null; 
     });
 }
 
-// NOVO: Edição Inteligente (Carrega OS Ativa ou OS Histórica)
 window.editOS = function(id, isHist = false) {
     const o = isHist ? window.db.os_hist.find(i=>i.id===id) : window.db.os.find(i=>i.id===id); 
     if(!o) return; 
     
-    // Altera a coleção para que o sistema salve no lugar certo (sem mover pro Kanban!)
     window.currentOSCollection = isHist ? 'os_historico' : 'os_ativa';
     
     document.getElementById('os-id').value=id; 
@@ -592,7 +586,6 @@ window.editOS = function(id, isHist = false) {
     const slots = document.querySelectorAll('.os-foto-slot'); 
     window.osFotos.forEach((f, i) => { if(f) slots[i].innerHTML = `<img src="${f}">`; else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; }); 
     
-    // Fecha os modais caso tenha clicado por lá
     document.getElementById('modal-extrato').style.display = 'none';
     document.getElementById('modal-overlay').style.display = 'none';
     
@@ -637,7 +630,7 @@ window.abrirCarteiraDevedores = function() {
         
         document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'flex'; 
+        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO
         document.getElementById('ext-preview-box').style.display = 'none'; 
         document.getElementById('modal-extrato').style.display = 'flex';
         window.shareData = null; 
@@ -672,7 +665,7 @@ window.gerenciarDividas = function(nome) {
     }
     document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome; 
     document.getElementById('ext-lista').innerHTML = html; 
-    document.getElementById('ext-share-area').style.display = 'flex'; 
+    document.getElementById('ext-share-area').style.display = 'none'; // OCULTO
     document.getElementById('ext-preview-box').style.display = 'none'; 
     document.getElementById('modal-extrato').style.display = 'flex';
     window.shareData = null; 
@@ -827,7 +820,6 @@ window.renderRelatorio = function() {
     document.getElementById('rank-serv').innerHTML = rankServ.length ? rankServ.map(s => `<div class="rank-item"><span>${s[0]}</span> <b>${s[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
 }
 
-// NOVO: Adicionado botões de Lixeira e Caneta para as OS
 window.abrirExtratoCliente = function(nome) {
     let html = '';
     
@@ -875,7 +867,8 @@ window.abrirExtratoCliente = function(nome) {
     document.getElementById('ext-nome').innerText = "HISTÓRICO: " + nome;
     document.getElementById('ext-lista').innerHTML = html;
     
-    document.getElementById('ext-share-area').style.display = 'flex'; 
+    // OCULTA OS BOTOES DE COMPARTILHAMENTO NAS LISTAS AQUI!
+    document.getElementById('ext-share-area').style.display = 'none'; 
     document.getElementById('ext-preview-box').style.display = 'none';
     document.getElementById('modal-extrato').style.display = 'flex';
     
@@ -899,7 +892,7 @@ window.prepararReciboOS = function(id, isFechada) {
         desconto: desc, 
         sinal: o.sinal || 0, 
         total: o.valor, 
-        // obs: o.defeito, -> Oculto do recibo de impressão/WhatsApp
+        // OBS omitida propositalmente para o Whatsapp/Recibo
         senha: o.senha, 
         fotos: o.fotos || [] 
     };
@@ -907,11 +900,13 @@ window.prepararReciboOS = function(id, isFechada) {
     abrirModalShare();
 }
 
+// =========================================================
+// FUNÇÃO QUE GERA OS BOTÕES FORÇADAMENTE SÓ NO RECIBO
+// =========================================================
 window.abrirModalShare = function() {
     if(!window.shareData) return;
     const d = window.shareData;
     
-    // Apenas para garantir que não imprima OBS
     let htmlPreview = `
         <div class="cupom-wrapper">
             <div class="c-header">
@@ -956,33 +951,29 @@ window.abrirModalShare = function() {
     
     document.getElementById('ext-nome').innerText = "COMPARTILHAR RECIBO";
     document.getElementById('ext-lista').innerHTML = '';
-    document.getElementById('ext-preview-box').innerHTML = htmlPreview;
     
-    document.getElementById('ext-preview-box').style.display = 'block';
-    document.getElementById('ext-share-area').style.display = 'flex';
+    const shareArea = document.getElementById('ext-share-area');
+    
+    // GERA OS 3 BOTÕES DE COMPARTILHAMENTO APENAS AQUI!
+    shareArea.innerHTML = `
+        <div id="ext-preview-box" style="display:block; margin-bottom:15px;">${htmlPreview}</div>
+        <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:10px">ESCOLHA COMO ENVIAR OU IMPRIMIR</div>
+        <button class="btn" style="background:#25d366; margin:0 0 8px 0; padding:12px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
+        <button class="btn" style="background:#0277bd; margin:0 0 8px 0; padding:12px" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> IMPRIMIR RAWBT (BLUETOOTH)</button>
+        <button class="btn" style="background:#333; margin:0; padding:12px" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> GERAR PDF / IMPRIMIR A4</button>
+    `;
+    
+    shareArea.style.display = 'flex';
+    shareArea.style.flexDirection = 'column';
+    
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
-// NOVO: WhatsApp Puxa o Telefone, e Bluetooth/PDF usam a tela de impressão do Android
 window.shareExtrato = function(metodo) {
-    const isRecibo = document.getElementById('ext-preview-box').style.display === 'block';
-
+    // Agora o PDF e o BLUETOOTH usam a tela de Impressão (onde você pode selecionar o RawBT)
     if(metodo === 'pdf' || metodo === 'bluetooth') {
         const area = document.getElementById('area-cupom-visual');
-        
-        if (isRecibo) {
-            area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
-        } else {
-            const nomeModal = document.getElementById('ext-nome').innerText;
-            const listaHtml = document.getElementById('ext-lista').innerHTML;
-            area.innerHTML = `
-                <div style="font-family: sans-serif; padding: 20px; color: #000;">
-                    <h2 style="text-align:center; margin-bottom: 5px;">${EMPRESA.nome}</h2>
-                    <h3 style="text-align:center; margin-top: 0; border-bottom: 2px dashed #000; padding-bottom: 10px;">${nomeModal}</h3>
-                    ${listaHtml}
-                </div>
-            `;
-        }
+        area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         
         document.body.classList.add('printing-cupom');
         window.print();
@@ -995,21 +986,15 @@ window.shareExtrato = function(metodo) {
     } else if (metodo === 'zap') {
         let telefoneCli = '';
         
-        // Puxa o numero de telefone para enviar mensagem direto
+        // Puxa o numero de telefone para enviar direto pro zap do cliente
         if(window.shareData && window.shareData.cliente) {
             const cli = window.db.clientes.find(c => c.nome.toUpperCase() === window.shareData.cliente.toUpperCase());
             if(cli && cli.tel) {
                 telefoneCli = '55' + cli.tel.replace(/\D/g, ''); 
             }
-        } else {
-            const nomeStr = document.getElementById('ext-nome').innerText.replace('HISTÓRICO: ', '').replace('CARTEIRA DE DEVEDORES', '').trim();
-            const cli = window.db.clientes.find(c => c.nome.toUpperCase() === nomeStr.toUpperCase());
-            if(cli && cli.tel) {
-                telefoneCli = '55' + cli.tel.replace(/\D/g, '');
-            }
         }
 
-        if (isRecibo && window.shareData) {
+        if (window.shareData) {
             const d = window.shareData;
             let txt = `*${EMPRESA.nome}*\n`;
             txt += `Comprovante: ${d.tipo}\n`;
@@ -1022,13 +1007,8 @@ window.shareExtrato = function(metodo) {
             txt += `*TOTAL:* R$ ${d.total.toFixed(2)}\n`;
             if(d.sinal > 0) txt += `*SINAL PAGO:* R$ ${d.sinal.toFixed(2)}\n`;
             if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `*RESTANTE:* R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
+            // Sem OBS :)
             
-            const encoded = encodeURIComponent(txt);
-            const url = telefoneCli ? `https://wa.me/${telefoneCli}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
-            window.open(url, '_blank');
-        } else {
-            let nomeModal = document.getElementById('ext-nome').innerText;
-            let txt = `*${EMPRESA.nome}*\n${nomeModal}\nData: ${new Date().toLocaleString()}\n\nSolicite o arquivo PDF para ver todos os detalhes dessa lista.`;
             const encoded = encodeURIComponent(txt);
             const url = telefoneCli ? `https://wa.me/${telefoneCli}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
             window.open(url, '_blank');
