@@ -19,6 +19,7 @@ window.db = { clientes:[], produtos:[], servicos:[], os:[], logs:[], dividas:[],
 window.carrinho = []; window.carrinhoOS = []; window.shareData = null; window.tempImg = null; window.retornoVenda = false; window.retornoOS = false; window.osFotos = [null, null, null, null]; window.currentFotoIndex = 0; window.extratoAtual = null; window.editingDateId = null;
 window.callbackSenha = null; window.verValores = false;
 window.isEditing = false; 
+window.currentOSCollection = 'os_ativa'; // NOVO: Controla se estamos editando OS Ativa ou Histórico
 
 window.estoqueTab = 'prod'; 
 
@@ -369,8 +370,13 @@ window.setGarantiaOS = function(idx, val) { window.carrinhoOS[idx].garantia = va
 window.editItemOS = function(index) { const i=window.carrinhoOS[index]; const n=prompt(`Valor TOTAL ${i.nome}:`, i.val); if(n!==null){const v=parseFloat(n); if(!isNaN(v)){window.carrinhoOS[index].val=v; renderItemsOS(); window.salvarEstadoLocal();}} }
 window.delItemOS = function(i) { window.carrinhoOS.splice(i,1); renderItemsOS(); window.salvarEstadoLocal(); }
 
+// ============================================
+// NOVO: SALVAR OS INTELIGENTE (SUPORTA EDIÇÃO NO HISTÓRICO)
+// ============================================
 window.salvarOS = async function() {
-    const id = document.getElementById('os-id').value; const cliField = document.getElementById('s-cli').value.trim();
+    const id = document.getElementById('os-id').value; 
+    const cliField = document.getElementById('s-cli').value.trim();
+    
     if(!cliField) return alert("ERRO: OBRIGATÓRIO NOME DO CLIENTE NA O.S.!");
     
     const sub = window.carrinhoOS.reduce((a,b)=>a+b.val,0); 
@@ -378,18 +384,8 @@ window.salvarOS = async function() {
     const sinal = parseFloat(document.getElementById('s-sinal').value) || 0;
     const total = sub - desc;
 
-    let numOS = 0;
-    if(!id) {
-        const configRef = doc(db, "config", "contador"); const configSnap = await getDoc(configRef);
-        if (configSnap.exists()) { numOS = configSnap.data().last + 1; await updateDoc(configRef, { last: numOS }); } 
-        else { numOS = 1; await setDoc(configRef, { last: 1 }); }
-    }
-    
     let statusFinal = document.getElementById('os-status-orig').value || 'pecas';
-    if (window.isEditing) {
-        statusFinal = 'retirado'; 
-        window.isEditing = false; 
-    } else if (!id) {
+    if (!id) {
         statusFinal = 'pecas'; 
     }
 
@@ -404,17 +400,46 @@ window.salvarOS = async function() {
         restante: total - sinal,
         itens: window.carrinhoOS, 
         fotos: window.osFotos, 
-        status: statusFinal, 
-        data: new Date().toISOString() 
+        status: statusFinal
     };
 
-    if(!id) os.num = numOS;
-    if(id) await updateDoc(doc(db,"os_ativa",id), os); else await addDoc(collection(db,"os_ativa"), os);
-    limparOS(); alert("SALVO! OS Nº " + (id ? "ATUALIZADA" : numOS));
+    if(id) {
+        // Se estamos editando uma OS existente, procuramos a original para não perder a data e o numero de registro
+        const isHist = window.currentOSCollection === 'os_historico';
+        const original = isHist ? window.db.os_hist.find(x => x.id === id) : window.db.os.find(x => x.id === id);
+        
+        if (original) {
+            os.data = original.data; // Mantém a data de criação
+            if (original.num) os.num = original.num; // Mantém o número original #
+        } else {
+            os.data = new Date().toISOString(); // Failsafe
+        }
+        
+        await updateDoc(doc(db, isHist ? "os_historico" : "os_ativa", id), os);
+    } else {
+        // Se é uma OS Nova
+        const configRef = doc(db, "config", "contador"); 
+        const configSnap = await getDoc(configRef);
+        let numOS = 1;
+        if (configSnap.exists()) { 
+            numOS = configSnap.data().last + 1; 
+            await updateDoc(configRef, { last: numOS }); 
+        } else { 
+            await setDoc(configRef, { last: 1 }); 
+        }
+        
+        os.data = new Date().toISOString();
+        os.num = numOS;
+        await addDoc(collection(db, "os_ativa"), os);
+    }
+
+    limparOS(); 
+    alert("SALVO! OS Nº " + (os.num || (id ? "ATUALIZADA" : "NOVA")));
 }
 
 window.limparOS = function() {
     window.isEditing = false; 
+    window.currentOSCollection = 'os_ativa'; // Reseta
     document.getElementById('os-id').value = ''; document.getElementById('s-cli').value = ''; document.getElementById('s-mod').value = ''; document.getElementById('s-senha').value = ''; document.getElementById('s-def').value = ''; 
     document.getElementById('s-desc').value = ''; document.getElementById('s-sinal').value = ''; 
     window.carrinhoOS = []; window.osFotos = [null,null,null,null]; renderItemsOS(); const slots = document.querySelectorAll('.os-foto-slot'); slots.forEach(s => s.innerHTML = '<i class="fas fa-camera"></i>');
@@ -434,11 +459,33 @@ window.renderKanban = function() {
         const numDisplay = o.num ? `<b>#${o.num}</b> - ` : '';
         const restanteVal = o.restante !== undefined ? o.restante : o.valor; 
         
-        c[o.status] += `<div id="os-card-${o.id}" class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">FALTA: R$ ${restanteVal.toFixed(2)}</div><div class="actions-row">${nav}</div><div class="actions-row"><button class="btn-mini blue" onclick="editOS('${o.id}')"><i class="fas fa-pen"></i></button><button class="btn-mini zap" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini red" onclick="delOS('${o.id}')"><i class="fas fa-trash"></i></button></div></div>`;
+        c[o.status] += `<div id="os-card-${o.id}" class="os-card ${o.status}"><div>${numDisplay}<b>${o.cliente}</b></div><div>${o.modelo}</div><div style="font-weight:bold; color:var(--primary)">FALTA: R$ ${restanteVal.toFixed(2)}</div><div class="actions-row">${nav}</div><div class="actions-row"><button class="btn-mini blue" onclick="editOS('${o.id}', false)"><i class="fas fa-pen"></i></button><button class="btn-mini zap" onclick="shareOS('${o.id}')"><i class="fas fa-share-alt"></i></button><button class="btn-mini red" onclick="delOS('${o.id}', false)"><i class="fas fa-trash"></i></button></div></div>`;
     });
     document.getElementById('k-pecas').innerHTML = c.pecas; document.getElementById('k-pgto').innerHTML = c.pgto; document.getElementById('k-retirado').innerHTML = c.retirado;
 }
-window.delOS = async function(id) { abrirModalSenha(async () => { document.getElementById('modal-overlay').style.display='none'; if(confirm("EXCLUIR OS?")) await deleteDoc(doc(db, "os_ativa", id)); }); }
+
+// NOVO: Exclusão Inteligente (Deleta tanto OS Ativa quanto do Histórico)
+window.delOS = async function(id, isHist = false) { 
+    abrirModalSenha(async () => { 
+        document.getElementById('modal-overlay').style.display='none'; 
+        if(confirm(isHist ? "EXCLUIR OS DO HISTÓRICO PERMANENTEMENTE?" : "EXCLUIR OS?")) {
+            const col = isHist ? "os_historico" : "os_ativa";
+            await deleteDoc(doc(db, col, id)); 
+            
+            // Recarrega o modal se estiver aberto
+            if(isHist) {
+                const extNome = document.getElementById('ext-nome').innerText;
+                if(extNome.includes("HISTÓRICO OS")) {
+                    verHistoricoOS();
+                } else if(extNome.includes("HISTÓRICO:")) {
+                    const nomeStr = extNome.replace('HISTÓRICO: ', '');
+                    abrirExtratoCliente(nomeStr);
+                }
+            }
+        }
+    }); 
+}
+
 window.moveOS = async function(id, dir) { const o = window.db.os.find(i=>i.id===id); const idx = ['pecas', 'pgto', 'retirado'].indexOf(o.status) + dir; await updateDoc(doc(db,"os_ativa",id), {status: ['pecas', 'pgto', 'retirado'][idx]}); }
 
 window.arqOS = async function(id) {
@@ -489,7 +536,7 @@ window.arqOS = async function(id) {
     await deleteDoc(doc(db,"os_ativa",id));
 }
 
-// NOVO: Adicionado .style.display='flex' para a área de botões
+// NOVO: Adicionado botões diretos de RECIBO, EDITAR (Caneta) e EXCLUIR (Lixeira) sem Reabrir!
 window.verHistoricoOS = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display = 'none';
@@ -497,65 +544,63 @@ window.verHistoricoOS = function() {
         if(window.db.os_hist.length === 0) html = '<div style="padding:20px;text-align:center;color:#999">VAZIO</div>';
         else {
             html = window.db.os_hist.map(o => {
-                return `<div class="fin-item" style="background:white; border-left-color:#666"><div class="fin-date">${new Date(o.data).toLocaleDateString()} - #${o.num||'S/N'}</div><b>${o.cliente}</b> - ${o.modelo}<br>R$ ${o.valor.toFixed(2)}<button class="btn-mini blue" style="margin-top:5px; width:100%" onclick="reabrirOS('${o.id}')">REABRIR (CORRIGIR)</button></div>`;
+                return `<div class="fin-item" style="background:white; border-left-color:#666">
+                    <div class="fin-date">${new Date(o.data).toLocaleDateString()} - #${o.num||'S/N'}</div>
+                    <div style="font-size:12px; margin-bottom:4px"><b>${o.cliente}</b> - ${o.modelo}</div>
+                    ${o.senha ? `<div style="font-size:11px; color:#555"><b>SENHA:</b> ${o.senha}</div>` : ''}
+                    ${o.defeito ? `<div style="font-size:11px; color:#555"><b>OBS:</b> ${o.defeito}</div>` : ''}
+                    <div style="font-weight:900; color:var(--primary); margin-top:5px; font-size:14px">TOTAL: R$ ${o.valor.toFixed(2)}</div>
+                    
+                    <div class="actions-row" style="margin-top:10px">
+                        <button class="btn-mini blue" onclick="prepararReciboOS('${o.id}', true)"><i class="fas fa-print"></i> RECIBO</button>
+                        <button class="btn-mini dark" onclick="editOS('${o.id}', true)"><i class="fas fa-pen"></i></button>
+                        <button class="btn-mini red" onclick="delOS('${o.id}', true)"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
             }).join('');
         }
         document.getElementById('ext-nome').innerText = "HISTÓRICO OS"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'flex'; // SEMPRE VISIVEL
+        document.getElementById('ext-share-area').style.display = 'flex'; 
         document.getElementById('ext-preview-box').style.display = 'none';
         document.getElementById('modal-extrato').style.display = 'flex';
-        window.shareData = null; // Indica que é uma lista para o shareExtrato
+        window.shareData = null; 
     });
 }
 
-window.reabrirOS = async function(id) {
-    if(!confirm("REABRIR PARA EDIÇÃO?\n\nIsso trará a OS de volta para a tela inicial.")) return;
-    const o = window.db.os_hist.find(x => x.id === id);
-    if(!o) return;
-
-    window.isEditing = true; 
-    document.getElementById('os-id').value = ''; 
-    document.getElementById('s-cli').value = o.cliente;
-    document.getElementById('s-mod').value = o.modelo;
-    document.getElementById('s-senha').value = o.senha;
-    document.getElementById('s-def').value = o.defeito;
-    document.getElementById('s-desc').value = o.desconto;
-    document.getElementById('s-sinal').value = o.sinal;
-
-    window.osFotos = o.fotos || [null,null,null,null];
-    const slots = document.querySelectorAll('.os-foto-slot'); 
-    window.osFotos.forEach((f, i) => { 
-        if(f) slots[i].innerHTML = `<img src="${f}">`; 
-        else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; 
-    });
-
-    window.carrinhoOS = o.itens || [];
-    renderItemsOS();
-
-    if (o.num) {
-        const q = query(collection(db, "dividas"), where("origem_os", "==", o.num));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (d) => await deleteDoc(doc(db, "dividas", d.id)));
-    }
+// NOVO: Edição Inteligente (Carrega OS Ativa ou OS Histórica)
+window.editOS = function(id, isHist = false) {
+    const o = isHist ? window.db.os_hist.find(i=>i.id===id) : window.db.os.find(i=>i.id===id); 
+    if(!o) return; 
     
-    await deleteDoc(doc(db, "os_historico", id));
-    document.getElementById('modal-extrato').style.display = 'none';
-    window.nav('servicos');
-    alert("DADOS RECUPERADOS! EDITE E SALVE.");
-    window.salvarEstadoLocal();
-}
-
-window.editOS = function(id) {
-    const o = window.db.os.find(i=>i.id===id); 
-    document.getElementById('os-id').value=id; document.getElementById('s-cli').value=o.cliente; document.getElementById('s-mod').value=o.modelo; document.getElementById('os-status-orig').value = o.status; document.getElementById('s-def').value=o.defeito; document.getElementById('s-senha').value=o.senha; 
+    // Altera a coleção para que o sistema salve no lugar certo (sem mover pro Kanban!)
+    window.currentOSCollection = isHist ? 'os_historico' : 'os_ativa';
+    
+    document.getElementById('os-id').value=id; 
+    document.getElementById('s-cli').value=o.cliente; 
+    document.getElementById('s-mod').value=o.modelo; 
+    document.getElementById('os-status-orig').value = o.status || 'pecas'; 
+    document.getElementById('s-def').value=o.defeito || ''; 
+    document.getElementById('s-senha').value=o.senha || ''; 
     document.getElementById('s-desc').value = o.desconto || '';
     document.getElementById('s-sinal').value = o.sinal || '';
+    
     window.carrinhoOS = (o.itens && Array.isArray(o.itens)) ? o.itens : (o.valor>0?[{nome: 'Serviço Antigo', val: o.valor, qtd: 1, garantia: '90 DIAS', tipo:'S'}]:[]);
     renderItemsOS(); 
-    window.osFotos = o.fotos || [null, null, null, null]; const slots = document.querySelectorAll('.os-foto-slot'); window.osFotos.forEach((f, i) => { if(f) slots[i].innerHTML = `<img src="${f}">`; else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; }); document.getElementById('page-servicos').scrollIntoView();
+    
+    window.osFotos = o.fotos || [null, null, null, null]; 
+    const slots = document.querySelectorAll('.os-foto-slot'); 
+    window.osFotos.forEach((f, i) => { if(f) slots[i].innerHTML = `<img src="${f}">`; else slots[i].innerHTML = `<i class="fas fa-camera"></i>`; }); 
+    
+    // Fecha os modais caso tenha clicado por lá
+    document.getElementById('modal-extrato').style.display = 'none';
+    document.getElementById('modal-overlay').style.display = 'none';
+    
+    window.nav('servicos');
+    document.getElementById('page-servicos').scrollIntoView();
     window.salvarEstadoLocal();
 }
+
 window.shareOS = function(id) {
     const o = window.db.os.find(i=>i.id===id); const it = (o.itens && o.itens.length) ? o.itens : [{nome:o.modelo, val:o.valor, qtd:1, garantia:'90 DIAS'}];
     const sub = it.reduce((a,b)=>a+b.val,0); const desc = o.desconto || 0; const numDisplay = o.num ? `Nº ${o.num}` : 'S/N';
@@ -581,7 +626,6 @@ function renderCliCard(c) {
 }
 window.edtCli = function(id) { const c=window.db.clientes.find(i=>i.id===id); document.getElementById('c-id').value=id; document.getElementById('c-nome').value=c.nome; document.getElementById('c-tel').value=c.tel; document.getElementById('c-bairro').value=c.bairro||''; document.getElementById('c-cidade').value=c.cidade||''; window.tempImg=c.foto; const view=document.getElementById('c-foto-view'); view.src=c.foto||''; if(c.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('form-cli').scrollIntoView(); }
 
-// NOVO: Adicionado .style.display='flex' para a área de botões
 window.abrirCarteiraDevedores = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display='none';
@@ -593,14 +637,13 @@ window.abrirCarteiraDevedores = function() {
         
         document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'flex'; // SEMPRE VISIVEL
+        document.getElementById('ext-share-area').style.display = 'flex'; 
         document.getElementById('ext-preview-box').style.display = 'none'; 
         document.getElementById('modal-extrato').style.display = 'flex';
-        window.shareData = null; // Indica que é uma lista
+        window.shareData = null; 
     });
 }
 
-// NOVO: Adicionado .style.display='flex' para a área de botões
 window.gerenciarDividas = function(nome) {
     const dividas = window.db.dividas.filter(d => d.cliente === nome && d.restante > 0.01).sort((a,b)=>new Date(a.data_venda)-new Date(b.data_venda)); 
     let html = '';
@@ -629,10 +672,10 @@ window.gerenciarDividas = function(nome) {
     }
     document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome; 
     document.getElementById('ext-lista').innerHTML = html; 
-    document.getElementById('ext-share-area').style.display = 'flex'; // SEMPRE VISIVEL
+    document.getElementById('ext-share-area').style.display = 'flex'; 
     document.getElementById('ext-preview-box').style.display = 'none'; 
     document.getElementById('modal-extrato').style.display = 'flex';
-    window.shareData = null; // Indica que é uma lista
+    window.shareData = null; 
 }
 
 window.excluirDivida = function(id, nome) {
@@ -784,14 +827,10 @@ window.renderRelatorio = function() {
     document.getElementById('rank-serv').innerHTML = rankServ.length ? rankServ.map(s => `<div class="rank-item"><span>${s[0]}</span> <b>${s[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
 }
 
-// ============================================
-// ABRIR EXTRATO COMPLETO DO CLIENTE (OLHINHO VERDE)
-// ============================================
-
+// NOVO: Adicionado botões de Lixeira e Caneta para as OS
 window.abrirExtratoCliente = function(nome) {
     let html = '';
     
-    // 1. Puxa as Ordens de Serviço (Histórico + Ativas)
     const oss = [...window.db.os_hist, ...window.db.os].filter(o => o.cliente === nome);
     
     oss.sort((a,b) => new Date(b.data) - new Date(a.data)).forEach(o => {
@@ -808,12 +847,12 @@ window.abrirExtratoCliente = function(nome) {
             
             <div class="actions-row" style="margin-top:10px">
                 <button class="btn-mini blue" onclick="prepararReciboOS('${o.id}', ${isFechada})"><i class="fas fa-print"></i> RECIBO</button>
-                ${isFechada ? `<button class="btn-mini dark" onclick="reabrirOS('${o.id}')"><i class="fas fa-lock-open"></i> REABRIR</button>` : `<button class="btn-mini dark" onclick="fecharModal({target:{id:'modal-overlay'}}); editOS('${o.id}')"><i class="fas fa-pen"></i> EDITAR</button>`}
+                <button class="btn-mini dark" onclick="editOS('${o.id}', ${isFechada})"><i class="fas fa-pen"></i></button>
+                <button class="btn-mini red" onclick="delOS('${o.id}', ${isFechada})"><i class="fas fa-trash"></i></button>
             </div>
         </div>`;
     });
     
-    // 2. Puxa compras/serviços que não estão vinculadas a uma OS
     const logsVendas = window.db.logs.filter(l => l.cliente === nome && !l.osNum).sort((a,b) => new Date(b.data) - new Date(a.data));
     
     if (logsVendas.length > 0) {
@@ -836,15 +875,13 @@ window.abrirExtratoCliente = function(nome) {
     document.getElementById('ext-nome').innerText = "HISTÓRICO: " + nome;
     document.getElementById('ext-lista').innerHTML = html;
     
-    // Deixa a área de compartilhar SEMPRE VISÍVEL
     document.getElementById('ext-share-area').style.display = 'flex'; 
     document.getElementById('ext-preview-box').style.display = 'none';
     document.getElementById('modal-extrato').style.display = 'flex';
     
-    window.shareData = null; // Zera para indicar que é uma LISTA de extrato
+    window.shareData = null; 
 }
 
-// Gera o Recibo quando clica no botão dentro do histórico
 window.prepararReciboOS = function(id, isFechada) {
     const o = isFechada ? window.db.os_hist.find(x => x.id === id) : window.db.os.find(x => x.id === id);
     if(!o) return;
@@ -862,7 +899,7 @@ window.prepararReciboOS = function(id, isFechada) {
         desconto: desc, 
         sinal: o.sinal || 0, 
         total: o.valor, 
-        obs: o.defeito, 
+        // obs: o.defeito, -> Oculto do recibo de impressão/WhatsApp
         senha: o.senha, 
         fotos: o.fotos || [] 
     };
@@ -870,14 +907,11 @@ window.prepararReciboOS = function(id, isFechada) {
     abrirModalShare();
 }
 
-// ============================================
-// FUNÇÕES DE COMPARTILHAMENTO E IMPRESSÃO (INTELIGENTES)
-// ============================================
-
 window.abrirModalShare = function() {
     if(!window.shareData) return;
     const d = window.shareData;
     
+    // Apenas para garantir que não imprima OBS
     let htmlPreview = `
         <div class="cupom-wrapper">
             <div class="c-header">
@@ -913,8 +947,6 @@ window.abrirModalShare = function() {
             ${d.sinal > 0 ? `<div class="c-row" style="margin-top:10px"><span>SINAL PAGO:</span> <span>R$ ${d.sinal.toFixed(2)}</span></div>` : ''}
             ${(d.total - (d.sinal || d.valorPago || 0)) > 0 ? `<div class="c-row"><span>RESTANTE:</span> <span class="c-row bold" style="color:red">R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}</span></div>` : ''}
             
-            ${d.obs ? `<div class="c-section-title">OBSERVAÇÕES</div><div style="font-size:10px; text-align:center">${d.obs}</div>` : ''}
-            
             <div class="c-footer">
                 OBRIGADO PELA PREFERÊNCIA!<br>
                 SISTEMA FILHÃO.CELL
@@ -931,18 +963,16 @@ window.abrirModalShare = function() {
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
+// NOVO: WhatsApp Puxa o Telefone, e Bluetooth/PDF usam a tela de impressão do Android
 window.shareExtrato = function(metodo) {
-    // Verifica se estamos compartilhando um Recibo ou uma Lista (Histórico/Devedores)
     const isRecibo = document.getElementById('ext-preview-box').style.display === 'block';
 
-    if(metodo === 'pdf') {
+    if(metodo === 'pdf' || metodo === 'bluetooth') {
         const area = document.getElementById('area-cupom-visual');
         
         if (isRecibo) {
-            // Imprime o cupom formatado
             area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         } else {
-            // Imprime a lista do modal (Histórico do cliente, lista de devedores, etc)
             const nomeModal = document.getElementById('ext-nome').innerText;
             const listaHtml = document.getElementById('ext-lista').innerHTML;
             area.innerHTML = `
@@ -963,6 +993,22 @@ window.shareExtrato = function(metodo) {
         }, 500);
         
     } else if (metodo === 'zap') {
+        let telefoneCli = '';
+        
+        // Puxa o numero de telefone para enviar mensagem direto
+        if(window.shareData && window.shareData.cliente) {
+            const cli = window.db.clientes.find(c => c.nome.toUpperCase() === window.shareData.cliente.toUpperCase());
+            if(cli && cli.tel) {
+                telefoneCli = '55' + cli.tel.replace(/\D/g, ''); 
+            }
+        } else {
+            const nomeStr = document.getElementById('ext-nome').innerText.replace('HISTÓRICO: ', '').replace('CARTEIRA DE DEVEDORES', '').trim();
+            const cli = window.db.clientes.find(c => c.nome.toUpperCase() === nomeStr.toUpperCase());
+            if(cli && cli.tel) {
+                telefoneCli = '55' + cli.tel.replace(/\D/g, '');
+            }
+        }
+
         if (isRecibo && window.shareData) {
             const d = window.shareData;
             let txt = `*${EMPRESA.nome}*\n`;
@@ -976,36 +1022,16 @@ window.shareExtrato = function(metodo) {
             txt += `*TOTAL:* R$ ${d.total.toFixed(2)}\n`;
             if(d.sinal > 0) txt += `*SINAL PAGO:* R$ ${d.sinal.toFixed(2)}\n`;
             if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `*RESTANTE:* R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
-            if(d.obs) txt += `\n*OBS:* ${d.obs}\n`;
             
             const encoded = encodeURIComponent(txt);
-            window.open(`https://wa.me/?text=${encoded}`, '_blank');
+            const url = telefoneCli ? `https://wa.me/${telefoneCli}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+            window.open(url, '_blank');
         } else {
-            // Compartilhamento simples de texto quando for uma lista
             let nomeModal = document.getElementById('ext-nome').innerText;
             let txt = `*${EMPRESA.nome}*\n${nomeModal}\nData: ${new Date().toLocaleString()}\n\nSolicite o arquivo PDF para ver todos os detalhes dessa lista.`;
             const encoded = encodeURIComponent(txt);
-            window.open(`https://wa.me/?text=${encoded}`, '_blank');
-        }
-        
-    } else if (metodo === 'bluetooth') {
-        if (isRecibo && window.shareData) {
-            const d = window.shareData;
-            let txt = `${EMPRESA.nome}\n`;
-            txt += `COMPROVANTE: ${d.tipo}\n`;
-            txt += `CLIENTE: ${d.cliente}\n`;
-            txt += `DATA: ${new Date().toLocaleString()}\n`;
-            txt += `--------------------------\n`;
-            d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
-            txt += `--------------------------\n`;
-            txt += `TOTAL: R$ ${d.total.toFixed(2)}\n`;
-            if(d.sinal > 0) txt += `SINAL: R$ ${d.sinal.toFixed(2)}\n`;
-            if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `RESTANTE: R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
-            
-            const b64 = btoa(unescape(encodeURIComponent(txt)));
-            window.location.href = `intent:${b64}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
-        } else {
-            alert("A impressão Bluetooth (RawBT) está configurada apenas para Recibos Térmicos! Se quiser imprimir este Histórico, use o botão PDF.");
+            const url = telefoneCli ? `https://wa.me/${telefoneCli}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+            window.open(url, '_blank');
         }
     }
 }
