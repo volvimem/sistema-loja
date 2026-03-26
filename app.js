@@ -23,6 +23,13 @@ window.currentOSCollection = 'os_ativa';
 
 window.estoqueTab = 'prod'; 
 
+// Garante que a tela volte ao normal após confirmar ou cancelar qualquer impressão
+window.addEventListener('afterprint', () => {
+    document.body.classList.remove('printing-cupom', 'printing-relatorio');
+    document.getElementById('area-cupom-visual').innerHTML = '';
+    document.getElementById('area-relatorio-visual').innerHTML = '';
+});
+
 window.salvarEstadoLocal = function() {
     const estado = {
         abaAtiva: document.querySelector('.page.active')?.id.replace('page-', '') || 'vendas',
@@ -529,6 +536,10 @@ window.arqOS = async function(id) {
     await deleteDoc(doc(db,"os_ativa",id));
 }
 
+// ==============================================================
+// LISTAS DOS MODAIS - ÁREA DE COMPARTILHAMENTO FICA OCULTA AQUI
+// ==============================================================
+
 window.verHistoricoOS = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display = 'none';
@@ -966,14 +977,16 @@ window.shareExtrato = function(metodo) {
         
         document.body.classList.add('printing-cupom');
         
-        // Chamada imediata (Síncrona) para evitar bloqueio do Android
-        window.print();
+        // Chamada imediata, usando o novo EventListener AfterPrint pra limpar
+        setTimeout(() => {
+            window.print();
+        }, 200);
         
     } else if (metodo === 'bluetooth') {
-        // Envia o texto direto para o RawBT formatado para bobina 80mm (Aprox. 48 caracteres de largura)
         if (window.shareData) {
             const d = window.shareData;
             
+            // Texto formatado para Bobina de 80mm (~48 colunas)
             let txt = `================================================\n`;
             txt += `              ${EMPRESA.nome}              \n`;
             txt += `             ${EMPRESA.tel}              \n`;
@@ -1000,8 +1013,9 @@ window.shareExtrato = function(metodo) {
             txt += `================================================\n`;
             txt += `           OBRIGADO PELA PREFERENCIA!           \n\n\n`;
 
-            const b64 = btoa(unescape(encodeURIComponent(txt)));
-            window.location.href = `intent:${b64}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+            // Envia como Texto codificado, sem btoa (Base64 que estava causando o bug de códigos loucos)
+            const encodedText = encodeURIComponent(txt);
+            window.location.href = `intent:${encodedText}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
         }
 
     } else if (metodo === 'zap') {
@@ -1097,8 +1111,9 @@ window.acaoImprimirRelatorio = function() {
 
     document.body.classList.add('printing-relatorio');
     
-    // Chamada imediata (Síncrona)
-    window.print();
+    setTimeout(() => {
+        window.print();
+    }, 200);
 }
 
 window.fecharExtrato = function(e) {
