@@ -489,6 +489,7 @@ window.arqOS = async function(id) {
     await deleteDoc(doc(db,"os_ativa",id));
 }
 
+// NOVO: Adicionado .style.display='flex' para a área de botões
 window.verHistoricoOS = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display = 'none';
@@ -499,7 +500,12 @@ window.verHistoricoOS = function() {
                 return `<div class="fin-item" style="background:white; border-left-color:#666"><div class="fin-date">${new Date(o.data).toLocaleDateString()} - #${o.num||'S/N'}</div><b>${o.cliente}</b> - ${o.modelo}<br>R$ ${o.valor.toFixed(2)}<button class="btn-mini blue" style="margin-top:5px; width:100%" onclick="reabrirOS('${o.id}')">REABRIR (CORRIGIR)</button></div>`;
             }).join('');
         }
-        document.getElementById('ext-nome').innerText = "HISTÓRICO OS"; document.getElementById('ext-lista').innerHTML = html; document.getElementById('ext-share-area').style.display = 'none'; document.getElementById('modal-extrato').style.display = 'flex';
+        document.getElementById('ext-nome').innerText = "HISTÓRICO OS"; 
+        document.getElementById('ext-lista').innerHTML = html; 
+        document.getElementById('ext-share-area').style.display = 'flex'; // SEMPRE VISIVEL
+        document.getElementById('ext-preview-box').style.display = 'none';
+        document.getElementById('modal-extrato').style.display = 'flex';
+        window.shareData = null; // Indica que é uma lista para o shareExtrato
     });
 }
 
@@ -575,6 +581,7 @@ function renderCliCard(c) {
 }
 window.edtCli = function(id) { const c=window.db.clientes.find(i=>i.id===id); document.getElementById('c-id').value=id; document.getElementById('c-nome').value=c.nome; document.getElementById('c-tel').value=c.tel; document.getElementById('c-bairro').value=c.bairro||''; document.getElementById('c-cidade').value=c.cidade||''; window.tempImg=c.foto; const view=document.getElementById('c-foto-view'); view.src=c.foto||''; if(c.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('form-cli').scrollIntoView(); }
 
+// NOVO: Adicionado .style.display='flex' para a área de botões
 window.abrirCarteiraDevedores = function() {
     abrirModalSenha(() => {
         document.getElementById('modal-overlay').style.display='none';
@@ -583,9 +590,17 @@ window.abrirCarteiraDevedores = function() {
         const lista = Object.entries(devedores).sort((a,b)=>b[1]-a[1]); let html = '';
         if(lista.length === 0) html = '<div style="text-align:center; padding:20px; color:#999">NINGUÉM DEVENDO!</div>';
         else { html = lista.map(([nome, total]) => `<div class="fin-item" style="display:flex; justify-content:space-between; align-items:center; background:white; border-left-color:red"><div>⚠️ <b>${nome}</b><br><span style="color:red; font-weight:bold">R$ ${total.toFixed(2)}</span></div><button class="btn-mini green" style="max-width:50px" onclick="gerenciarDividas('${nome}')"><i class="fas fa-eye"></i></button></div>`).join(''); }
-        document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES"; document.getElementById('ext-lista').innerHTML = html; document.getElementById('ext-share-area').style.display = 'none'; document.getElementById('ext-preview-box').style.display = 'none'; document.getElementById('modal-extrato').style.display = 'flex';
+        
+        document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES"; 
+        document.getElementById('ext-lista').innerHTML = html; 
+        document.getElementById('ext-share-area').style.display = 'flex'; // SEMPRE VISIVEL
+        document.getElementById('ext-preview-box').style.display = 'none'; 
+        document.getElementById('modal-extrato').style.display = 'flex';
+        window.shareData = null; // Indica que é uma lista
     });
 }
+
+// NOVO: Adicionado .style.display='flex' para a área de botões
 window.gerenciarDividas = function(nome) {
     const dividas = window.db.dividas.filter(d => d.cliente === nome && d.restante > 0.01).sort((a,b)=>new Date(a.data_venda)-new Date(b.data_venda)); 
     let html = '';
@@ -612,7 +627,12 @@ window.gerenciarDividas = function(nome) {
             </div>`; 
         }).join(''); 
     }
-    document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome; document.getElementById('ext-lista').innerHTML = html; document.getElementById('ext-share-area').style.display = 'none'; document.getElementById('ext-preview-box').style.display = 'none'; document.getElementById('modal-extrato').style.display = 'flex';
+    document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome; 
+    document.getElementById('ext-lista').innerHTML = html; 
+    document.getElementById('ext-share-area').style.display = 'flex'; // SEMPRE VISIVEL
+    document.getElementById('ext-preview-box').style.display = 'none'; 
+    document.getElementById('modal-extrato').style.display = 'flex';
+    window.shareData = null; // Indica que é uma lista
 }
 
 window.excluirDivida = function(id, nome) {
@@ -764,9 +784,8 @@ window.renderRelatorio = function() {
     document.getElementById('rank-serv').innerHTML = rankServ.length ? rankServ.map(s => `<div class="rank-item"><span>${s[0]}</span> <b>${s[1]}x</b></div>`).join('') : '<div style="text-align:center; color:#999; font-size:10px">VAZIO</div>';
 }
 
-
 // ============================================
-// NOVO: ABRIR EXTRATO COMPLETO DO CLIENTE (OLHINHO VERDE)
+// ABRIR EXTRATO COMPLETO DO CLIENTE (OLHINHO VERDE)
 // ============================================
 
 window.abrirExtratoCliente = function(nome) {
@@ -789,7 +808,7 @@ window.abrirExtratoCliente = function(nome) {
             
             <div class="actions-row" style="margin-top:10px">
                 <button class="btn-mini blue" onclick="prepararReciboOS('${o.id}', ${isFechada})"><i class="fas fa-print"></i> RECIBO</button>
-                ${isFechada ? `<button class="btn-mini dark" onclick="reabrirOS('${o.id}')"><i class="fas fa-lock-open"></i> REABRIR OS</button>` : `<button class="btn-mini dark" onclick="fecharModal({target:{id:'modal-overlay'}}); editOS('${o.id}')"><i class="fas fa-pen"></i> EDITAR</button>`}
+                ${isFechada ? `<button class="btn-mini dark" onclick="reabrirOS('${o.id}')"><i class="fas fa-lock-open"></i> REABRIR</button>` : `<button class="btn-mini dark" onclick="fecharModal({target:{id:'modal-overlay'}}); editOS('${o.id}')"><i class="fas fa-pen"></i> EDITAR</button>`}
             </div>
         </div>`;
     });
@@ -816,9 +835,13 @@ window.abrirExtratoCliente = function(nome) {
 
     document.getElementById('ext-nome').innerText = "HISTÓRICO: " + nome;
     document.getElementById('ext-lista').innerHTML = html;
-    document.getElementById('ext-share-area').style.display = 'none'; // Esconde os botões de Zap/Print até apertar em 'Recibo'
+    
+    // Deixa a área de compartilhar SEMPRE VISÍVEL
+    document.getElementById('ext-share-area').style.display = 'flex'; 
     document.getElementById('ext-preview-box').style.display = 'none';
     document.getElementById('modal-extrato').style.display = 'flex';
+    
+    window.shareData = null; // Zera para indicar que é uma LISTA de extrato
 }
 
 // Gera o Recibo quando clica no botão dentro do histórico
@@ -848,7 +871,7 @@ window.prepararReciboOS = function(id, isFechada) {
 }
 
 // ============================================
-// FUNÇÕES DE COMPARTILHAMENTO E IMPRESSÃO
+// FUNÇÕES DE COMPARTILHAMENTO E IMPRESSÃO (INTELIGENTES)
 // ============================================
 
 window.abrirModalShare = function() {
@@ -902,18 +925,34 @@ window.abrirModalShare = function() {
     document.getElementById('ext-nome').innerText = "COMPARTILHAR RECIBO";
     document.getElementById('ext-lista').innerHTML = '';
     document.getElementById('ext-preview-box').innerHTML = htmlPreview;
+    
     document.getElementById('ext-preview-box').style.display = 'block';
     document.getElementById('ext-share-area').style.display = 'flex';
     document.getElementById('modal-extrato').style.display = 'flex';
 }
 
 window.shareExtrato = function(metodo) {
-    if(!window.shareData) return;
-    const d = window.shareData;
+    // Verifica se estamos compartilhando um Recibo ou uma Lista (Histórico/Devedores)
+    const isRecibo = document.getElementById('ext-preview-box').style.display === 'block';
 
     if(metodo === 'pdf') {
         const area = document.getElementById('area-cupom-visual');
-        area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
+        
+        if (isRecibo) {
+            // Imprime o cupom formatado
+            area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
+        } else {
+            // Imprime a lista do modal (Histórico do cliente, lista de devedores, etc)
+            const nomeModal = document.getElementById('ext-nome').innerText;
+            const listaHtml = document.getElementById('ext-lista').innerHTML;
+            area.innerHTML = `
+                <div style="font-family: sans-serif; padding: 20px; color: #000;">
+                    <h2 style="text-align:center; margin-bottom: 5px;">${EMPRESA.nome}</h2>
+                    <h3 style="text-align:center; margin-top: 0; border-bottom: 2px dashed #000; padding-bottom: 10px;">${nomeModal}</h3>
+                    ${listaHtml}
+                </div>
+            `;
+        }
         
         document.body.classList.add('printing-cupom');
         window.print();
@@ -924,36 +963,50 @@ window.shareExtrato = function(metodo) {
         }, 500);
         
     } else if (metodo === 'zap') {
-        // Envia direto pro Zap montando o texto bonitinho!
-        let txt = `*${EMPRESA.nome}*\n`;
-        txt += `Comprovante: ${d.tipo}\n`;
-        txt += `Cliente: ${d.cliente}\n`;
-        txt += `Data: ${new Date().toLocaleString()}\n\n`;
-        txt += `*ITENS:*\n`;
-        d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
-        txt += `\n*SUBTOTAL:* R$ ${d.subtotal.toFixed(2)}\n`;
-        if(d.desconto > 0) txt += `*DESCONTO:* - R$ ${d.desconto.toFixed(2)}\n`;
-        txt += `*TOTAL:* R$ ${d.total.toFixed(2)}\n`;
-        if(d.sinal > 0) txt += `*SINAL PAGO:* R$ ${d.sinal.toFixed(2)}\n`;
-        if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `*RESTANTE:* R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
-        if(d.obs) txt += `\n*OBS:* ${d.obs}\n`;
-        
-        const encoded = encodeURIComponent(txt);
-        window.open(`https://wa.me/?text=${encoded}`, '_blank');
+        if (isRecibo && window.shareData) {
+            const d = window.shareData;
+            let txt = `*${EMPRESA.nome}*\n`;
+            txt += `Comprovante: ${d.tipo}\n`;
+            txt += `Cliente: ${d.cliente}\n`;
+            txt += `Data: ${new Date().toLocaleString()}\n\n`;
+            txt += `*ITENS:*\n`;
+            d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
+            txt += `\n*SUBTOTAL:* R$ ${d.subtotal.toFixed(2)}\n`;
+            if(d.desconto > 0) txt += `*DESCONTO:* - R$ ${d.desconto.toFixed(2)}\n`;
+            txt += `*TOTAL:* R$ ${d.total.toFixed(2)}\n`;
+            if(d.sinal > 0) txt += `*SINAL PAGO:* R$ ${d.sinal.toFixed(2)}\n`;
+            if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `*RESTANTE:* R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
+            if(d.obs) txt += `\n*OBS:* ${d.obs}\n`;
+            
+            const encoded = encodeURIComponent(txt);
+            window.open(`https://wa.me/?text=${encoded}`, '_blank');
+        } else {
+            // Compartilhamento simples de texto quando for uma lista
+            let nomeModal = document.getElementById('ext-nome').innerText;
+            let txt = `*${EMPRESA.nome}*\n${nomeModal}\nData: ${new Date().toLocaleString()}\n\nSolicite o arquivo PDF para ver todos os detalhes dessa lista.`;
+            const encoded = encodeURIComponent(txt);
+            window.open(`https://wa.me/?text=${encoded}`, '_blank');
+        }
         
     } else if (metodo === 'bluetooth') {
-        // Envia para o RawBT pra imprimir térmico no Celular
-        let txt = `${EMPRESA.nome}\n`;
-        txt += `COMPROVANTE: ${d.tipo}\n`;
-        txt += `CLIENTE: ${d.cliente}\n`;
-        txt += `DATA: ${new Date().toLocaleString()}\n`;
-        txt += `--------------------------\n`;
-        d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
-        txt += `--------------------------\n`;
-        txt += `TOTAL: R$ ${d.total.toFixed(2)}\n`;
-        
-        const b64 = btoa(unescape(encodeURIComponent(txt)));
-        window.location.href = `intent:${b64}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+        if (isRecibo && window.shareData) {
+            const d = window.shareData;
+            let txt = `${EMPRESA.nome}\n`;
+            txt += `COMPROVANTE: ${d.tipo}\n`;
+            txt += `CLIENTE: ${d.cliente}\n`;
+            txt += `DATA: ${new Date().toLocaleString()}\n`;
+            txt += `--------------------------\n`;
+            d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
+            txt += `--------------------------\n`;
+            txt += `TOTAL: R$ ${d.total.toFixed(2)}\n`;
+            if(d.sinal > 0) txt += `SINAL: R$ ${d.sinal.toFixed(2)}\n`;
+            if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `RESTANTE: R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
+            
+            const b64 = btoa(unescape(encodeURIComponent(txt)));
+            window.location.href = `intent:${b64}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+        } else {
+            alert("A impressão Bluetooth (RawBT) está configurada apenas para Recibos Térmicos! Se quiser imprimir este Histórico, use o botão PDF.");
+        }
     }
 }
 
