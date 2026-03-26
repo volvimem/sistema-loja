@@ -686,12 +686,27 @@ window.renderListaEstoque = function() {
 window.edtProd = function(col, id) { const i=(col=='produtos'?window.db.produtos:window.db.servicos).find(x=>x.id===id); document.getElementById('p-id').value=id; document.getElementById('p-nome').value=i.nome; document.getElementById('p-venda').value=i.precoVenda; document.getElementById('p-qtd').value=i.qtd||''; document.getElementById('p-custo').value=i.custo||''; document.getElementById('p-custo').type='password'; document.getElementById('btn-ver-custo').style.display='block'; window.tempImg=i.foto; const view=document.getElementById('p-foto-view'); view.src=i.foto||''; if(i.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('page-estoque').querySelector('.card').scrollIntoView(); }
 window.revelarCusto = function() { abrirModalSenha(() => { document.getElementById('modal-overlay').style.display='none'; document.getElementById('p-custo').type = 'number'; document.getElementById('btn-ver-custo').style.display = 'none'; }); }
 
-window.togglePriv = function() { window.verValores = !window.verValores; const ico = document.getElementById('eye-rel'); if(window.verValores) { ico.classList.remove('fa-eye'); ico.classList.add('fa-eye-slash'); ico.classList.add('fa-eye'); } else { ico.classList.remove('fa-eye-slash'); ico.classList.add('fa-eye'); } renderRelatorio(); }
-
 
 // ============================================
-// LÓGICA DO RELATÓRIO E FILTRAGEM
+// LÓGICA DO RELATÓRIO E BOTÃO DO OLHO (CORRIGIDO)
 // ============================================
+
+window.togglePriv = function() { 
+    window.verValores = !window.verValores; 
+    const ico = document.getElementById('eye-rel'); 
+    
+    if(window.verValores) { 
+        // Mostrando os valores, ícone fica cortado
+        ico.classList.remove('fa-eye'); 
+        ico.classList.add('fa-eye-slash'); 
+    } else { 
+        // Escondendo os valores, volta pro ícone de olho normal
+        ico.classList.remove('fa-eye-slash'); 
+        ico.classList.add('fa-eye'); 
+    } 
+    renderRelatorio(); 
+}
+
 window.renderRelatorio = function() {
     const f = document.getElementById('r-filtro').value; 
     const now = new Date(); 
