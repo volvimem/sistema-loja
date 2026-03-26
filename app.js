@@ -50,6 +50,7 @@ window.restaurarEstadoLocal = function() {
     if (salvo) {
         try {
             const estado = JSON.parse(salvo);
+            window.carrinho = window.carrinhoOS = []; // Reset temporário
             window.carrinho = estado.carrinhoVenda || [];
             window.carrinhoOS = estado.carrinhoOS || [];
             window.isEditing = estado.inputs.isEditing || false;
@@ -279,8 +280,6 @@ window.finalizarVenda = async function() {
     }
     
     let troco = 0; if(valorPago > total) { troco = valorPago - total; }
-    
-    // AQUI: Registra a data/hora exata que a Venda foi finalizada
     const nowISO = new Date().toISOString();
 
     for(let i of window.carrinho) { await addDoc(collection(db,"logs"), { tipo: i.tipo=='P'?'PRODUTO':'SERVICO', desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: cli, data: nowISO }); }
@@ -514,7 +513,6 @@ window.arqOS = async function(id) {
 
     await setDoc(doc(db, "os_historico", id), o);
     
-    // AQUI: Salva no relatório com a Data/Hora exata em que foi fechada a OS (HOJE!)
     const dataFechamento = new Date().toISOString();
     
     if(o.itens && o.itens.length>0) { 
@@ -972,17 +970,22 @@ window.shareExtrato = function(metodo) {
     if (metodo === 'pdf') {
         const area = document.getElementById('area-cupom-visual');
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
-        
         document.body.classList.add('printing-cupom');
         
-        // Android exige que a chamada seja sincrona aqui
-        window.print();
+        // Android precisa de um tempo para renderizar a tela antes de abrir o spooler
+        setTimeout(() => {
+            window.print();
+            // Restaura o app para o estado normal após 3 segundos
+            setTimeout(() => {
+                document.body.classList.remove('printing-cupom');
+                area.innerHTML = '';
+            }, 3000);
+        }, 300);
         
     } else if (metodo === 'bluetooth') {
         if (window.shareData) {
             const d = window.shareData;
             
-            // Texto formatado perfeitamente para 80mm (Aprox. 48 caracteres)
             let txt = `================================================\n`;
             txt += `              ${EMPRESA.nome}              \n`;
             txt += `             ${EMPRESA.tel}              \n`;
@@ -1009,7 +1012,6 @@ window.shareExtrato = function(metodo) {
             txt += `================================================\n`;
             txt += `           OBRIGADO PELA PREFERENCIA!           \n\n\n`;
 
-            // Chama o RawBT usando URI com texto encode, sem Base64 (que causa letras doidas)
             const encodedText = encodeURIComponent(txt);
             window.location.href = `intent:${encodedText}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
         }
@@ -1107,8 +1109,15 @@ window.acaoImprimirRelatorio = function() {
 
     document.body.classList.add('printing-relatorio');
     
-    // Sem atraso
-    window.print();
+    // Android precisa de um tempo para renderizar a tela antes de abrir o spooler
+    setTimeout(() => {
+        window.print();
+        // Restaura o app para o estado normal após 3 segundos
+        setTimeout(() => {
+            document.body.classList.remove('printing-relatorio');
+            area.innerHTML = '';
+        }, 3000);
+    }, 300);
 }
 
 window.fecharExtrato = function(e) {
