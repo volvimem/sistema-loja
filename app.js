@@ -557,7 +557,7 @@ window.verHistoricoOS = function() {
         }
         document.getElementById('ext-nome').innerText = "HISTÓRICO OS"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO
+        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO AQUI
         document.getElementById('ext-preview-box').style.display = 'none';
         document.getElementById('modal-extrato').style.display = 'flex';
         window.shareData = null; 
@@ -630,7 +630,7 @@ window.abrirCarteiraDevedores = function() {
         
         document.getElementById('ext-nome').innerText = "CARTEIRA DE DEVEDORES"; 
         document.getElementById('ext-lista').innerHTML = html; 
-        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO
+        document.getElementById('ext-share-area').style.display = 'none'; // OCULTO AQUI
         document.getElementById('ext-preview-box').style.display = 'none'; 
         document.getElementById('modal-extrato').style.display = 'flex';
         window.shareData = null; 
@@ -665,7 +665,7 @@ window.gerenciarDividas = function(nome) {
     }
     document.getElementById('ext-nome').innerText = "FINANCEIRO: " + nome; 
     document.getElementById('ext-lista').innerHTML = html; 
-    document.getElementById('ext-share-area').style.display = 'none'; // OCULTO
+    document.getElementById('ext-share-area').style.display = 'none'; // OCULTO AQUI
     document.getElementById('ext-preview-box').style.display = 'none'; 
     document.getElementById('modal-extrato').style.display = 'flex';
     window.shareData = null; 
@@ -867,7 +867,7 @@ window.abrirExtratoCliente = function(nome) {
     document.getElementById('ext-nome').innerText = "HISTÓRICO: " + nome;
     document.getElementById('ext-lista').innerHTML = html;
     
-    // OCULTA OS BOTOES DE COMPARTILHAMENTO NAS LISTAS AQUI!
+    // OCULTA OS BOTÕES DE COMPARTILHAR AQUI (MOSTRA SÓ A LISTA)
     document.getElementById('ext-share-area').style.display = 'none'; 
     document.getElementById('ext-preview-box').style.display = 'none';
     document.getElementById('modal-extrato').style.display = 'flex';
@@ -892,7 +892,7 @@ window.prepararReciboOS = function(id, isFechada) {
         desconto: desc, 
         sinal: o.sinal || 0, 
         total: o.valor, 
-        // OBS omitida propositalmente para o Whatsapp/Recibo
+        // obs: o.defeito,  <-- Mantido oculto propositalmente para WhatsApp/Impressão
         senha: o.senha, 
         fotos: o.fotos || [] 
     };
@@ -901,7 +901,7 @@ window.prepararReciboOS = function(id, isFechada) {
 }
 
 // =========================================================
-// FUNÇÃO QUE GERA OS BOTÕES FORÇADAMENTE SÓ NO RECIBO
+// GERA OS BOTÕES FORÇADAMENTE SÓ DENTRO DO RECIBO
 // =========================================================
 window.abrirModalShare = function() {
     if(!window.shareData) return;
@@ -954,13 +954,13 @@ window.abrirModalShare = function() {
     
     const shareArea = document.getElementById('ext-share-area');
     
-    // GERA OS 3 BOTÕES DE COMPARTILHAMENTO APENAS AQUI!
+    // GERA OS BOTÕES NO MODAL
     shareArea.innerHTML = `
-        <div id="ext-preview-box" style="display:block; margin-bottom:15px;">${htmlPreview}</div>
+        <div id="ext-preview-box" style="display:block; margin-bottom:15px; max-height:40vh; overflow-y:auto; border:1px solid #ccc; border-radius:8px; padding:5px">${htmlPreview}</div>
         <div style="font-size:10px; color:#999; text-align:center; font-weight:bold; margin-bottom:10px">ESCOLHA COMO ENVIAR OU IMPRIMIR</div>
-        <button class="btn" style="background:#25d366; margin:0 0 8px 0; padding:12px" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
-        <button class="btn" style="background:#0277bd; margin:0 0 8px 0; padding:12px" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> IMPRIMIR RAWBT (BLUETOOTH)</button>
-        <button class="btn" style="background:#333; margin:0; padding:12px" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> GERAR PDF / IMPRIMIR A4</button>
+        <button class="btn" style="background:#25d366; margin:0 0 8px 0; padding:12px; width:100%" onclick="shareExtrato('zap')"><i class="fab fa-whatsapp"></i> ENVIAR WHATSAPP</button>
+        <button class="btn" style="background:#0277bd; margin:0 0 8px 0; padding:12px; width:100%" onclick="shareExtrato('bluetooth')"><i class="fab fa-bluetooth"></i> IMPRIMIR RAWBT (BLUETOOTH)</button>
+        <button class="btn" style="background:#333; margin:0; padding:12px; width:100%" onclick="shareExtrato('pdf')"><i class="fas fa-file-pdf"></i> GERAR PDF / IMPRIMIR A4</button>
     `;
     
     shareArea.style.display = 'flex';
@@ -970,7 +970,6 @@ window.abrirModalShare = function() {
 }
 
 window.shareExtrato = function(metodo) {
-    // Agora o PDF e o BLUETOOTH usam a tela de Impressão (onde você pode selecionar o RawBT)
     if(metodo === 'pdf' || metodo === 'bluetooth') {
         const area = document.getElementById('area-cupom-visual');
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
@@ -986,7 +985,6 @@ window.shareExtrato = function(metodo) {
     } else if (metodo === 'zap') {
         let telefoneCli = '';
         
-        // Puxa o numero de telefone para enviar direto pro zap do cliente
         if(window.shareData && window.shareData.cliente) {
             const cli = window.db.clientes.find(c => c.nome.toUpperCase() === window.shareData.cliente.toUpperCase());
             if(cli && cli.tel) {
@@ -1007,7 +1005,6 @@ window.shareExtrato = function(metodo) {
             txt += `*TOTAL:* R$ ${d.total.toFixed(2)}\n`;
             if(d.sinal > 0) txt += `*SINAL PAGO:* R$ ${d.sinal.toFixed(2)}\n`;
             if((d.total - (d.sinal || d.valorPago || 0)) > 0) txt += `*RESTANTE:* R$ ${(d.total - (d.sinal || d.valorPago || 0)).toFixed(2)}\n`;
-            // Sem OBS :)
             
             const encoded = encodeURIComponent(txt);
             const url = telefoneCli ? `https://wa.me/${telefoneCli}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
