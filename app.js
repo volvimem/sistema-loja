@@ -714,13 +714,12 @@ window.gerenciarDividas = function(nome) {
 }
 
 window.excluirDivida = function(id, nome) {
-    abrirModalSenha(async () => {
-        document.getElementById('modal-overlay').style.display='none';
-        if(confirm("ATENÇÃO: Deseja apagar esta dívida permanentemente?\n(Não desfaz movimentações de caixa, apenas remove a cobrança)")) {
+    abrirModalSenha(() => {
+        window.confirmarPremium(`Deseja apagar a dívida de <b>${nome}</b>?<br><span style="font-size:11px; color:#d32f2f; display:block; margin-top:5px">Isso não altera seu caixa, apenas remove a cobrança da tela do cliente.</span>`, async () => {
             await deleteDoc(doc(db, "dividas", id));
             gerenciarDividas(nome);
             listarCli(); 
-        }
+        });
     });
 }
 
