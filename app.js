@@ -615,21 +615,42 @@ window.listarCli = function() { document.getElementById('lista-clientes').innerH
 
 window.limparCli = function() { document.getElementById('c-id').value = ''; document.getElementById('c-nome').value = ''; document.getElementById('c-tel').value = ''; document.getElementById('c-bairro').value = ''; document.getElementById('c-cidade').value = ''; window.tempImg = null; document.getElementById('c-foto-view').src = ''; document.getElementById('c-foto-view').classList.remove('has-img'); }
 
-// --- NOVA FUNÇÃO DA LIXEIRA ---
-window.del = function(col, id) {
-    abrirModalSenha(async () => {
+// --- MODAL PREMIUM DE EXCLUSÃO ---
+window.confirmarPremium = function(mensagem, callback) {
+    document.getElementById('modal-overlay').style.display = 'flex';
+    document.getElementById('modal-content-default').innerHTML = `
+        <div style="text-align:center; padding: 10px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: #ffebee; color: #d32f2f; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 15px auto;">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <h3 style="justify-content:center; border:none; margin-bottom:10px; color:#333; font-size:18px">CONFIRMAR EXCLUSÃO</h3>
+            <div style="font-size:13px; color:#666; margin-bottom:25px; line-height:1.5">${mensagem}</div>
+            <div style="display:flex; gap:10px; justify-content:center">
+                <button class="btn" style="background:#9e9e9e; flex:1; padding:12px; font-weight:bold; margin:0" onclick="document.getElementById('modal-overlay').style.display='none'">CANCELAR</button>
+                <button class="btn" style="background:#d32f2f; flex:1; padding:12px; font-weight:bold; margin:0" id="btn-confirma-sim">SIM, EXCLUIR</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('btn-confirma-sim').onclick = () => {
         document.getElementById('modal-overlay').style.display = 'none';
-        if(confirm("ATENÇÃO: Deseja realmente excluir este item permanentemente?")) {
+        callback();
+    };
+}
+
+// --- NOVA FUNÇÃO DA LIXEIRA (USANDO MODAL PREMIUM) ---
+window.del = function(col, id) {
+    abrirModalSenha(() => {
+        window.confirmarPremium("Esta ação é irreversível. Deseja realmente excluir este item permanentemente?", async () => {
             try {
                 await deleteDoc(doc(db, col, id));
             } catch (error) {
                 console.error("Erro ao excluir:", error);
-                alert("Erro ao tentar excluir o item. Verifique sua conexão.");
+                alert("Erro ao excluir o item.");
             }
-        }
+        });
     });
 }
-// ------------------------------
+// -----------------------------------------------------
 
 function renderCliCard(c) {
     const zap = c.tel ? `https://wa.me/55${c.tel.replace(/\D/g,'')}` : '#';
