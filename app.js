@@ -610,8 +610,26 @@ window.salvarCliente = async function() {
     if(id) await updateDoc(doc(db,"clientes",id), d); else await addDoc(collection(db,"clientes"), d);
     limparCli(); if(window.retornoVenda) { window.retornoVenda=false; window.nav('vendas'); document.getElementById('v-cli').value=d.nome; } else if(window.retornoOS) { window.retornoOS=false; window.nav('servicos'); document.getElementById('s-cli').value=d.nome; }
 }
+
 window.listarCli = function() { document.getElementById('lista-clientes').innerHTML = window.db.clientes.map(renderCliCard).join(''); }
+
 window.limparCli = function() { document.getElementById('c-id').value = ''; document.getElementById('c-nome').value = ''; document.getElementById('c-tel').value = ''; document.getElementById('c-bairro').value = ''; document.getElementById('c-cidade').value = ''; window.tempImg = null; document.getElementById('c-foto-view').src = ''; document.getElementById('c-foto-view').classList.remove('has-img'); }
+
+// --- NOVA FUNÇÃO DA LIXEIRA ---
+window.del = function(col, id) {
+    abrirModalSenha(async () => {
+        document.getElementById('modal-overlay').style.display = 'none';
+        if(confirm("ATENÇÃO: Deseja realmente excluir este item permanentemente?")) {
+            try {
+                await deleteDoc(doc(db, col, id));
+            } catch (error) {
+                console.error("Erro ao excluir:", error);
+                alert("Erro ao tentar excluir o item. Verifique sua conexão.");
+            }
+        }
+    });
+}
+// ------------------------------
 
 function renderCliCard(c) {
     const zap = c.tel ? `https://wa.me/55${c.tel.replace(/\D/g,'')}` : '#';
@@ -620,6 +638,7 @@ function renderCliCard(c) {
 
     return `<div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center"><div style="display:flex; gap:10px; align-items:center">${c.foto?`<img src="${c.foto}" style="width:40px;height:40px;border-radius:50%">`:`<div style="width:40px;height:40px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center"><i class="fas fa-user"></i></div>`}<div>${alerta}<b>${c.nome}</b><br><span style="font-size:11px">${c.tel}</span><div style="font-size:9px; color:#666; font-weight:bold">${c.bairro||''} ${c.cidade?'- '+c.cidade:''}</div></div></div><div class="actions-row" style="width:auto; gap:5px; justify-content:flex-end">${c.tel?`<a href="${zap}" target="_blank" class="btn-mini zap" style="padding:5px; font-size:12px; width:30px; flex:none"><i class="fab fa-whatsapp"></i></a>`:''} <button class="btn-mini blue" style="padding:5px; font-size:12px; width:30px; flex:none" onclick="edtCli('${c.id}')"><i class="fas fa-pen"></i></button> <button class="btn-mini red" style="padding:5px; font-size:12px; width:30px; flex:none" onclick="del('clientes','${c.id}')"><i class="fas fa-trash"></i></button></div></div>`;
 }
+
 window.edtCli = function(id) { const c=window.db.clientes.find(i=>i.id===id); document.getElementById('c-id').value=id; document.getElementById('c-nome').value=c.nome; document.getElementById('c-tel').value=c.tel; document.getElementById('c-bairro').value=c.bairro||''; document.getElementById('c-cidade').value=c.cidade||''; window.tempImg=c.foto; const view=document.getElementById('c-foto-view'); view.src=c.foto||''; if(c.foto) view.classList.add('has-img'); else view.classList.remove('has-img'); document.getElementById('form-cli').scrollIntoView(); }
 
 window.abrirCarteiraDevedores = function() {
