@@ -461,9 +461,9 @@ window.renderKanban = function() {
 }
 
 window.delOS = async function(id, isHist = false) { 
-    abrirModalSenha(async () => { 
-        document.getElementById('modal-overlay').style.display='none'; 
-        if(confirm(isHist ? "EXCLUIR OS DO HISTÓRICO PERMANENTEMENTE?" : "EXCLUIR OS?")) {
+    abrirModalSenha(() => { 
+        const msg = isHist ? "Tem certeza que deseja apagar o registro desta OS do <b>Histórico</b> permanentemente?" : "Tem certeza que deseja excluir esta <b>Ordem de Serviço</b> do sistema?";
+        window.confirmarPremium(msg, async () => {
             const col = isHist ? "os_historico" : "os_ativa";
             await deleteDoc(doc(db, col, id)); 
             
@@ -476,10 +476,9 @@ window.delOS = async function(id, isHist = false) {
                     abrirExtratoCliente(nomeStr);
                 }
             }
-        }
+        });
     }); 
 }
-
 window.moveOS = async function(id, dir) { const o = window.db.os.find(i=>i.id===id); const idx = ['pecas', 'pgto', 'retirado'].indexOf(o.status) + dir; await updateDoc(doc(db,"os_ativa",id), {status: ['pecas', 'pgto', 'retirado'][idx]}); }
 
 window.arqOS = async function(id) {
