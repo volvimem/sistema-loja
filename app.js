@@ -1078,17 +1078,18 @@ window.shareExtrato = function(metodo) {
         const area = document.getElementById('area-cupom-visual');
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         
-        // Fecha o modal preto IMEDIATAMENTE para ele não tampar o cupom na hora da foto
+        // Fecha o modal preto IMEDIATAMENTE 
         document.getElementById('modal-extrato').style.display = 'none';
         
-        // Dá um tempo maior (1 segundo) para o celular "desenhar" o recibo na tela
+        // SÓ LIMPA A TELA DEPOIS QUE A TELA DE IMPRESSÃO FOR FECHADA/CONCLUÍDA
+        window.onafterprint = function() {
+            area.innerHTML = '';
+            window.onafterprint = null; // Remove o evento
+        };
+        
         setTimeout(() => {
             window.print();
-            
-            setTimeout(() => {
-                area.innerHTML = '';
-            }, 2000);
-        }, 1000);
+        }, 500);
         
     } else if (metodo === 'bluetooth') {
         if (window.shareData) {
