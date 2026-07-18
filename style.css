@@ -169,6 +169,8 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
         background-color: #ffffff !important; 
         margin: 0 !important; 
         padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
@@ -181,8 +183,7 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
     body.printing-relatorio > *:not(#area-relatorio-visual) { display: none !important; }
     
     body.printing-cupom #area-cupom-visual { 
-        display: flex !important; 
-        justify-content: center !important;
+        display: block !important; 
         width: 100%; 
         margin: 0; 
         padding: 5mm; 
@@ -205,6 +206,7 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
         max-width: 320px !important; 
         width: 100% !important; 
         margin: 0 auto !important; 
+        page-break-inside: avoid;
     }
     
     * { color: #000 !important; text-shadow: none !important; box-shadow: none !important; }
