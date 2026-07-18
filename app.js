@@ -1078,6 +1078,9 @@ window.shareExtrato = function(metodo) {
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         document.body.classList.add('printing-cupom');
         
+        // ESSA LINHA É A MÁGICA: Fecha o modal preto pra não bugar a tela do PDF no Android
+        document.getElementById('modal-extrato').style.display = 'none';
+        
         setTimeout(() => {
             window.print();
             setTimeout(() => {
