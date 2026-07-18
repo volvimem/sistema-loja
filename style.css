@@ -159,11 +159,10 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
 .relatorio-print-table th { background: #f0f0f0; border: 1px solid #000; padding: 8px; font-size: 12px; }
 .relatorio-print-table td { border: 1px solid #ccc; padding: 6px 8px; font-size: 11px; }
 
-/* REGRAS RÍGIDAS DE IMPRESSÃO PROFISSIONAL (Remove o aspecto de 'Print de tela') */
+/* REGRAS RÍGIDAS DE IMPRESSÃO PROFISSIONAL */
 #area-cupom-visual, #area-relatorio-visual { display: none; }
 
 @media print {
-    /* Reseta a página para limpar margens automáticas e cores de fundo da interface */
     @page { margin: 0; size: auto; }
     
     html, body { 
@@ -174,7 +173,6 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
         print-color-adjust: exact !important;
     }
 
-    /* Oculta FORÇADAMENTE tudo que não for a área de impressão */
     header, nav, .container, #modal-overlay, #modal-extrato, .no-print { 
         display: none !important; 
     }
@@ -182,16 +180,14 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
     body.printing-cupom > *:not(#area-cupom-visual) { display: none !important; }
     body.printing-relatorio > *:not(#area-relatorio-visual) { display: none !important; }
     
-    /* Exibe APENAS a área que será impressa */
     body.printing-cupom #area-cupom-visual { 
-        display: block !important; 
+        display: flex !important; 
+        justify-content: center !important;
         width: 100%; 
         margin: 0; 
         padding: 5mm; 
         background: white; 
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: relative !important; 
     }
     
     body.printing-relatorio #area-relatorio-visual { 
@@ -200,21 +196,17 @@ nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; displ
         margin: 0; 
         padding: 10mm; 
         background: white; 
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: relative !important; 
     }
     
-    /* Remove sombras e bordas estéticas para economizar tinta e ficar profissional */
     .cupom-wrapper { 
-        border: none !important; 
+        border: 1px solid #ccc !important; 
         box-shadow: none !important; 
-        max-width: 100% !important; 
+        max-width: 320px !important; 
         width: 100% !important; 
-        margin: 0 !important; 
+        margin: 0 auto !important; 
     }
     
-    /* Força cores pretas e fundo transparente */
     * { color: #000 !important; text-shadow: none !important; box-shadow: none !important; }
     .c-section-title { border-color: #000 !important; background: transparent !important; }
     .c-destaque-os { background: transparent !important; }
