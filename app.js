@@ -282,8 +282,20 @@ window.finalizarVenda = async function() {
     let troco = 0; if(valorPago > total) { troco = valorPago - total; }
     const nowISO = new Date().toISOString();
 
-    for(let i of window.carrinho) { await addDoc(collection(db,"logs"), { tipo: i.tipo=='P'?'PRODUTO':'SERVICO', desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: cli, data: nowISO }); }
-    if(desc>0) await addDoc(collection(db,"logs"), {tipo:'DESCONTO', desc:'DESCONTO', valor: -desc, cliente:cli, data: nowISO});
+    const configRef = doc(db, "config", "contador_vendas"); 
+    const configSnap = await getDoc(configRef);
+    let numVenda = 1;
+    if (configSnap.exists()) { 
+        numVenda = configSnap.data().last + 1; 
+        await updateDoc(configRef, { last: numVenda }); 
+    } else { 
+        await setDoc(configRef, { last: 1 }); 
+    }
+
+    for(let i of window.carrinho) { 
+        await addDoc(collection(db,"logs"), { tipo: i.tipo=='P'?'PRODUTO':'SERVICO', desc: i.nome, valor: i.val, qtd: i.qtd||1, garantia: i.garantia, cliente: cli, data: nowISO, vendaNum: numVenda }); 
+    }
+    if(desc>0) await addDoc(collection(db,"logs"), {tipo:'DESCONTO', desc:'DESCONTO', valor: -desc, cliente:cli, data: nowISO, vendaNum: numVenda});
 
     let msgFiado = "";
     if(valorPago < total) {
@@ -292,9 +304,9 @@ window.finalizarVenda = async function() {
         msgFiado = `\n\nATENÇÃO: DÉBITO DE R$ ${restante.toFixed(2)} REGISTRADO!`;
     }
 
-    window.shareData = { tipo:'VENDA', cliente:cli, itens:window.carrinho, subtotal: sub, desconto: desc, total: total, valorPago: valorPago, troco: troco, sinal: entrada };
+    window.shareData = { tipo:'VENDA Nº ' + numVenda, cliente:cli, itens:window.carrinho, subtotal: sub, desconto: desc, total: total, valorPago: valorPago, troco: troco, sinal: entrada, customDate: nowISO };
     limparVendas();
-    alert("VENDA FINALIZADA!" + msgFiado);
+    alert("VENDA Nº " + numVenda + " FINALIZADA!" + msgFiado);
     abrirModalShare();
 }
 
@@ -865,7 +877,6 @@ window.abrirExtratoCliente = function(nome) {
     let html = '';
     
     const oss = [...window.db.os_hist, ...window.db.os].filter(o => o.cliente === nome);
-    
     oss.sort((a,b) => new Date(b.data) - new Date(a.data)).forEach(o => {
         const isFechada = window.db.os_hist.some(h => h.id === o.id);
         const statusLabel = isFechada ? 'FINALIZADA' : 'ATIVA';
@@ -886,18 +897,41 @@ window.abrirExtratoCliente = function(nome) {
         </div>`;
     });
     
-    const logsVendas = window.db.logs.filter(l => l.cliente === nome && !l.osNum).sort((a,b) => new Date(b.data) - new Date(a.data));
-    
-    if (logsVendas.length > 0) {
+    const logsVendasRaw = window.db.logs.filter(l => l.cliente === nome && !l.osNum && l.tipo !== 'PAGAMENTO DÍVIDA');
+    const vendasAgrupadas = {};
+
+    logsVendasRaw.forEach(l => {
+        let key = l.vendaNum ? `V_${l.vendaNum}` : `D_${l.data}`;
+        if(!vendasAgrupadas[key]) {
+            vendasAgrupadas[key] = { data: l.data, vendaNum: l.vendaNum || null, itens: [], subtotal: 0, desc: 0, cliente: l.cliente };
+        }
+        if(l.tipo === 'DESCONTO') {
+            vendasAgrupadas[key].desc += Math.abs(l.valor);
+        } else {
+            vendasAgrupadas[key].itens.push({ nome: l.desc, val: l.valor, qtd: l.qtd || 1, garantia: l.garantia || 'SEM GARANTIA' });
+            vendasAgrupadas[key].subtotal += l.valor;
+        }
+    });
+
+    const vendasArray = Object.values(vendasAgrupadas).sort((a,b) => new Date(b.data) - new Date(a.data));
+
+    if (vendasArray.length > 0) {
         html += `<h4 style="margin:15px 0 10px 0; font-size:11px; text-align:center; color:#666">OUTRAS MOVIMENTAÇÕES (VENDAS GERAIS)</h4>`;
-        logsVendas.forEach(l => {
-            const color = l.valor < 0 ? 'red' : 'var(--primary)';
+        
+        vendasArray.forEach(v => {
+            const total = v.subtotal - v.desc;
+            const numLabel = v.vendaNum ? `VENDA Nº ${v.vendaNum}` : 'VENDA (ANTIGA)';
+            const k = v.vendaNum ? `V_${v.vendaNum}` : `D_${v.data}`;
+            
             html += `
-            <div class="fin-item" style="background:white; border-left-color:${color}; padding: 8px;">
-                <div class="fin-date">${new Date(l.data).toLocaleDateString()} ${new Date(l.data).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center">
-                    <div><b>${l.tipo}</b><br><span style="font-size:10px">${l.desc}</span></div>
-                    <div style="font-weight:bold; color:${color}">R$ ${l.valor.toFixed(2)}</div>
+            <div class="fin-item" style="background:white; border-left-color:var(--primary); padding: 8px;">
+                <div class="fin-date">${new Date(v.data).toLocaleDateString()} ${new Date(v.data).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})} - ${numLabel}</div>
+                <div style="font-size:12px; margin-bottom:8px">
+                    ${v.itens.map(i => `<b>${i.qtd}x</b> ${i.nome}`).join('<br>')}
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:8px">
+                    <div style="font-weight:900; color:var(--primary); font-size:14px">TOTAL: R$ ${total.toFixed(2)}</div>
+                    <button class="btn-mini blue" style="max-width:90px; margin:0" onclick="prepararReciboVenda('${k}', '${nome}')"><i class="fas fa-print"></i> RECIBO</button>
                 </div>
             </div>`;
         });
@@ -907,12 +941,46 @@ window.abrirExtratoCliente = function(nome) {
 
     document.getElementById('ext-nome').innerText = "HISTÓRICO: " + nome;
     document.getElementById('ext-lista').innerHTML = html;
-    
     document.getElementById('ext-share-area').style.display = 'none'; 
     document.getElementById('ext-preview-box').style.display = 'none';
     document.getElementById('modal-extrato').style.display = 'flex';
-    
     window.shareData = null; 
+}
+
+window.prepararReciboVenda = function(key, clienteNome) {
+    const logsVendas = window.db.logs.filter(l => l.cliente === clienteNome && !l.osNum && l.tipo !== 'PAGAMENTO DÍVIDA');
+    let v = { vendaNum: null, data: null, itens: [], subtotal: 0, desc: 0 };
+
+    logsVendas.forEach(l => {
+        let lKey = l.vendaNum ? `V_${l.vendaNum}` : `D_${l.data}`;
+        if(lKey === key) {
+            v.data = l.data;
+            v.vendaNum = l.vendaNum;
+            if(l.tipo === 'DESCONTO') {
+                v.desc += Math.abs(l.valor);
+            } else {
+                v.itens.push({ nome: l.desc, val: l.valor, qtd: l.qtd || 1, garantia: l.garantia || 'SEM GARANTIA' });
+                v.subtotal += l.valor;
+            }
+        }
+    });
+
+    const total = v.subtotal - v.desc;
+    const numDisplay = v.vendaNum ? `Nº ${v.vendaNum}` : '(ANTIGA)';
+    
+    window.shareData = {
+        tipo: 'VENDA ' + numDisplay,
+        cliente: clienteNome,
+        itens: v.itens,
+        subtotal: v.subtotal,
+        desconto: v.desc,
+        sinal: 0,
+        total: total,
+        customDate: v.data,
+        fotos: []
+    };
+    
+    abrirModalShare();
 }
 
 window.prepararReciboOS = function(id, isFechada) {
@@ -954,7 +1022,7 @@ window.abrirModalShare = function() {
             <div class="c-section-title">COMPROVANTE DE ${d.tipo}</div>
             <div class="c-row"><span>CLIENTE:</span> <span class="c-row bold">${d.cliente}</span></div>
             ${d.modelo ? `<div class="c-row"><span>APARELHO:</span> <span class="c-row bold">${d.modelo}</span></div>` : ''}
-            <div class="c-row"><span>DATA:</span> <span>${new Date().toLocaleString()}</span></div>
+            <div class="c-row"><span>DATA:</span> <span>${d.customDate ? new Date(d.customDate).toLocaleString() : new Date().toLocaleString()}</span></div>
             
             <table class="c-table">
                 <thead><tr><th>QTD</th><th>ITEM</th><th style="text-align:right">TOTAL</th></tr></thead>
@@ -1010,15 +1078,13 @@ window.shareExtrato = function(metodo) {
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
         document.body.classList.add('printing-cupom');
         
-        // Android precisa de um tempo para renderizar a tela antes de abrir o spooler
         setTimeout(() => {
             window.print();
-            // Restaura o app para o estado normal após 3 segundos
             setTimeout(() => {
                 document.body.classList.remove('printing-cupom');
                 area.innerHTML = '';
             }, 3000);
-        }, 300);
+        }, 800);
         
     } else if (metodo === 'bluetooth') {
         if (window.shareData) {
@@ -1031,7 +1097,7 @@ window.shareExtrato = function(metodo) {
             txt += `COMPROVANTE: ${d.tipo}\n`;
             txt += `CLIENTE: ${d.cliente}\n`;
             if (d.modelo) txt += `APARELHO: ${d.modelo}\n`;
-            txt += `DATA: ${new Date().toLocaleString()}\n`;
+            txt += `DATA: ${d.customDate ? new Date(d.customDate).toLocaleString() : new Date().toLocaleString()}\n`;
             txt += `------------------------------------------------\n`;
             
             d.itens.forEach(i => {
@@ -1070,7 +1136,7 @@ window.shareExtrato = function(metodo) {
             txt += `Comprovante: ${d.tipo}\n`;
             txt += `Cliente: ${d.cliente}\n`;
             if (d.modelo) txt += `Aparelho: ${d.modelo}\n`;
-            txt += `Data: ${new Date().toLocaleString()}\n\n`;
+            txt += `Data: ${d.customDate ? new Date(d.customDate).toLocaleString() : new Date().toLocaleString()}\n\n`;
             txt += `*ITENS:*\n`;
             d.itens.forEach(i => { txt += `${i.qtd || 1}x ${i.nome} - R$ ${i.val.toFixed(2)}\n`; });
             txt += `\n*SUBTOTAL:* R$ ${d.subtotal.toFixed(2)}\n`;
