@@ -920,7 +920,7 @@ window.abrirExtratoCliente = function(nome) {
         
         vendasArray.forEach(v => {
             const total = v.subtotal - v.desc;
-            const numLabel = v.vendaNum ? `VENDA Nº ${v.vendaNum}` : 'VENDA (ANTIGA)';
+            const numLabel = v.vendaNum ? `VENDA Nº ${v.vendaNum}` : 'VENDA';
             const k = v.vendaNum ? `V_${v.vendaNum}` : `D_${v.data}`;
             
             html += `
@@ -966,10 +966,11 @@ window.prepararReciboVenda = function(key, clienteNome) {
     });
 
     const total = v.subtotal - v.desc;
-    const numDisplay = v.vendaNum ? `Nº ${v.vendaNum}` : '(ANTIGA)';
+    const numDisplay = v.vendaNum ? `Nº ${v.vendaNum}` : '';
+    const tipoFinal = ('VENDA ' + numDisplay).trim();
     
     window.shareData = {
-        tipo: 'VENDA ' + numDisplay,
+        tipo: tipoFinal,
         cliente: clienteNome,
         itens: v.itens,
         subtotal: v.subtotal,
@@ -1076,18 +1077,18 @@ window.shareExtrato = function(metodo) {
     if (metodo === 'pdf') {
         const area = document.getElementById('area-cupom-visual');
         area.innerHTML = document.getElementById('ext-preview-box').innerHTML;
-        document.body.classList.add('printing-cupom');
         
-        // ESSA LINHA É A MÁGICA: Fecha o modal preto pra não bugar a tela do PDF no Android
+        // Fecha o modal preto IMEDIATAMENTE para ele não tampar o cupom na hora da foto
         document.getElementById('modal-extrato').style.display = 'none';
         
+        // Dá um tempo maior (1 segundo) para o celular "desenhar" o recibo na tela
         setTimeout(() => {
             window.print();
+            
             setTimeout(() => {
-                document.body.classList.remove('printing-cupom');
                 area.innerHTML = '';
-            }, 3000);
-        }, 800);
+            }, 2000);
+        }, 1000);
         
     } else if (metodo === 'bluetooth') {
         if (window.shareData) {
